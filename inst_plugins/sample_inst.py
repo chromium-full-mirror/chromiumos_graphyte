@@ -16,32 +16,34 @@
 
 import vinst
 
-class dut(vinst.vinst):
+class Dut(vinst.Vinst):
   def __init__(self, app):
+    super(Dut, self).__init__(app)
     self.name = "Sample INST Plugin"
     self.app = app
     print "Initializing " + self.name
 
-  def info(self):
+  def Info(self):
     print "It's the " + self.name
 
-  def wlan_initialize(self):
+  def WlanInitialize(self):
     return (True,)
 
-  def wlan_disconnect(self):
+  def WlanDisconnect(self):
     return (True,)
 
-  def wlan_tx_config(self, test_params={}, frequency=0, trigger_level=0,
-                ref_level=0, rf_ports={}, signal_type={}, measurement={}):
-    if bool(test_params) == False:
+  def WlanTxConfig(self, test_params=None, frequency=0, trigger_level=0,
+                   ref_level=0, rf_ports=None, signal_type=None,
+                   measurement=None):
+    if test_params is None:
       #Interpret the other arguments, else use the dictionary
       pass
 
     return (True,)
 
-  def wlan_tx_measure(self):
+  def WlanTxMeasure(self):
     return (True,)
 
-  def wlan_tx_get_results(self):
+  def WlanTxGetResults(self):
     results = {'TX Result':'Everything is fine'}
     return (True, results)

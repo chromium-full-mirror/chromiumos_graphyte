@@ -21,13 +21,13 @@ However, right not this module hardcodes only one test case
 """
 
 
-class testplan(object):
+class TestPlan(object):
   def __init__(self):
     # When implementation is complete, we will actually read the testplan file
     # in the constructor.
-    pass
+    self.tp = None
 
-  def get_next_test(self):
+  def GetNextTest(self):
     """
     Returns the next test case from the test plan. Fasle otherwise.
 

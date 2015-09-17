@@ -22,9 +22,8 @@ Almost all the functions return a tuple. The first element is the return value
 True/False. The rest of the elements can be different (Usually a dictionary)
 """
 
-import ConfigParser
 
-class vdut(object):
+class Vdut(object):
   def __init__(self, app):
     """
     The constructor is passed the app object, which is the reference to graphyte
@@ -35,27 +34,27 @@ class vdut(object):
     self.app = app
     print self.name
 
-  def info(self):
+  def Info(self):
     """
     Right now not much useful. It may be used to print information about
     the plugin itself.
     """
     print self.name
 
-  def wlan_initialize(self, component_name):
+  def WlanInitialize(self, component_name):
     """
     Initialize the given interface.
     """
-    return (True,)
+    raise NotImplementedError
 
-  def wlan_disconnect(self):
+  def WlanDisconnect(self):
     """
     Disconnect/unconfigure the interface that was being used.
     """
     return (True,)
 
-  def wlan_tx_set_mode(self, test_params={}, channel=0, signal_type={},
-                  chain_mask=0, payload=0, ifs=0):
+  def WlanTxSetMode(self, test_params=None, channel=0, signal_type=None,
+                    chain_mask=0, payload=0, ifs=0):
     """
     The test case details are passed in the test_params dictionary.
     However, we can decide to have other parameters in case someone
@@ -64,13 +63,9 @@ class vdut(object):
     If the test_params is NULL/False, then the rest of the parameters
     can be used
     """
-    if bool(test_params) == False:
-      #Interpret the other arguments, else use the dictionary
-      pass
+    raise NotImplementedError
 
-    return (True,)
-
-  def wlan_tx_set_power(self, power=0):
+  def WlanTxSetPower(self, power=0):
     """
     Set the power of the interface to power, if its not zero.
     If power=0, then use it from the params passed in the test_params.
@@ -80,7 +75,7 @@ class vdut(object):
 
     return (True,)
 
-  def wlan_tx_on(self):
+  def WlanTxOn(self):
     """
     Start the TX on the interface.
 
@@ -90,7 +85,7 @@ class vdut(object):
     """
     return (True,)
 
-  def wlan_tx_off(self):
+  def WlanTxOff(self):
     """
     Stop the TX
     """

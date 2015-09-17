@@ -22,9 +22,8 @@ implement.
 Almost all the functions return a tuple. The first element is the return value
 True/False. The rest of the elements can be different (Usually a dictionary)
 """
-import ConfigParser
 
-class vinst(object):
+class Vinst(object):
   def __init__(self, app):
     """
     The constructor is passed the app object, which is the reference to graphyte
@@ -37,27 +36,28 @@ class vinst(object):
     self.app = app
     print self.name
 
-  def info(self):
+  def Info(self):
     """
     Right now not much useful. It may be used to print information about
     the plugin itself.
     """
     print self.name
 
-  def wlan_initialize(self):
+  def WlanInitialize(self):
     """
     Initialize the instrument.
     """
     return (True,)
 
-  def wlan_disconnect(self):
+  def WlanDisconnect(self):
     """"
     Disconnect from the instrument
     """
     return (True,)
 
-  def wlan_tx_config(self, test_params={}, frequency=0, trigger_level=0,
-                ref_level=0, rf_ports={}, signal_type={}, measurement={}):
+  def WlanTxConfig(self, test_params=None, frequency=0, trigger_level=0,
+                   ref_level=0, rf_ports=None, signal_type=None,
+                   measurement=None):
     """
     The test case details are passed in the test_params dictionary.
     However, we can decide to have other parameters in case someone
@@ -66,22 +66,18 @@ class vinst(object):
     If the test_params is NULL/False, then the rest of the parameters
     can be used
     """
-    if bool(test_params) == False:
-      #Interpret the other arguments, else use the dictionary
-      pass
+    raise NotImplementedError
 
-    return (True,)
-
-  def wlan_tx_measure(self):
+  def WlanTxMeasure(self):
     """
     The instrument should block in this call until its done with the
-    measurement.  The graphyte assumes that when the call returns the measurement
-    is done and is ready to be read. graphyte will not wait to make the next call
-    once this function returns.
+    measurement.  The graphyte assumes that when the call returns the
+    measurement is done and is ready to be read. graphyte will not wait to make
+    the next call once this function returns.
     """
     return (True,)
 
-  def wlan_tx_get_results(self):
+  def WlanTxGetResults(self):
     """
     Read results from the instruments
     """

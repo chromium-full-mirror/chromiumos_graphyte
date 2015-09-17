@@ -40,7 +40,7 @@ import testplan
 # All functions return a tuple. The tuple has atleast one element at index 0,
 # which will be the return value of the function (success True and failure is
 # False)
-_RETVAL=0
+_RETVAL = 0
 
 # IDEAS:
 # The functions can always return a dictionary. The first element can always be
@@ -54,7 +54,7 @@ Instantiating the class does everything now. Refer to the constructor below.
 
 """
 
-class graphyte(object):
+class Graphyte(object):
   def __init__(self):
     """
     The constructor for this module does most of it right now.
@@ -65,13 +65,13 @@ class graphyte(object):
 
     Most of the error conditions are ignored and values are hardcoded.
 
-    The graphyte.settings file follows the settings understood by the ConfigParser
+    The graphyte.settings file follows the settings understood by ConfigParser
     https://docs.python.org/2/library/configparser.html
 
     Right now the configuration file has only one section called [plugins] and
-    two entries "dut=" and "inst=". These entries are initialized to sample_dut.py
-    and sample_inst.py. The dut pluings are searched under ./dut-plugins/ and the
-    instrument plugins are searched under ./inst_plugins/
+    two entries "dut=" and "inst=". These entries are initialized to
+    sample_dut.py and sample_inst.py. The dut pluings are searched under
+    ./dut-plugins/ and the instrument plugins are searched under ./inst_plugins/
 
     Once the plugins are found, they are loaded.
 
@@ -82,34 +82,62 @@ class graphyte(object):
     Right now the testplan module has only one test case.
 
     The interaction with the dut and the instrument plugin is dipicted in
-    the flow diagram. 
+    the flow diagram.
     """
+    self.inst = None
+    self.inst_module = None
+    self.inst_module_info = None
+    self.dut = None
+    self.dut_module = None
+    self.dut_module_info = None
+    self.tp = None
+
     print "Starting Graphyte...."
 
     self.config = ConfigParser.ConfigParser()
     self.config.read('graphyte.settings')
 
-    self.dut_plugin_name = self.config.get('plugins','dut')
-    self.inst_plugin_name = self.config.get('plugins','inst')
+    self.dut_plugin_name = self.config.get('plugins', 'dut')
+    self.inst_plugin_name = self.config.get('plugins', 'inst')
 
-    self._load_dut_plugin()
-    self._load_inst_plugin()
+    self._LoadDutPlugin()
+    self._LoadInstPlugin()
 
-    self.testplans = testplan.testplan()
+    self.testplans = testplan.TestPlan()
 
+  def __del__(self):
+    if (self.dut.wlan_disconnect()[_RETVAL] == False or
+        self.inst.wlan_disconnect()[_RETVAL] == False):
+      print "Failed to disconnect from Inst/Dut"
+
+  def _LoadDutPlugin(self):
+    self.dut_module_info = imp.find_module(self.dut_plugin_name,
+                                           ['./dut_plugins'])
+    self.dut_module = imp.load_module(self.dut_plugin_name,
+                                      *self.dut_module_info)
+    self.dut = self.dut_module.Dut(self)
+
+  def _LoadInstPlugin(self):
+    self.inst_module_info = imp.find_module(self.inst_plugin_name,
+                                            ['./inst_plugins'])
+    self.inst_module = imp.load_module(self.inst_plugin_name,
+                                       *self.inst_module_info)
+    self.inst = self.inst_module.Dut(self)
+
+  def Run(self):
     # For now, only one test plan.
-    self.tp = self.testplans.get_next_test()
+    self.tp = self.testplans.GetNextTest()
 
     if self.tp[_RETVAL] == False:
       # Raise exception instead?
-      print("No test cases to execute")
+      print "No test cases to execute"
       return
 
     # Configure the instrument && DUT
-    if (self.inst.wlan_initialize()[_RETVAL] == False or
-        self.dut.wlan_initialize(self.tp[1]['Component Name'])[_RETVAL]
+    if (self.inst.WlanInitialize()[_RETVAL] == False or
+        self.dut.WlanInitialize(self.tp[1]['Component Name'])[_RETVAL]
         == False):
-      print("Failed to initialize the instrument/DUT")
+      print "Failed to initialize the instrument/DUT"
       return
 
     # Note for tx_set_power:
@@ -117,51 +145,38 @@ class graphyte(object):
     # then the dut plugin should use the value passed in
     # wlan_tx_set_mode. If the value is not 0 (or not passed),
     # then that would be overriding the value thats already passed.
-    if (self.dut.wlan_tx_set_mode(test_params=self.tp)[_RETVAL] == False or
-        self.dut.wlan_tx_set_power()[_RETVAL] == False):
-      print("Failed to set TX mode/power on dut")
+    if (self.dut.WlanTxSetMode(test_params=self.tp)[_RETVAL] == False or
+        self.dut.WlanTxSetPower()[_RETVAL] == False):
+      print "Failed to set TX mode/power on dut"
       return
 
     port_map = {'vsa':0, 'port':0}
 
-    if (self.inst.wlan_tx_config(test_params=self.tp,rf_ports=port_map)[_RETVAL]
-        == False):
-      print("Failed to load instrument tx config")
+    if not self.inst.WlanTxConfig(
+        test_params=self.tp, rf_ports=port_map)[_RETVAL]:
+      print "Failed to load instrument tx config"
       return
 
-    if self.dut.wlan_tx_on()[_RETVAL] == False:
-      print("DUT TX On Failed")
+    if self.dut.WlanTxOn()[_RETVAL] == False:
+      print "DUT TX On Failed"
     else:
-      if self.inst.wlan_tx_measure()[_RETVAL] == False:
-        print("Inst TX Measure failed")
+      if self.inst.WlanTxMeasure()[_RETVAL] == False:
+        print "Inst TX Measure failed"
       else:
-        result = self.inst.wlan_tx_get_results()
+        result = self.inst.WlanTxGetResults()
         if result[_RETVAL] == False:
-          print("Inst: Failed to get results")
+          print "Inst: Failed to get results"
         else:
-          print(result[1])
+          print result[1]
 
-    if self.dut.wlan_tx_off()[_RETVAL] == False:
-      print("Failed to do TX Off")
+    if self.dut.WlanTxOff()[_RETVAL] == False:
+      print "Failed to do TX Off"
 
-  def __del__(self):
-    if (self.dut.wlan_disconnect()[_RETVAL] == False or
-        self.inst.wlan_disconnect()[_RETVAL] == False):
-      print("Failed to disconnect from Inst/Dut")
 
-  def _load_dut_plugin(self):
-    self.dut_module_info = imp.find_module(self.dut_plugin_name,
-                                           ['./dut_plugins'])
-    self.dut_module = imp.load_module(self.dut_plugin_name,
-                                      *self.dut_module_info)
-    self.dut = self.dut_module.dut(self)
+def main():
+  app = Graphyte()
+  app.Run()
 
-  def _load_inst_plugin(self):
-    self.inst_module_info = imp.find_module(self.inst_plugin_name,
-                                            ['./inst_plugins'])
-    self.inst_module = imp.load_module(self.inst_plugin_name,
-                                       *self.inst_module_info)
-    self.inst = self.inst_module.dut(self)
 
 if __name__ == '__main__':
-  app = graphyte()
+  main()

@@ -16,37 +16,39 @@
 
 import vdut
 
-class dut(vdut.vdut):
+class Dut(vdut.Vdut):
   def __init__(self, app):
+    super(Dut, self).__init__(app)
     self.name = "Sample DUT Plugin"
     self.app = app
     print "Initializing " + self.name
 
-  def info(self):
+  def Info(self):
     print "It's the " + self.name
 
-  def wlan_initialize(self, component_name):
+  def WlanInitialize(self, component_name): # pylint: disable=W0613
     return (True,)
 
-  def wlan_disconnect(self):
+  def WlanDisconnect(self):
     return (True,)
 
-  def wlan_tx_set_mode(self, test_params={}, channel=0, signal_type={},
-                  chain_mask=0, payload=0, ifs=0):
-    if bool(test_params) == False:
+  # pylint: disable=W0613
+  def WlanTxSetMode(self, test_params=None, channel=0, signal_type=None,
+                    chain_mask=0, payload=0, ifs=0):
+    if test_params is None:
       #Interpret the other arguments, else use the dictionary
       pass
 
     return (True,)
 
-  def wlan_tx_set_power(self, power=0):
+  def WlanTxSetPower(self, power=0):
     if power == 0:
       return (True,)
 
     return (True,)
 
-  def wlan_tx_on(self):
+  def WlanTxOn(self):
     return (True,)
 
-  def wlan_tx_off(self):
+  def WlanTxOff(self):
     return (True,)
