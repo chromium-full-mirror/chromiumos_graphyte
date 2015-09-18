@@ -1,0 +1,14 @@
+config_name: Graphyte Sample Config
+
+plugins:
+  inst: sample_inst
+  dut: sample_dut
+
+inst_config:
+  ip_address: 192.168.86.10
+  meas_channel: CHAN1
+
+dut_config:
+  ip_address: 192.168.86.1
+
+test_plan: sample_testplan.csv

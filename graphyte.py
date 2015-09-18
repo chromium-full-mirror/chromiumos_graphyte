@@ -125,6 +125,9 @@ class Graphyte(object):
     self.inst = self.inst_module.Dut(self)
 
   def Run(self):
+    #TODO(akahuang): Currently the code is broken because the implementation
+    # of TestPlan changed. Should implement new test runner later.
+
     # For now, only one test plan.
     self.tp = self.testplans.GetNextTest()
 
