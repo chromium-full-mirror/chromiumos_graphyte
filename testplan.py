@@ -3,6 +3,7 @@
 # Copyright 2015 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
+
 """The testplans module.
 
 The test plan module will go through the CSV file (the format of which is
@@ -75,7 +76,7 @@ class TestPlan(object):
             continue
           value = map(ConvertType, row[1:])
           arg_table = dict(zip(header[:split_idx], value[:split_idx]))
-          results = dict(zip(header[split_idx+1:], value[split_idx+1:]))
+          result_limit = dict(zip(header[split_idx+1:], value[split_idx+1:]))
           # Generate the test cases with all combination of arguments
           for key in arg_table:
             if type(arg_table[key]) is not list:
@@ -85,46 +86,58 @@ class TestPlan(object):
           for arg_values in itertools.product(*arg_table.values()):
             logging.debug('arg_values: %s', arg_values)
             args = dict(zip(arg_keys, arg_values))
-            self.test_cases.append(TestCase(args, results))
+            self.test_cases.append(TestCase(args, result_limit))
 
 
 class TestCase(object):
-  '''The test case. It contains the arguments of a RF test.'''
+  """The test case. It contains the arguments of a RF test."""
 
-  def __init__(self, args, results):
+  def __init__(self, args, result_limit):
     self.rf_type = args['rf_type']
     self.test_type = args['test_type']
     self.args = args
-    self.results = results
+    self.result_limit = result_limit
 
   def __str__(self):
     return 'RF: %s, Type: %s\nArgs: %s\nResults: %s' % (
-        self.rf_type, self.test_type, self.args, self.results)
+        self.rf_type, self.test_type, self.args, self.result_limit)
 
   def ResolveAttr(self, arg_keys):
-    '''Returns the value in args. It's used for sorting the test cases.'''
+    """Returns the value in args. It's used for sorting the test cases."""
     try:
       return tuple([self.args[arg_key] for arg_key in arg_keys])
     except KeyError:
       logging.exception('test_case does not have attribute: %s', arg_keys)
 
   def IsTestPass(self, result):
-    '''Check the result meets the result or not.'''
-    for key in self.result.keys():
+    """Check the result meets the result or not."""
+    for key in self.result_limit.keys():
       # Check required result is at the result
       if key not in result:
         logging.error('The result of %s is missing.', key)
         return False
 
       # Check the result meets the result
-      lower_bound, upper_bound = self.result[key]
+      lower_bound, upper_bound = self.result_limit[key]
       value = result[key]
       if ((lower_bound is not None and value < lower_bound) or
           (upper_bound is not None and value > upper_bound)):
         logging.info('The test in result %s failed. %s not in (%s, %s)',
-                     key, result, lower_bound, upper_bound)
+                     key, result[key], lower_bound, upper_bound)
         return False
     return True
+
+  def ToDict(self):
+    """Return a dictionary containing all arguments of the class. It is for
+    expanding the arguments of the function. For example:
+
+    def foo(component_name, **kwargs):
+      pass
+    foo(**test_case.ToDict())
+    """
+    ret = self.args
+    ret['result_limit'] = self.result_limit
+    return ret
 
 
 def StripRow(row):

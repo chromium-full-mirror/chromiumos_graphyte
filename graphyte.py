@@ -1,18 +1,8 @@
 #!/usr/bin/python
-#
-# Copyright 2015 Google Inc. All Rights Reserved.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+# -*- coding: utf-8 -*-
+# Copyright 2015 The Chromium OS Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
 
 """The Google RF Test Framework module.
 
@@ -32,152 +22,160 @@ NOTE: Check the flow diagram.
 
 """
 
+import logging
+import os
+from argparse import ArgumentParser
+import yaml
 
-import imp
-import ConfigParser
 import testplan
 
-# All functions return a tuple. The tuple has atleast one element at index 0,
-# which will be the return value of the function (success True and failure is
-# False)
-_RETVAL = 0
 
-# IDEAS:
-# The functions can always return a dictionary. The first element can always be
-# the return value and then the rest can be values that are returned.
+DEFAULT_CONFIG_FILE = './graphyte_config.sample.yaml'
 
-"""
-The graphyte module.
-
-Instantiating the class does everything now. Refer to the constructor below.
-
-
-"""
 
 class Graphyte(object):
-  def __init__(self):
+  """The graphyte module.
+  Instantiating the class does everything now. Refer to the constructor below.
+  """
+  def __init__(self, options):
     """
     The constructor for this module does most of it right now.
     - Load the graphyte.settings file to find the modules to load.
     - Load the plugins
     - Load test plans
-    - Execute the TX test.
+    - Execute all the tests in the test plan.
 
-    Most of the error conditions are ignored and values are hardcoded.
+    The configuration file graphyte_config.sample.yaml follows the yaml format.
+    The file has the dut and inst module name and config file.
+    These entries are initialized to sample_dut.py and sample_inst.py. The dut
+    pluings are searched under ./dut/ and the instrument plugins are searched
+    under ./inst/. Once the plugins are found, they are loaded.
 
-    The graphyte.settings file follows the settings understood by ConfigParser
-    https://docs.python.org/2/library/configparser.html
-
-    Right now the configuration file has only one section called [plugins] and
-    two entries "dut=" and "inst=". These entries are initialized to
-    sample_dut.py and sample_inst.py. The dut pluings are searched under
-    ./dut-plugins/ and the instrument plugins are searched under ./inst_plugins/
-
-    Once the plugins are found, they are loaded.
-
-    The testplans module is responsible for reading the CSV file which defines
-    the testplans and generate a dictionary that can be passed to inst and dut
-    plugins.
-
-    Right now the testplan module has only one test case.
+    The testplan module is responsible for reading the CSV file which defines
+    the testplan and generate a list of the test case, that can be passed to
+    inst and dut plugins.
 
     The interaction with the dut and the instrument plugin is dipicted in
     the flow diagram.
     """
-    self.inst = None
-    self.inst_module = None
-    self.inst_module_info = None
-    self.dut = None
-    self.dut_module = None
-    self.dut_module_info = None
-    self.tp = None
+    self.SetLogging(options)
+    logging.info('Starting Graphyte....')
 
-    print "Starting Graphyte...."
+    with open(options.config_file, 'r') as f:
+      graphyte_config = yaml.load(f)
 
-    self.config = ConfigParser.ConfigParser()
-    self.config.read('graphyte.settings')
+    # Load Dut and Inst class
+    dut_name = graphyte_config['dut']
+    dut_config_file = graphyte_config['dut_config']
+    module = __import__('dut.%s.%s' % (dut_name, dut_name), fromlist=['Dut'])
+    with open(os.path.join('dut', dut_name, dut_config_file), 'r') as f:
+      dut_config = yaml.load(f)
+    logging.info('DUT %s, config: %s', dut_name, dut_config)
+    self.dut = module.Dut(dut_config)
 
-    self.dut_plugin_name = self.config.get('plugins', 'dut')
-    self.inst_plugin_name = self.config.get('plugins', 'inst')
+    inst_name = graphyte_config['inst']
+    inst_config_file = graphyte_config['inst_config']
+    module = __import__('inst.%s.%s' % (inst_name, inst_name),
+                        fromlist=['Inst'])
+    with open(os.path.join('inst', inst_name, inst_config_file), 'r') as f:
+      inst_config = yaml.load(f)
+    logging.info('Inst %s, config: %s', inst_name, inst_config)
+    self.inst = module.Inst(inst_config)
 
-    self._LoadDutPlugin()
-    self._LoadInstPlugin()
-
-    self.testplans = testplan.TestPlan()
+    # Load test plan
+    self.testplans = testplan.TestPlan(graphyte_config['test_plan'])
+    self.rf_type = None
 
   def __del__(self):
-    if (self.dut.wlan_disconnect()[_RETVAL] == False or
-        self.inst.wlan_disconnect()[_RETVAL] == False):
-      print "Failed to disconnect from Inst/Dut"
+    self.TerminateDevices()
 
-  def _LoadDutPlugin(self):
-    self.dut_module_info = imp.find_module(self.dut_plugin_name,
-                                           ['./dut_plugins'])
-    self.dut_module = imp.load_module(self.dut_plugin_name,
-                                      *self.dut_module_info)
-    self.dut = self.dut_module.Dut(self)
-
-  def _LoadInstPlugin(self):
-    self.inst_module_info = imp.find_module(self.inst_plugin_name,
-                                            ['./inst_plugins'])
-    self.inst_module = imp.load_module(self.inst_plugin_name,
-                                       *self.inst_module_info)
-    self.inst = self.inst_module.Dut(self)
+  def SetLogging(self, options):
+    level = logging.DEBUG if options.verbose else logging.INFO
+    logging.basicConfig(
+        level=level,
+        format='[%(levelname)s] %(filename)s:%(lineno)d %(message)s',
+        datefmt='%H:%M:%S')
 
   def Run(self):
-    #TODO(akahuang): Currently the code is broken because the implementation
-    # of TestPlan changed. Should implement new test runner later.
+    self.InitialzeDevices()
+    for test_case in self.testplans:
+      self.RunTest(test_case)
+    self.TerminateDevices()
 
-    # For now, only one test plan.
-    self.tp = self.testplans.GetNextTest()
+  def InitialzeDevices(self):
+    try:
+      self.inst.Initialize()
+      self.inst.LockInstrument()
+      self.inst.SelfCalibrate()
+      # TODO(akahuang): Implement the path loss
+      self.inst.InitPathloss(None)
+    except Exception:
+      logging.exception('Initialize devices failed')
 
-    if self.tp[_RETVAL] == False:
-      # Raise exception instead?
-      print "No test cases to execute"
-      return
+  def TerminateDevices(self):
+    try:
+      self.inst.UnlockInstrument()
+      self.inst.Terminate()
+      self.dut.Terminate()
+    except Exception:
+      logging.exception('Terminate devices failed')
 
-    # Configure the instrument && DUT
-    if (self.inst.WlanInitialize()[_RETVAL] == False or
-        self.dut.WlanInitialize(self.tp[1]['Component Name'])[_RETVAL]
-        == False):
-      print "Failed to initialize the instrument/DUT"
-      return
+  def SetRf(self, rf_type):
+    logging.info('Set RF type: %s', rf_type)
+    self.rf_type = rf_type
+    self.dut.SetRf(rf_type)
+    self.inst.SetRf(rf_type)
 
-    # Note for tx_set_power:
-    # If nothing  is passed (then the function assumes it to be 0),
-    # then the dut plugin should use the value passed in
-    # wlan_tx_set_mode. If the value is not 0 (or not passed),
-    # then that would be overriding the value thats already passed.
-    if (self.dut.WlanTxSetMode(test_params=self.tp)[_RETVAL] == False or
-        self.dut.WlanTxSetPower()[_RETVAL] == False):
-      print "Failed to set TX mode/power on dut"
-      return
+  def RunTest(self, test_case):
+    logging.info('Running test: \n%s', test_case)
+    # Initialize the device if the RF is changed.
+    if test_case.rf_type != self.rf_type:
+      if self.rf_type is not None:
+        self.dut.Terminate()
+      self.SetRf(test_case.rf_type)
+      self.dut.Initialize(test_case)
 
-    port_map = {'vsa':0, 'port':0}
+    # TODO(akahuang): Implement the port mapping
+    self.inst.SetPassloss(port=None, table_indice=None)
 
-    if not self.inst.WlanTxConfig(
-        test_params=self.tp, rf_ports=port_map)[_RETVAL]:
-      print "Failed to load instrument tx config"
-      return
+    function_map = {
+        'TX_MOD': self.RunTxTest,
+        'RX_PER': self.RunRxTest}
+    function_map[test_case.test_type](test_case)
 
-    if self.dut.WlanTxOn()[_RETVAL] == False:
-      print "DUT TX On Failed"
-    else:
-      if self.inst.WlanTxMeasure()[_RETVAL] == False:
-        print "Inst TX Measure failed"
-      else:
-        result = self.inst.WlanTxGetResults()
-        if result[_RETVAL] == False:
-          print "Inst: Failed to get results"
-        else:
-          print result[1]
+  def RunTxTest(self, test_case):
+    try:
+      self.dut.TxSetMode(test_case)
+      self.dut.TxSetPower(test_case)
+      self.inst.TxConfig(test_case)
+      self.dut.TxStart(test_case)
+      self.inst.TxMeasure(test_case)
+      self.inst.TxGetResult(test_case)
+      self.dut.TxStop(test_case)
+    except Exception:
+      logging.exception('RunTxTest error. test_case: %s', test_case)
 
-    if self.dut.WlanTxOff()[_RETVAL] == False:
-      print "Failed to do TX Off"
+  def RunRxTest(self, test_case):
+    try:
+      self.dut.RxSetMode(test_case)
+      self.dut.RxClearResult(test_case)
+      self.inst.RxConfig(test_case)
+      self.inst.RxGenerate(test_case)
+      self.dut.RxGetResult(test_case)
+    except Exception:
+      logging.exception('RunRxTest error. test_case: %s', test_case)
 
 
 def main():
-  app = Graphyte()
+  parser = ArgumentParser()
+  parser.add_argument('--config-file', dest='config_file', action='store',
+                    type=str, default=DEFAULT_CONFIG_FILE,
+                    help='The path of config file')
+  parser.add_argument('-v', '--verbose', dest='verbose', action='store_true',
+                    help='Enable debug logging', default=False)
+  options = parser.parse_args()
+
+  app = Graphyte(options)
   app.Run()
 
 

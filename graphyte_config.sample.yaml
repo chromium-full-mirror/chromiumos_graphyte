@@ -1,14 +1,13 @@
+# Copyright 2015 The Chromium OS Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
 config_name: Graphyte Sample Config
 
-plugins:
-  inst: sample_inst
-  dut: sample_dut
+inst: sample_inst
+inst_config: sample_inst_config.yaml
 
-inst_config:
-  ip_address: 192.168.86.10
-  meas_channel: CHAN1
-
-dut_config:
-  ip_address: 192.168.86.1
+dut: sample_dut
+dut_config: sample_dut_config.yaml
 
 test_plan: sample_testplan.csv
