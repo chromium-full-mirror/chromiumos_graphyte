@@ -28,6 +28,11 @@ class InstBase(object):
         'ZIGBEE': self.ZigbeeControllerBase(self)}
     self.rf_type = None
 
+    # Active component record the current (component_name, tx_or_rx)
+    # for port mapping and pathloss.
+    self.port_config_table = None
+    self.active_component = (None, None)
+
   def __getattr__(self, name):
     """Delegate to the active controller, that is recorded at rf_type."""
     try:
@@ -58,10 +63,41 @@ class InstBase(object):
   def AutoLevel(self, ports):
     raise NotImplementedError
 
-  def InitPathloss(self, loss_table):
-    raise NotImplementedError
+  def InitPortConfig(self, port_config_table):
+    self.port_config_table = port_config_table
 
-  def SetPassloss(self, port, table_indice):
+  def SetPortConfig(self, test):
+    component_name = test.args['component_name']
+    tx_or_rx = test.tx_or_rx
+
+    if self.active_component == (component_name, tx_or_rx):
+      logging.debug('The port config is the same, ignored')
+      return
+    logging.info('Set the port config for component: %s %s',
+                 component_name, tx_or_rx)
+    self.active_component = (component_name, tx_or_rx)
+    active_port_config = self.port_config_table.QueryPortConfig(
+        component_name, tx_or_rx)
+    port_mapping = [config['port_mapping'] for config in active_port_config]
+    pathloss = [config['pathloss'] for config in active_port_config]
+    logging.debug('Port mapping: %s', port_mapping)
+    logging.debug('Path loss: %s', pathloss)
+    self._SetPortConfig(port_mapping, pathloss)
+
+  def _SetPortConfig(self, port_mapping, pathloss):
+    """Set the port mapping and the path loss for the active component.
+    Because a component might be multiple antenna, the port mapping and the path
+    loss are the list.
+    Arg:
+      port_mapping: The port name for each antenna.
+        The format is <port name>:<port number>
+        eg: ['VSA0:0', 'VSA1:0', 'VSA2:0']
+      pathloss: the path loss for each antenna.
+        The format is a dict which key is frequency, value is power loss in dB.
+        eg: [{'2440': '20.4', '2412': '20.4'},
+             {'2440': '20.2', '2412': '20.5'},
+             {'2440': '20.1', '2412': '20.6'}]
+    """
     raise NotImplementedError
 
   def LockInstrument(self):

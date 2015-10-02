@@ -95,6 +95,7 @@ class TestCase(object):
   def __init__(self, args, result_limit):
     self.rf_type = args['rf_type']
     self.test_type = args['test_type']
+    self.tx_or_rx = self.test_type.split('_')[0]
     self.args = args
     self.result_limit = result_limit
 

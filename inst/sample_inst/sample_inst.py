@@ -33,11 +33,8 @@ class Inst(InstBase):
   def AutoLevel(self, ports):
     logging.info('Inst AutoLevel')
 
-  def InitPathloss(self, loss_table):
-    logging.info('Inst InitPathloss')
-
-  def SetPassloss(self, port, table_indice):
-    logging.info('Inst SetPassloss')
+  def _SetPortConfig(self, port_mapping, pathloss):
+    logging.info('Inst _SetPortConfig')
 
   def LockInstrument(self):
     logging.info('Inst LockInstrument')

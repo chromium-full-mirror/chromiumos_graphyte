@@ -1,0 +1,81 @@
+# Copyright 2015 The Chromium OS Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# The format of port_config:
+# {
+#   <component_name>: [ // List is represented for the multiple antenna
+#     {
+#       TX: {
+#         port_mapping: <RF name:port number>,
+#         pathloss: [<pathloss csv file>, <pathloss title>]
+#       },
+#       RX: {
+#         port_mapping: <RF name:port number>,
+#         pathloss: [<pathloss csv file>, <pathloss title>]
+#       }
+#     }
+#   ]
+# }
+#
+# The component names are defined in DUT config file, and the RF names are
+# defined in inst config file.
+port_config:
+  WLAN_2G:
+  # Antenna 0
+  - TX:
+      port_mapping: 'VSA0:0'
+      pathloss: ['sample_pathloss.csv', 'wlan_2g_tx0']
+    RX:
+      port_mapping: 'VSG0:0'
+      pathloss: ['sample_pathloss.csv', 'wlan_2g_rx0']
+  # Antenna 1
+  - TX:
+      port_mapping: 'VSA1:0'
+      pathloss: ['sample_pathloss.csv', 'wlan_2g_tx0']
+    RX:
+      port_mapping: 'VSG1:0'
+      pathloss: ['sample_pathloss.csv', 'wlan_2g_rx0']
+  # Antenna 2
+  - TX:
+      port_mapping: 'VSA2:0'
+      pathloss: ['sample_pathloss.csv', 'wlan_2g_tx0']
+    RX:
+      port_mapping: 'VSG2:0'
+      pathloss: ['sample_pathloss.csv', 'wlan_2g_rx0']
+  WLAN_5G:
+  # Antenna 0
+  - TX:
+      port_mapping: 'VSA0:1'
+      pathloss: ['sample_pathloss.csv', 'wlan_5g_tx0']
+    RX:
+      port_mapping: 'VSG0:1'
+      pathloss: ['sample_pathloss.csv', 'wlan_5g_rx0']
+  # Antenna 1
+  - TX:
+      port_mapping: 'VSA1:1'
+      pathloss: ['sample_pathloss.csv', 'wlan_5g_tx0']
+    RX:
+      port_mapping: 'VSG1:1'
+      pathloss: ['sample_pathloss.csv', 'wlan_5g_rx0']
+  # Antenna 2
+  - TX:
+      port_mapping: 'VSA0:1'
+      pathloss: ['sample_pathloss.csv', 'wlan_5g_tx0']
+    RX:
+      port_mapping: 'VSG0:1'
+      pathloss: ['sample_pathloss.csv', 'wlan_5g_rx0']
+  BLUETOOTH:
+  - TX:
+      port_mapping: 'VSA3:0'
+      pathloss: ['sample_pathloss.csv', 'wlan_2g_tx0']
+    RX:
+      port_mapping: 'VSG3:0'
+      pathloss: ['sample_pathloss.csv', 'wlan_2g_rx0']
+  ZIGBEE:
+  - TX:
+      port_mapping: 'VSA4:0'
+      pathloss: ['sample_pathloss.csv', 'wlan_2g_tx0']
+    RX:
+      port_mapping: 'VSG4:0'
+      pathloss: ['sample_pathloss.csv', 'wlan_2g_rx0']

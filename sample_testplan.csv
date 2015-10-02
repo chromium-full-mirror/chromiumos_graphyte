@@ -2,34 +2,34 @@
 #,order_by,"[component_name, center_freq]",,,,,,,,,,,,,
 ,,,,,,,,,,,,,,,
 @,component_name,rf_type,standard,format,test_type,center_freq,bandwidth,data_rate,nss,chain_mask,power_level,@,evm,avg_power,freq_error
-,wlan_2g,WLAN,B,DSSS,TX_MOD,"[2412, 2437, 2462]",20,1,None,"[1, 2, 4]",18,,"(None,-25)","(16,20)","(0,20)"
-,wlan_2g,WLAN,B,CCK,TX_MOD,"[2412, 2437, 2462]",20,11,None,"[1, 2, 4]",18,,"(None,-25)","(16,20)","(0,20)"
-,wlan_2g,WLAN,G,OFDM,TX_MOD,"[2412, 2437, 2462]",20,54,None,"[1, 2, 4]",18,,"(None,-25)","(16,20)","(0,20)"
-,wlan_2g,WLAN,N,OFDM,TX_MOD,"[2412, 2437, 2462]",20,MCS7,None,"[1, 2, 4]",20,,"(None,-25)","(18,22)","(0,20)"
-,wlan_2g,WLAN,N,OFDM,TX_MOD,"[2412, 2437, 2462]",20,MCS7,None,"[1, 2, 4]",20,,"(None,-25)","(18,22)","(0,20)"
-,wlan_2g,WLAN,N,OFDM,TX_MOD,"[2412, 2437, 2462]",20,MCS7,None,"[1, 2, 4]",20,,"(None,-25)","(18,22)","(0,20)"
-,wlan_2g,WLAN,N,OFDM,TX_MOD,2422,40,MCS7,None,"[1, 2, 4]",20,,"(None,-25)","(18,22)","(0,20)"
+,WLAN_2G,WLAN,B,DSSS,TX_MOD,"[2412, 2437, 2462]",20,1,None,"[1, 2, 4]",18,,"(None,-25)","(16,20)","(0,20)"
+,WLAN_2G,WLAN,B,CCK,TX_MOD,"[2412, 2437, 2462]",20,11,None,"[1, 2, 4]",18,,"(None,-25)","(16,20)","(0,20)"
+,WLAN_2G,WLAN,G,OFDM,TX_MOD,"[2412, 2437, 2462]",20,54,None,"[1, 2, 4]",18,,"(None,-25)","(16,20)","(0,20)"
+,WLAN_2G,WLAN,N,OFDM,TX_MOD,"[2412, 2437, 2462]",20,MCS7,None,"[1, 2, 4]",20,,"(None,-25)","(18,22)","(0,20)"
+,WLAN_2G,WLAN,N,OFDM,TX_MOD,"[2412, 2437, 2462]",20,MCS7,None,"[1, 2, 4]",20,,"(None,-25)","(18,22)","(0,20)"
+,WLAN_2G,WLAN,N,OFDM,TX_MOD,"[2412, 2437, 2462]",20,MCS7,None,"[1, 2, 4]",20,,"(None,-25)","(18,22)","(0,20)"
+,WLAN_2G,WLAN,N,OFDM,TX_MOD,2422,40,MCS7,None,"[1, 2, 4]",20,,"(None,-25)","(18,22)","(0,20)"
 ,,,,,,,,,,,,,,,
 @,component_name,rf_type,standard,format,test_type,center_freq,bandwidth,data_rate,nss,chain_mask,power_level,rx_num_packets,@,rx_per,
-,wlan_2g,WLAN,B,CCK,RX_PER,"[2412, 2437, 2462]",20,11,None,"[1, 2, 4]",-90,100,,"(0,10)",
-,wlan_2g,WLAN,G,OFDM,RX_PER,"[2412, 2437, 2462]",20,54,None,"[1, 2, 4]",-85,100,,"(0,10)",
-,wlan_2g,WLAN,N,OFDM,RX_PER,"[2412, 2437, 2462]",20,MCS7,None,"[1, 2, 4]",,100,,"(0,10)",
-,wlan_2g,WLAN,N,OFDM,RX_PER,"[2412, 2437, 2462]",20,MCS7,None,"[1, 2, 4]",,100,,"(0,10)",
-,wlan_2g,WLAN,N,OFDM,RX_PER,"[2412, 2437, 2462]",20,MCS7,None,"[1, 2, 4]",,100,,"(0,10)",
-,wlan_2g,WLAN,N,OFDM,RX_PER,2422,40,MCS7,None,"[1, 2, 4]",,100,,"(0,10)",
+,WLAN_2G,WLAN,B,CCK,RX_PER,"[2412, 2437, 2462]",20,11,None,"[1, 2, 4]",-90,100,,"(0,10)",
+,WLAN_2G,WLAN,G,OFDM,RX_PER,"[2412, 2437, 2462]",20,54,None,"[1, 2, 4]",-85,100,,"(0,10)",
+,WLAN_2G,WLAN,N,OFDM,RX_PER,"[2412, 2437, 2462]",20,MCS7,None,"[1, 2, 4]",,100,,"(0,10)",
+,WLAN_2G,WLAN,N,OFDM,RX_PER,"[2412, 2437, 2462]",20,MCS7,None,"[1, 2, 4]",,100,,"(0,10)",
+,WLAN_2G,WLAN,N,OFDM,RX_PER,"[2412, 2437, 2462]",20,MCS7,None,"[1, 2, 4]",,100,,"(0,10)",
+,WLAN_2G,WLAN,N,OFDM,RX_PER,2422,40,MCS7,None,"[1, 2, 4]",,100,,"(0,10)",
 ,,,,,,,,,,,,,,,
 @,component_name,rf_type,standard,format,test_type,center_freq,bandwidth,data_rate,nss,chain_mask,power_level,@,evm,avg_power,freq_error
-,wlan_5g,WLAN,A,OFDM,TX_MOD,"[5180, 5825]",20,54,None,"[1, 2, 4]",18,,"(None,-25)","(16,20)","(0,20)"
-,wlan_5g,WLAN,N,OFDM,TX_MOD,"[5180, 5825]",20,MCS7,None,"[1, 2, 4]",18,,"(None,-25)","(16,20)","(0,20)"
-,wlan_5g,WLAN,N,OFDM,TX_MOD,"[5180, 5825]",40,MCS7,None,"[1, 2, 4]",18,,"(None,-25)","(16,20)","(0,20)"
-,wlan_5g,WLAN,AC,OFDM,TX_MOD,"[5180, 5825]",20,MCS7,1,"[1, 2, 4]",20,,"(None,-25)","(18,22)","(0,20)"
-,wlan_5g,WLAN,AC,OFDM,TX_MOD,"[5180, 5825]",40,MCS9,1,"[1, 2, 4]",20,,"(None,-25)","(18,22)","(0,20)"
-,wlan_5g,WLAN,AC,OFDM,TX_MOD,"[5180, 5825]",80,MCS9,1,"[1, 2, 4]",20,,"(None,-25)","(18,22)","(0,20)"
+,WLAN_5G,WLAN,A,OFDM,TX_MOD,"[5180, 5825]",20,54,None,"[1, 2, 4]",18,,"(None,-25)","(16,20)","(0,20)"
+,WLAN_5G,WLAN,N,OFDM,TX_MOD,"[5180, 5825]",20,MCS7,None,"[1, 2, 4]",18,,"(None,-25)","(16,20)","(0,20)"
+,WLAN_5G,WLAN,N,OFDM,TX_MOD,"[5180, 5825]",40,MCS7,None,"[1, 2, 4]",18,,"(None,-25)","(16,20)","(0,20)"
+,WLAN_5G,WLAN,AC,OFDM,TX_MOD,"[5180, 5825]",20,MCS7,1,"[1, 2, 4]",20,,"(None,-25)","(18,22)","(0,20)"
+,WLAN_5G,WLAN,AC,OFDM,TX_MOD,"[5180, 5825]",40,MCS9,1,"[1, 2, 4]",20,,"(None,-25)","(18,22)","(0,20)"
+,WLAN_5G,WLAN,AC,OFDM,TX_MOD,"[5180, 5825]",80,MCS9,1,"[1, 2, 4]",20,,"(None,-25)","(18,22)","(0,20)"
 ,,,,,,,,,,,,,,,
 @,component_name,rf_type,standard,format,test_type,center_freq,bandwidth,data_rate,nss,chain_mask,power_level,rx_num_packets,@,rx_per,
-,wlan_5g,WLAN,A,OFDM,RX_PER,"[5180, 5825]",20,54,None,"[1, 2, 4]",-68,100,,"(0,10)",
-,wlan_5g,WLAN,N,OFDM,RX_PER,"[5180, 5825]",20,MCS7,None,"[1, 2, 4]",,100,,"(0,10)",
-,wlan_5g,WLAN,N,OFDM,RX_PER,"[5180, 5825]",40,MCS7,None,"[1, 2, 4]",,100,,"(0,10)",
-,wlan_5g,WLAN,AC,OFDM,RX_PER,"[5180, 5825]",20,MCS7,1,"[1, 2, 4]",,100,,"(0,10)",
-,wlan_5g,WLAN,AC,OFDM,RX_PER,"[5180, 5825]",40,MCS9,1,"[1, 2, 4]",,100,,"(0,10)",
-,wlan_5g,WLAN,AC,OFDM,RX_PER,"[5180, 5825]",80,MCS9,1,"[1, 2, 4]",,100,,"(0,10)",
+,WLAN_5G,WLAN,A,OFDM,RX_PER,"[5180, 5825]",20,54,None,"[1, 2, 4]",-68,100,,"(0,10)",
+,WLAN_5G,WLAN,N,OFDM,RX_PER,"[5180, 5825]",20,MCS7,None,"[1, 2, 4]",,100,,"(0,10)",
+,WLAN_5G,WLAN,N,OFDM,RX_PER,"[5180, 5825]",40,MCS7,None,"[1, 2, 4]",,100,,"(0,10)",
+,WLAN_5G,WLAN,AC,OFDM,RX_PER,"[5180, 5825]",20,MCS7,1,"[1, 2, 4]",,100,,"(0,10)",
+,WLAN_5G,WLAN,AC,OFDM,RX_PER,"[5180, 5825]",40,MCS9,1,"[1, 2, 4]",,100,,"(0,10)",
+,WLAN_5G,WLAN,AC,OFDM,RX_PER,"[5180, 5825]",80,MCS9,1,"[1, 2, 4]",,100,,"(0,10)",

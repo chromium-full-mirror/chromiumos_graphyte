@@ -27,7 +27,8 @@ import os
 from argparse import ArgumentParser
 import yaml
 
-import testplan
+from port_config import PortConfig
+from testplan import TestPlan
 
 
 DEFAULT_CONFIG_FILE = './graphyte_config.sample.yaml'
@@ -83,8 +84,11 @@ class Graphyte(object):
     self.inst = module.Inst(inst_config)
 
     # Load test plan
-    self.testplans = testplan.TestPlan(graphyte_config['test_plan'])
+    self.testplans = TestPlan(graphyte_config['test_plan'])
     self.rf_type = None
+
+    # Load port config, including port mapping and path loss
+    self.port_config = PortConfig(graphyte_config['port_config'])
 
   def __del__(self):
     self.TerminateDevices()
@@ -107,8 +111,7 @@ class Graphyte(object):
       self.inst.Initialize()
       self.inst.LockInstrument()
       self.inst.SelfCalibrate()
-      # TODO(akahuang): Implement the path loss
-      self.inst.InitPathloss(None)
+      self.inst.InitPortConfig(self.port_config)
     except Exception:
       logging.exception('Initialize devices failed')
 
@@ -135,13 +138,11 @@ class Graphyte(object):
       self.SetRf(test_case.rf_type)
       self.dut.Initialize(test_case)
 
-    # TODO(akahuang): Implement the port mapping
-    self.inst.SetPassloss(port=None, table_indice=None)
-
+    self.inst.SetPortConfig(test_case)
     function_map = {
-        'TX_MOD': self.RunTxTest,
-        'RX_PER': self.RunRxTest}
-    function_map[test_case.test_type](test_case)
+        'TX': self.RunTxTest,
+        'RX': self.RunRxTest}
+    function_map[test_case.tx_or_rx](test_case)
 
   def RunTxTest(self, test_case):
     try:
@@ -169,10 +170,10 @@ class Graphyte(object):
 def main():
   parser = ArgumentParser()
   parser.add_argument('--config-file', dest='config_file', action='store',
-                    type=str, default=DEFAULT_CONFIG_FILE,
-                    help='The path of config file')
+                      type=str, default=DEFAULT_CONFIG_FILE,
+                      help='The path of config file')
   parser.add_argument('-v', '--verbose', dest='verbose', action='store_true',
-                    help='Enable debug logging', default=False)
+                      help='Enable debug logging', default=False)
   options = parser.parse_args()
 
   app = Graphyte(options)
