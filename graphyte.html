@@ -1,0 +1,99 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: module graphyte</title>
+<meta charset="utf-8">
+</head><body bgcolor="#f0f0f8">
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#7799ee">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong>graphyte</strong></big></big></font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:/source/rf_framework/graphyte_marvell/graphyte.py">/source/rf_framework/graphyte_marvell/graphyte.py</a></font></td></tr></table>
+    <p><tt>The&nbsp;Google&nbsp;RF&nbsp;Test&nbsp;Framework&nbsp;module.<br>
+&nbsp;<br>
+This&nbsp;is&nbsp;the&nbsp;main&nbsp;application&nbsp;module&nbsp;from&nbsp;which&nbsp;the&nbsp;execution&nbsp;starts.<br>
+This&nbsp;will&nbsp;drive&nbsp;the&nbsp;other&nbsp;modules.&nbsp;This&nbsp;module&nbsp;can&nbsp;be&nbsp;directly&nbsp;launched.<br>
+&nbsp;<br>
+This&nbsp;module&nbsp;can&nbsp;also&nbsp;be&nbsp;imported&nbsp;and&nbsp;an&nbsp;instance&nbsp;of&nbsp;<a href="#graphyte">graphyte</a>&nbsp;created&nbsp;from&nbsp;there.<br>
+&nbsp;<br>
+Typical&nbsp;Usage&nbsp;(Standalone)<br>
+&nbsp;&nbsp;./<a href="#graphyte">graphyte</a>.py<br>
+&nbsp;<br>
+Typicak&nbsp;Usage&nbsp;(Import&nbsp;to&nbsp;other&nbsp;modules):<br>
+&nbsp;&nbsp;import&nbsp;<a href="#graphyte">graphyte</a><br>
+&nbsp;&nbsp;app&nbsp;=&nbsp;<a href="#graphyte">graphyte</a>.<a href="#graphyte">graphyte</a>()<br>
+&nbsp;<br>
+NOTE:&nbsp;Check&nbsp;the&nbsp;flow&nbsp;diagram.</tt></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#aa55cc">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Modules</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="ConfigParser.html">ConfigParser</a><br>
+</td><td width="25%" valign=top><a href="imp.html">imp</a><br>
+</td><td width="25%" valign=top><a href="testplan.html">testplan</a><br>
+</td><td width="25%" valign=top></td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ee77aa">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Classes</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#ee77aa"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl>
+<dt><font face="helvetica, arial"><a href="__builtin__.html#object">__builtin__.object</a>
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="graphyte.html#graphyte">graphyte</a>
+</font></dt></dl>
+</dd>
+</dl>
+ <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="graphyte">class <strong>graphyte</strong></a>(<a href="__builtin__.html#object">__builtin__.object</a>)</font></td></tr>
+    
+<tr><td bgcolor="#ffc8d8"><tt>&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="graphyte-__del__"><strong>__del__</strong></a>(self)</dt></dl>
+
+<dl><dt><a name="graphyte-__init__"><strong>__init__</strong></a>(self)</dt><dd><tt>The&nbsp;constructor&nbsp;for&nbsp;this&nbsp;module&nbsp;does&nbsp;most&nbsp;of&nbsp;it&nbsp;right&nbsp;now.<br>
+-&nbsp;Load&nbsp;the&nbsp;<a href="#graphyte">graphyte</a>.settings&nbsp;file&nbsp;to&nbsp;find&nbsp;the&nbsp;modules&nbsp;to&nbsp;load.<br>
+-&nbsp;Load&nbsp;the&nbsp;plugins<br>
+-&nbsp;Load&nbsp;test&nbsp;plans<br>
+-&nbsp;Execute&nbsp;the&nbsp;TX&nbsp;test.<br>
+&nbsp;<br>
+Most&nbsp;of&nbsp;the&nbsp;error&nbsp;conditions&nbsp;are&nbsp;ignored&nbsp;and&nbsp;values&nbsp;are&nbsp;hardcoded.<br>
+&nbsp;<br>
+The&nbsp;<a href="#graphyte">graphyte</a>.settings&nbsp;file&nbsp;follows&nbsp;the&nbsp;settings&nbsp;understood&nbsp;by&nbsp;the&nbsp;ConfigParser<br>
+https://docs.python.org/2/library/configparser.html<br>
+&nbsp;<br>
+Right&nbsp;now&nbsp;the&nbsp;configuration&nbsp;file&nbsp;has&nbsp;only&nbsp;one&nbsp;section&nbsp;called&nbsp;[plugins]&nbsp;and<br>
+two&nbsp;entries&nbsp;"dut="&nbsp;and&nbsp;"inst=".&nbsp;These&nbsp;entries&nbsp;are&nbsp;initialized&nbsp;to&nbsp;sample_dut.py<br>
+and&nbsp;sample_inst.py.&nbsp;The&nbsp;dut&nbsp;pluings&nbsp;are&nbsp;searched&nbsp;under&nbsp;./dut-plugins/&nbsp;and&nbsp;the<br>
+instrument&nbsp;plugins&nbsp;are&nbsp;searched&nbsp;under&nbsp;./inst_plugins/<br>
+&nbsp;<br>
+Once&nbsp;the&nbsp;plugins&nbsp;are&nbsp;found,&nbsp;they&nbsp;are&nbsp;loaded.<br>
+&nbsp;<br>
+The&nbsp;testplans&nbsp;module&nbsp;is&nbsp;responsible&nbsp;for&nbsp;reading&nbsp;the&nbsp;CSV&nbsp;file&nbsp;which&nbsp;defines<br>
+the&nbsp;testplans&nbsp;and&nbsp;generate&nbsp;a&nbsp;dictionary&nbsp;that&nbsp;can&nbsp;be&nbsp;passed&nbsp;to&nbsp;inst&nbsp;and&nbsp;dut<br>
+plugins.<br>
+&nbsp;<br>
+Right&nbsp;now&nbsp;the&nbsp;testplan&nbsp;module&nbsp;has&nbsp;only&nbsp;one&nbsp;test&nbsp;case.<br>
+&nbsp;<br>
+The&nbsp;interaction&nbsp;with&nbsp;the&nbsp;dut&nbsp;and&nbsp;the&nbsp;instrument&nbsp;plugin&nbsp;is&nbsp;dipicted&nbsp;in<br>
+the&nbsp;flow&nbsp;diagram.</tt></dd></dl>
+
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+</td></tr></table></td></tr></table>
+</body></html>

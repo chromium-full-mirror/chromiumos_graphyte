@@ -1,0 +1,88 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: module vinst</title>
+<meta charset="utf-8">
+</head><body bgcolor="#f0f0f8">
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#7799ee">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong>vinst</strong></big></big></font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:/source/rf_framework/graphyte_marvell/vinst.py">/source/rf_framework/graphyte_marvell/vinst.py</a></font></td></tr></table>
+    <p><tt>The&nbsp;Virtual&nbsp;Instrument&nbsp;module.<br>
+&nbsp;<br>
+This&nbsp;is&nbsp;the&nbsp;virtual&nbsp;instrument&nbsp;class&nbsp;which&nbsp;every&nbsp;instrument&nbsp;plugin&nbsp;should<br>
+implement.<br>
+&nbsp;<br>
+Almost&nbsp;all&nbsp;the&nbsp;functions&nbsp;return&nbsp;a&nbsp;tuple.&nbsp;The&nbsp;first&nbsp;element&nbsp;is&nbsp;the&nbsp;return&nbsp;value<br>
+True/False.&nbsp;The&nbsp;rest&nbsp;of&nbsp;the&nbsp;elements&nbsp;can&nbsp;be&nbsp;different&nbsp;(Usually&nbsp;a&nbsp;dictionary)</tt></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#aa55cc">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Modules</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="ConfigParser.html">ConfigParser</a><br>
+</td><td width="25%" valign=top></td><td width="25%" valign=top></td><td width="25%" valign=top></td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ee77aa">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Classes</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#ee77aa"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl>
+<dt><font face="helvetica, arial"><a href="__builtin__.html#object">__builtin__.object</a>
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="vinst.html#vinst">vinst</a>
+</font></dt></dl>
+</dd>
+</dl>
+ <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="vinst">class <strong>vinst</strong></a>(<a href="__builtin__.html#object">__builtin__.object</a>)</font></td></tr>
+    
+<tr><td bgcolor="#ffc8d8"><tt>&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="vinst-__init__"><strong>__init__</strong></a>(self, app)</dt><dd><tt>The&nbsp;constructor&nbsp;is&nbsp;passed&nbsp;the&nbsp;app&nbsp;<a href="__builtin__.html#object">object</a>,&nbsp;which&nbsp;is&nbsp;the&nbsp;reference&nbsp;to&nbsp;graphyte<br>
+module.&nbsp;This&nbsp;has&nbsp;to&nbsp;be&nbsp;stored&nbsp;by&nbsp;the&nbsp;inst&nbsp;plugin,&nbsp;which&nbsp;can&nbsp;be&nbsp;used&nbsp;to<br>
+access&nbsp;the&nbsp;graphyte&nbsp;methods&nbsp;or&nbsp;the&nbsp;dut&nbsp;(Useful&nbsp;for&nbsp;calibration).<br>
+This&nbsp;will&nbsp;also&nbsp;give&nbsp;the&nbsp;plugins&nbsp;the&nbsp;ability&nbsp;to&nbsp;talk&nbsp;to&nbsp;each&nbsp;other<br>
+directly.</tt></dd></dl>
+
+<dl><dt><a name="vinst-info"><strong>info</strong></a>(self)</dt><dd><tt>Right&nbsp;now&nbsp;not&nbsp;much&nbsp;useful.&nbsp;It&nbsp;may&nbsp;be&nbsp;used&nbsp;to&nbsp;print&nbsp;information&nbsp;about<br>
+the&nbsp;plugin&nbsp;itself.</tt></dd></dl>
+
+<dl><dt><a name="vinst-wlan_disconnect"><strong>wlan_disconnect</strong></a>(self)</dt><dd><tt>"<br>
+Disconnect&nbsp;from&nbsp;the&nbsp;instrument</tt></dd></dl>
+
+<dl><dt><a name="vinst-wlan_initialize"><strong>wlan_initialize</strong></a>(self)</dt><dd><tt>Initialize&nbsp;the&nbsp;instrument.</tt></dd></dl>
+
+<dl><dt><a name="vinst-wlan_tx_config"><strong>wlan_tx_config</strong></a>(self, test_params<font color="#909090">={}</font>, frequency<font color="#909090">=0</font>, trigger_level<font color="#909090">=0</font>, ref_level<font color="#909090">=0</font>, rf_ports<font color="#909090">={}</font>, signal_type<font color="#909090">={}</font>, measurement<font color="#909090">={}</font>)</dt><dd><tt>The&nbsp;test&nbsp;case&nbsp;details&nbsp;are&nbsp;passed&nbsp;in&nbsp;the&nbsp;test_params&nbsp;dictionary.<br>
+However,&nbsp;we&nbsp;can&nbsp;decide&nbsp;to&nbsp;have&nbsp;other&nbsp;parameters&nbsp;in&nbsp;case&nbsp;someone<br>
+wants&nbsp;to&nbsp;override&nbsp;(Not&nbsp;sure&nbsp;if&nbsp;we&nbsp;will&nbsp;keep&nbsp;these&nbsp;parameters&nbsp;going&nbsp;ahead).<br>
+&nbsp;<br>
+If&nbsp;the&nbsp;test_params&nbsp;is&nbsp;NULL/False,&nbsp;then&nbsp;the&nbsp;rest&nbsp;of&nbsp;the&nbsp;parameters<br>
+can&nbsp;be&nbsp;used</tt></dd></dl>
+
+<dl><dt><a name="vinst-wlan_tx_get_results"><strong>wlan_tx_get_results</strong></a>(self)</dt><dd><tt>Read&nbsp;results&nbsp;from&nbsp;the&nbsp;instruments</tt></dd></dl>
+
+<dl><dt><a name="vinst-wlan_tx_measure"><strong>wlan_tx_measure</strong></a>(self)</dt><dd><tt>The&nbsp;instrument&nbsp;should&nbsp;block&nbsp;in&nbsp;this&nbsp;call&nbsp;until&nbsp;its&nbsp;done&nbsp;with&nbsp;the<br>
+measurement.&nbsp;&nbsp;The&nbsp;graphyte&nbsp;assumes&nbsp;that&nbsp;when&nbsp;the&nbsp;call&nbsp;returns&nbsp;the&nbsp;measurement<br>
+is&nbsp;done&nbsp;and&nbsp;is&nbsp;ready&nbsp;to&nbsp;be&nbsp;read.&nbsp;graphyte&nbsp;will&nbsp;not&nbsp;wait&nbsp;to&nbsp;make&nbsp;the&nbsp;next&nbsp;call<br>
+once&nbsp;this&nbsp;function&nbsp;returns.</tt></dd></dl>
+
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+</td></tr></table></td></tr></table>
+</body></html>
