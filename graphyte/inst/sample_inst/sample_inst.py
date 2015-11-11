@@ -8,7 +8,7 @@
 
 import logging
 
-from inst import InstBase
+from .. import InstBase
 
 
 class Inst(InstBase):

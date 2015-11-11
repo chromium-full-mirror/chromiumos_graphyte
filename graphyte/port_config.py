@@ -37,10 +37,11 @@ import csv
 import logging
 import yaml
 
+from .utils import SearchConfig
 
 class PortConfig(object):
   def __init__(self, config_file):
-    with open(config_file, 'r') as f:
+    with open(SearchConfig(config_file), 'r') as f:
       config = yaml.load(f)
     self.port_config = config['port_config']
 
@@ -56,7 +57,7 @@ class PortConfig(object):
     """Lazy loading the pathloss file."""
     if filename not in self._pathloss_table:
       self._pathloss_table[filename] = {}
-      with open(filename, 'r') as csv_file:
+      with open(SearchConfig(filename), 'r') as csv_file:
         for table in csv.DictReader(csv_file):
           title = table['title']
           del table['title']

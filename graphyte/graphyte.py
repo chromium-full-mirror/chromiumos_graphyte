@@ -6,39 +6,33 @@
 
 """The Google RF Test Framework module.
 
-This is the main application module from which the execution starts.
-This will drive the other modules. This module can be directly launched.
-
+This is the main application module that will drive the other modules.
 This module can also be imported and an instance of graphyte created from there.
 
-Typical Usage (Standalone)
-  ./graphyte.py
-
-Typicak Usage (Import to other modules):
-  import graphyte
-  app = graphyte.graphyte()
-
-NOTE: Check the flow diagram.
-
+Typical Usage (Import to other modules):
+  from graphyte.graphyte import Graphyte
+  app = Graphyte()
+Please refer to graphyte_main.py.
 """
 
 import logging
 import os
-from argparse import ArgumentParser
 import yaml
 
-from port_config import PortConfig
-from testplan import TestPlan
+from .port_config import PortConfig
+from .testplan import TestPlan
+from .utils import SearchConfig
 
 
-DEFAULT_CONFIG_FILE = './graphyte_config.sample.yaml'
+GRAPHYTE_DIR = os.path.dirname(os.path.realpath(__file__))
+DEFAULT_CONFIG_FILE = 'graphyte_config.sample.yaml'
 
 
 class Graphyte(object):
   """The graphyte module.
   Instantiating the class does everything now. Refer to the constructor below.
   """
-  def __init__(self, options):
+  def __init__(self, config_file=DEFAULT_CONFIG_FILE, verbose=False):
     """
     The constructor for this module does most of it right now.
     - Load the graphyte.settings file to find the modules to load.
@@ -59,26 +53,30 @@ class Graphyte(object):
     The interaction with the dut and the instrument plugin is dipicted in
     the flow diagram.
     """
-    self.SetLogging(options)
+    self.SetLogging(verbose)
     logging.info('Starting Graphyte....')
 
-    with open(options.config_file, 'r') as f:
+    config_path = SearchConfig(config_file, GRAPHYTE_DIR)
+    with open(config_path, 'r') as f:
       graphyte_config = yaml.load(f)
 
     # Load Dut and Inst class
     dut_name = graphyte_config['dut']
-    dut_config_file = graphyte_config['dut_config']
-    module = __import__('dut.%s.%s' % (dut_name, dut_name), fromlist=['Dut'])
-    with open(os.path.join('dut', dut_name, dut_config_file), 'r') as f:
+    module = __import__('dut.%s.%s' % (dut_name, dut_name), globals(),
+                        level=1, fromlist=['Dut'])
+    dut_dir = os.path.join(GRAPHYTE_DIR, 'dut', dut_name)
+    dut_config_file = SearchConfig(graphyte_config['dut_config'], dut_dir)
+    with open(dut_config_file, 'r') as f:
       dut_config = yaml.load(f)
     logging.info('DUT %s, config: %s', dut_name, dut_config)
     self.dut = module.Dut(dut_config)
 
     inst_name = graphyte_config['inst']
-    inst_config_file = graphyte_config['inst_config']
-    module = __import__('inst.%s.%s' % (inst_name, inst_name),
-                        fromlist=['Inst'])
-    with open(os.path.join('inst', inst_name, inst_config_file), 'r') as f:
+    module = __import__('inst.%s.%s' % (inst_name, inst_name), globals(),
+                        level=1, fromlist=['Inst'])
+    inst_dir = os.path.join(GRAPHYTE_DIR, 'inst', inst_name)
+    inst_config_file = SearchConfig(graphyte_config['inst_config'], inst_dir)
+    with open(inst_config_file, 'r') as f:
       inst_config = yaml.load(f)
     logging.info('Inst %s, config: %s', inst_name, inst_config)
     self.inst = module.Inst(inst_config)
@@ -93,8 +91,8 @@ class Graphyte(object):
   def __del__(self):
     self.TerminateDevices()
 
-  def SetLogging(self, options):
-    level = logging.DEBUG if options.verbose else logging.INFO
+  def SetLogging(self, verbose):
+    level = logging.DEBUG if verbose else logging.INFO
     logging.basicConfig(
         level=level,
         format='[%(levelname)s] %(filename)s:%(lineno)d %(message)s',
@@ -165,20 +163,3 @@ class Graphyte(object):
       self.dut.RxGetResult(test_case)
     except Exception:
       logging.exception('RunRxTest error. test_case: %s', test_case)
-
-
-def main():
-  parser = ArgumentParser()
-  parser.add_argument('--config-file', dest='config_file', action='store',
-                      type=str, default=DEFAULT_CONFIG_FILE,
-                      help='The path of config file')
-  parser.add_argument('-v', '--verbose', dest='verbose', action='store_true',
-                      help='Enable debug logging', default=False)
-  options = parser.parse_args()
-
-  app = Graphyte(options)
-  app.Run()
-
-
-if __name__ == '__main__':
-  main()

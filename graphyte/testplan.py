@@ -30,6 +30,7 @@ import csv
 import itertools
 import logging
 
+from .utils import SearchConfig
 
 class TestPlan(object):
   def __init__(self, config_file):
@@ -47,7 +48,7 @@ class TestPlan(object):
 
   def ParseCsvFile(self, config_file):
     logging.info('Loading test config file: %s', config_file)
-    with open(config_file) as csv_file:
+    with open(SearchConfig(config_file)) as csv_file:
       reader = csv.reader(csv_file)
       header = None
       split_idx = None

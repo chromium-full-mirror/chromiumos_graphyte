@@ -1,1 +1,5 @@
 *.pyc
+build/
+dist/
+graphyte.egg-info
+MANIFEST

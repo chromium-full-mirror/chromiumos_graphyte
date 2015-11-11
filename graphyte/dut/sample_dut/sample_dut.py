@@ -8,7 +8,7 @@
 
 import logging
 
-from dut import DutBase
+from .. import DutBase
 
 
 class Dut(DutBase):

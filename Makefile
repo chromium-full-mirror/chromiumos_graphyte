@@ -12,6 +12,8 @@ LINT_BLACKLIST=
 LINT_FILES=$(shell find . -name '*.py' -type f | sort)
 LINT_WHITELIST=$(filter-out $(LINT_BLACKLIST),$(LINT_FILES))
 
+default:
+
 lint:
 	@set -e -o pipefail; \
 	out=$$(mktemp); \
