@@ -9,6 +9,20 @@
 import logging
 
 from .. import InstBase
+from ...testplan import ChainMaskToList
+
+
+def _MakePassResult(result_limit):
+  """Make the result that pass all limit."""
+  def _MakeInBoundValue(bound):
+    lower, upper = bound
+    if lower is None:
+      return upper - 1
+    if upper is None:
+      return lower + 1
+    return (lower + upper) / 2
+  return dict([(key, _MakeInBoundValue(bound))
+               for key, bound in result_limit.iteritems()])
 
 
 class Inst(InstBase):
@@ -43,16 +57,24 @@ class Inst(InstBase):
     logging.info('Inst UnlockInstrument')
 
   class WlanController(InstBase.WlanControllerBase):
+    def __init__(self, inst):
+      super(Inst.WlanController, self).__init__(inst)
+      self.chain_list = None
+
     def _TxConfig(self, **kwargs):
       logging.info('Wlan TxConfig')
+      self.chain_list = ChainMaskToList(kwargs.get('chain_mask'))
 
     def _TxMeasure(self, **kwargs):
       logging.info('Wlan TxMeasure')
 
     def _TxGetResult(self, result_limit, **kwargs):
       logging.info('Wlan TxGetResult. Result limit: %s', result_limit)
-      results = dict([(key, 0) for key in result_limit.keys()])
-      return results
+      result = _MakePassResult(result_limit)
+      if len(self.chain_list) > 1:
+        for key, value in result.iteritems():
+          result[key] = [value for _ in self.chain_list]
+      return result
 
     def _RxConfig(self, **kwargs):
       logging.info('Wlan RxConfig')
@@ -73,8 +95,7 @@ class Inst(InstBase):
 
     def _TxGetResult(self, result_limit, **kwargs):
       logging.info('Bluetooth TxGetResult. Result limit: %s', result_limit)
-      results = dict([(key, 0) for key in result_limit.keys()])
-      return results
+      return _MakePassResult(result_limit)
 
     def _RxConfig(self, **kwargs):
       logging.info('Bluetooth RxConfig')
@@ -95,8 +116,7 @@ class Inst(InstBase):
 
     def _TxGetResult(self, result_limit, **kwargs):
       logging.info('Zigbee TxGetResult. Result limit: %s', result_limit)
-      results = dict([(key, 0) for key in result_limit.keys()])
-      return results
+      return _MakePassResult(result_limit)
 
     def _RxConfig(self, **kwargs):
       logging.info('Zigbee RxConfig')

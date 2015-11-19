@@ -3,3 +3,4 @@ build/
 dist/
 graphyte.egg-info
 MANIFEST
+log_files/

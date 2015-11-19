@@ -19,22 +19,25 @@ import logging
 import os
 import yaml
 
+from .default_setting import DEFAULT_CONFIG_FILE
+from .default_setting import DEFAULT_LOG_FILE
+from .default_setting import DEFAULT_RESULT_FILE
+from .default_setting import GRAPHYTE_DIR
+from .result_writer import ResultWriter
 from .port_config import PortConfig
 from .testplan import TestPlan
+from .utils import PrepareOutputFile
 from .utils import SearchConfig
-
-
-GRAPHYTE_DIR = os.path.dirname(os.path.realpath(__file__))
-DEFAULT_CONFIG_FILE = 'graphyte_config.sample.yaml'
 
 
 class Graphyte(object):
   """The graphyte module.
   Instantiating the class does everything now. Refer to the constructor below.
   """
-  def __init__(self, config_file=DEFAULT_CONFIG_FILE, verbose=False):
-    """
-    The constructor for this module does most of it right now.
+  def __init__(self, config_file=DEFAULT_CONFIG_FILE,
+               log_file=DEFAULT_LOG_FILE, result_file=DEFAULT_RESULT_FILE,
+               verbose=False, console_output=False, append_mode=False):
+    """The constructor for this module does most of it right now.
     - Load the graphyte.settings file to find the modules to load.
     - Load the plugins
     - Load test plans
@@ -53,7 +56,7 @@ class Graphyte(object):
     The interaction with the dut and the instrument plugin is dipicted in
     the flow diagram.
     """
-    self.SetLogging(verbose)
+    self.SetLogging(log_file, verbose, append_mode, console_output)
     logging.info('Starting Graphyte....')
 
     config_path = SearchConfig(config_file, GRAPHYTE_DIR)
@@ -88,21 +91,44 @@ class Graphyte(object):
     # Load port config, including port mapping and path loss
     self.port_config = PortConfig(graphyte_config['port_config'])
 
+    # Open a result writer
+    self.result_writer = ResultWriter(result_file)
+
+    # Record all tests are pass or not
+    self.all_tests_pass = None
+
   def __del__(self):
     self.TerminateDevices()
 
-  def SetLogging(self, verbose):
+  def SetLogging(self, log_file, verbose, append_mode, console_output):
     level = logging.DEBUG if verbose else logging.INFO
+    mode = 'a' if append_mode else 'w'
+    log_file = PrepareOutputFile(log_file)
+    log_format = '[%(levelname)s] %(filename)s:%(lineno)d %(message)s'
     logging.basicConfig(
         level=level,
-        format='[%(levelname)s] %(filename)s:%(lineno)d %(message)s',
-        datefmt='%H:%M:%S')
+        format=log_format,
+        datefmt='%H:%M:%S',
+        filename=log_file,
+        filemode=mode)
+    if console_output:
+      console_handler = logging.StreamHandler()
+      console_handler.setLevel(level)
+      console_handler.setFormatter(logging.Formatter(log_format))
+      logging.getLogger().addHandler(console_handler)
 
   def Run(self):
+    """The main method of the class.
+    It returns whether all tests are passed or not.
+    """
+    self.all_tests_pass = True
     self.InitialzeDevices()
     for test_case in self.testplans:
       self.RunTest(test_case)
     self.TerminateDevices()
+    logging.info('All tests are pass? %s', self.all_tests_pass)
+    self.result_writer.WriteTotalResult(self.all_tests_pass)
+    return self.all_tests_pass
 
   def InitialzeDevices(self):
     try:
@@ -140,26 +166,28 @@ class Graphyte(object):
     function_map = {
         'TX': self.RunTxTest,
         'RX': self.RunRxTest}
-    function_map[test_case.tx_or_rx](test_case)
+    try:
+      is_pass, result = function_map[test_case.tx_or_rx](test_case)
+    except Exception:
+      logging.exception('RunTest error. test_case: %s', test_case)
+      is_pass, result = False, {}
+    self.all_tests_pass &= is_pass
+    self.result_writer.WriteResult(test_case, result)
 
   def RunTxTest(self, test_case):
-    try:
-      self.dut.TxSetMode(test_case)
-      self.dut.TxSetPower(test_case)
-      self.inst.TxConfig(test_case)
-      self.dut.TxStart(test_case)
-      self.inst.TxMeasure(test_case)
-      self.inst.TxGetResult(test_case)
-      self.dut.TxStop(test_case)
-    except Exception:
-      logging.exception('RunTxTest error. test_case: %s', test_case)
+    self.dut.TxSetMode(test_case)
+    self.dut.TxSetPower(test_case)
+    self.inst.TxConfig(test_case)
+    self.dut.TxStart(test_case)
+    self.inst.TxMeasure(test_case)
+    result = self.inst.TxGetResult(test_case)
+    self.dut.TxStop(test_case)
+    return result
 
   def RunRxTest(self, test_case):
-    try:
-      self.dut.RxSetMode(test_case)
-      self.dut.RxClearResult(test_case)
-      self.inst.RxConfig(test_case)
-      self.inst.RxGenerate(test_case)
-      self.dut.RxGetResult(test_case)
-    except Exception:
-      logging.exception('RunRxTest error. test_case: %s', test_case)
+    self.dut.RxSetMode(test_case)
+    self.dut.RxClearResult(test_case)
+    self.inst.RxConfig(test_case)
+    self.inst.RxGenerate(test_case)
+    result = self.dut.RxGetResult(test_case)
+    return result

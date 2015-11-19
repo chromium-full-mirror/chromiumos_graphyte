@@ -30,13 +30,17 @@ import csv
 import itertools
 import logging
 
-from .utils import SearchConfig
+from .utils import SearchConfig, IsInBound
 
 class TestPlan(object):
   def __init__(self, config_file):
     self.test_cases = []
     self.test_config = {}
-    self.ParseCsvFile(config_file)
+    try:
+      self.ParseCsvFile(config_file)
+    except ValueError:
+      logging.exception('Parsing csv file %s error.', config_file)
+      self.test_cases = []
 
     order_by = self.test_config.get('order_by', None)
     if order_by is not None:
@@ -104,12 +108,26 @@ class TestCase(object):
     return 'RF: %s, Type: %s\nArgs: %s\nResults: %s' % (
         self.rf_type, self.test_type, self.args, self.result_limit)
 
+  def GetCanonicalName(self):
+    """Return the name of the test case. It should contain important arguments
+    information in a certain order.
+    """
+    arg_order = ['component_name', 'test_type', 'rf_type', 'center_freq',
+                 'format', 'standard', 'data_rate', 'bandwidth', 'chain_mask']
+    # TODO(akahung): confirm the argument below needed or not.
+    #        'power_level', 'rx_num_packets', 'nss'
+    args = self.ToDict()
+    if args.get('bandwidth'):
+      args['bandwidth'] = 'BW-' + str(args['bandwidth'])
+    if args.get('chain_mask'):
+      chain_list = ChainMaskToList(args['chain_mask'])
+      args['chain_mask'] = 'ANTENNA-' + ','.join(map(str, chain_list))
+    arg_values = [args.get(key) for key in arg_order if args.get(key)]
+    return ' '.join(map(str, arg_values))
+
   def ResolveAttr(self, arg_keys):
     """Returns the value in args. It's used for sorting the test cases."""
-    try:
-      return tuple([self.args[arg_key] for arg_key in arg_keys])
-    except KeyError:
-      logging.exception('test_case does not have attribute: %s', arg_keys)
+    return tuple([self.args.get(arg_key) for arg_key in arg_keys])
 
   def IsTestPass(self, result):
     """Check the result meets the result or not."""
@@ -118,14 +136,10 @@ class TestCase(object):
       if key not in result:
         logging.error('The result of %s is missing.', key)
         return False
-
       # Check the result meets the result
-      lower_bound, upper_bound = self.result_limit[key]
-      value = result[key]
-      if ((lower_bound is not None and value < lower_bound) or
-          (upper_bound is not None and value > upper_bound)):
-        logging.info('The test in result %s failed. %s not in (%s, %s)',
-                     key, result[key], lower_bound, upper_bound)
+      if not IsInBound(result[key], self.result_limit[key]):
+        logging.info('The test in result %s failed. %s not in %s',
+                     key, result[key], self.result_limit[key])
         return False
     return True
 
@@ -137,12 +151,29 @@ class TestCase(object):
       pass
     foo(**test_case.ToDict())
     """
-    ret = self.args
-    ret['result_limit'] = self.result_limit
+    ret = self.args.copy()
+    ret['result_limit'] = self.result_limit.copy()
     return ret
 
 
+def ChainMaskToList(chain_mask):
+  """Convert the chain mask to the list of active antenna, starts from 0.
+  If the chain_mask is None, it means there is only 1 antenna.
+  """
+  if chain_mask is None:
+    return [0]
+  ret = []
+  antenna_idx = 0
+  while chain_mask > 0:
+    if chain_mask & 1:
+      ret.append(antenna_idx)
+    chain_mask >>= 1
+    antenna_idx += 1
+  return ret
+
+
 def StripRow(row):
+  """Strip every item in the row, and remove the right side of empty item."""
   row = [item.strip() for item in row]
   while len(row) > 0 and len(row[-1]) == 0:
     row.pop()
@@ -150,6 +181,11 @@ def StripRow(row):
 
 
 def ConvertType(data):
+  """Convert the string to the python data type.
+  Currently we only support tuple, list, None, int, and str.
+  Caution: nested structure is not allowed.
+  """
+  # TODO(akahuang): Implement the nested structure parsing.
   if data.startswith('('):
     return tuple(map(ConvertType, data[1:-1].split(',')))
   if data.startswith('['):

@@ -124,7 +124,7 @@ class InstBase(object):
 
     def TxGetResult(self, test):
       results = self._TxGetResult(**test.ToDict())
-      return test.IsTestPass(results)
+      return (test.IsTestPass(results), results)
 
     def _TxGetResult(self, result_limit, **kwargs):
       raise NotImplementedError

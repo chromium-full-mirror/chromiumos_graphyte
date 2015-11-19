@@ -11,6 +11,19 @@ import logging
 from .. import DutBase
 
 
+def _MakePassResult(result_limit):
+  """Make the result that pass all limit."""
+  def _MakeInBoundValue(bound):
+    lower, upper = bound
+    if lower is None:
+      return upper - 1
+    if upper is None:
+      return lower + 1
+    return (lower + upper) / 2
+  return dict([(key, _MakeInBoundValue(bound))
+               for key, bound in result_limit.iteritems()])
+
+
 class Dut(DutBase):
   def __init__(self, args):
     logging.debug('Mock DUT __init__()')
@@ -48,8 +61,7 @@ class Dut(DutBase):
 
     def _RxGetResult(self, result_limit, **kwargs):
       logging.info('DUT Wlan RxGetResult')
-      results = dict([(key, 0) for key in result_limit.keys()])
-      return results
+      return _MakePassResult(result_limit)
 
   class BluetoothController(DutBase.BluetoothControllerBase):
     def _Initialize(self, component_name, **kwargs):
@@ -78,8 +90,7 @@ class Dut(DutBase):
 
     def _RxGetResult(self, result_limit, **kwargs):
       logging.info('DUT Bluetooth RxGetResult')
-      results = dict([(key, 0) for key in result_limit.keys()])
-      return results
+      return _MakePassResult(result_limit)
 
   class ZigbeeController(DutBase.ZigbeeControllerBase):
     def _Initialize(self, component_name, **kwargs):
@@ -108,5 +119,4 @@ class Dut(DutBase):
 
     def _RxGetResult(self, result_limit, **kwargs):
       logging.info('DUT Zigbee RxGetResult')
-      results = dict([(key, 0) for key in result_limit.keys()])
-      return results
+      return _MakePassResult(result_limit)
