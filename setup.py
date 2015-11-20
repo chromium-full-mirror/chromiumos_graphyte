@@ -3,20 +3,11 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-import fnmatch
-import os
 from distutils.core import setup
+import os
 
 PROJECT_NAME = 'graphyte'
 PROJECT_DIR = os.path.join(PROJECT_NAME, os.path.dirname(__file__))
-
-# Get all path of *.yaml and *.csv
-DATA_PATHS = []
-for root, _, filenames in os.walk(PROJECT_DIR):
-  DATA_PATHS += [os.path.join(root, filename) for filename in
-                 fnmatch.filter(filenames, '*.yaml')]
-  DATA_PATHS += [os.path.join(root, filename) for filename in
-                 fnmatch.filter(filenames, '*.csv')]
 
 setup(
     name=PROJECT_NAME,
@@ -26,8 +17,19 @@ setup(
     author='Chih-Yu Huang',
     author_email='akahuang@google.com',
     license='Chromium',
-    packages=[PROJECT_NAME],
-    package_data={PROJECT_NAME: DATA_PATHS},
+    packages=[
+        PROJECT_NAME,
+        PROJECT_NAME + '.links',
+        PROJECT_NAME + '.dut',
+        PROJECT_NAME + '.dut.sample_dut',
+        PROJECT_NAME + '.inst',
+        PROJECT_NAME + '.inst.anritsu_ml2437a',
+        PROJECT_NAME + '.inst.sample_inst'],
+    package_data={
+        PROJECT_NAME: ['config_files/*'],
+        PROJECT_NAME + '.dut.sample_dut': ['*.yaml'],
+        PROJECT_NAME + '.inst.anritsu_ml2437a': ['*.yaml'],
+        PROJECT_NAME + '.inst.sample_inst': ['*.yaml']},
     scripts=['graphyte_main.py'],
     install_requires=['pyyaml'],
     )

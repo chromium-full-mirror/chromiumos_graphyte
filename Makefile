@@ -19,6 +19,13 @@ UNITTEST_FILES=$(shell find . -name '*_unittest.py' | sort)
 UNITTEST_WHITELIST=$(filter-out $(UNITTEST_BLACKLIST), $(UNITTEST_FILES))
 
 default:
+	python setup.py sdist
+
+install:
+	python setup.py install
+
+clean:
+	sudo rm -rf build dist MANIFEST graphyte.egg-info
 
 lint:
 	@set -e -o pipefail; \
