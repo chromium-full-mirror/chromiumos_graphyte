@@ -72,7 +72,7 @@ port_config:
     RX:
       port_mapping: 'VSG3:0'
       pathloss: ['sample_pathloss.csv', 'wlan_2g_rx0']
-  ZIGBEE:
+  802_15_4:
   - TX:
       port_mapping: 'VSA4:0'
       pathloss: ['sample_pathloss.csv', 'wlan_2g_tx0']

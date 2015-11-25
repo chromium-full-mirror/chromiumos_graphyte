@@ -30,7 +30,35 @@ import csv
 import itertools
 import logging
 
-from .utils import SearchConfig, IsInBound
+from .data_parser import ListChecker
+from .data_parser import TupleChecker
+from .data_parser import Parse
+from .utils import IsInBound
+from .utils import SearchConfig
+
+
+_RESULT_CHECKER = TupleChecker(([None, int, float],  # lower bound
+                                [None, int, float])) # upper bound
+# TODO(akahuang): Update after we support MIMO
+ARG_CHECKER = {
+    'component_name': ListChecker([str]),
+    'rf_type':        ListChecker(['WLAN', 'BLUETOOTH', '802_15_4']),
+    'standard':       ListChecker(['A', 'AC', 'B', 'G', 'N']),
+    'format':         ListChecker(['DSSS', 'CCK', 'OFDM', 'O_QPSK']),
+    'test_type':      ListChecker(['TX_MOD', 'RX_PER']),
+    'center_freq':    ListChecker([lambda freq: 2400 < freq < 6000]),
+    'bandwidth':      ListChecker([20, 40, 80, 160]),
+    'data_rate':      ListChecker([int] + ['MCS' + str(i) for i in range(10)]),
+    'nss':            ListChecker([None, 1, 2, 3, 4]),
+    'chain_mask':     ListChecker([1, 2, 4, 8]),
+    'power_level':    ListChecker([int]),
+    'evm':            _RESULT_CHECKER,
+    'avg_power':      _RESULT_CHECKER,
+    'freq_error':     _RESULT_CHECKER,
+    'rx_per':         _RESULT_CHECKER}
+HEADER_CHECKER = {
+    'order_by': ListChecker(ARG_CHECKER.keys())}
+
 
 class TestPlan(object):
   def __init__(self, config_file):
@@ -63,13 +91,16 @@ class TestPlan(object):
 
         # General config starts with #
         if row[0] == '#':
-          self.test_config[row[1]] = ConvertType(row[2])
+          key, value = row[1], row[2]
+          data = Parse(value, HEADER_CHECKER.get(key))
+          self.test_config[key] = data
           logging.debug('test_config: %s', self.test_config)
         # Header starts with @, arguments and results is splitted by @
         elif row[0] == '@':
           header = row[1:]
           try:
             split_idx = header.index('@')
+            arg_header, result_header = header[:split_idx], header[split_idx+1:]
           except ValueError:
             logging.error('The header should have second @ for result')
             header = None
@@ -79,9 +110,13 @@ class TestPlan(object):
           if header is None:
             logging.error('There should be valid header before content.')
             continue
-          value = map(ConvertType, row[1:])
-          arg_table = dict(zip(header[:split_idx], value[:split_idx]))
-          result_limit = dict(zip(header[split_idx+1:], value[split_idx+1:]))
+          value = row[1:]
+          arg_data = map(Parse, value[:split_idx],
+                         map(ARG_CHECKER.get, arg_header))
+          arg_table = dict(zip(arg_header, arg_data))
+          result_data = map(Parse, value[split_idx+1:],
+                            map(ARG_CHECKER.get, result_header))
+          result_limit = dict(zip(result_header, result_data))
           # Generate the test cases with all combination of arguments
           for key in arg_table:
             if type(arg_table[key]) is not list:
@@ -178,24 +213,6 @@ def StripRow(row):
   while len(row) > 0 and len(row[-1]) == 0:
     row.pop()
   return row
-
-
-def ConvertType(data):
-  """Convert the string to the python data type.
-  Currently we only support tuple, list, None, int, and str.
-  Caution: nested structure is not allowed.
-  """
-  # TODO(akahuang): Implement the nested structure parsing.
-  if data.startswith('('):
-    return tuple(map(ConvertType, data[1:-1].split(',')))
-  if data.startswith('['):
-    return list(map(ConvertType, data[1:-1].split(',')))
-  if data.strip() in ['None', 'none', 'null']:
-    return None
-  try:
-    return int(data)
-  except ValueError:
-    return data.strip()
 
 
 def main():

@@ -25,7 +25,7 @@ class InstBase(object):
     self.controllers = {
         'WLAN': self.WlanControllerBase(self),
         'BLUETOOTH': self.BluetoothControllerBase(self),
-        'ZIGBEE': self.ZigbeeControllerBase(self)}
+        '802_15_4': self.ZigbeeControllerBase(self)}
     self.rf_type = None
 
     # Active component record the current (component_name, tx_or_rx)

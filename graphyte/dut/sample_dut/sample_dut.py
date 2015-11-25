@@ -32,7 +32,7 @@ class Dut(DutBase):
     self.controllers = {
         'WLAN': self.WlanController(self),
         'BLUETOOTH': self.BluetoothController(self),
-        'ZIGBEE': self.ZigbeeController(self)}
+        '802_15_4': self.ZigbeeController(self)}
 
   class WlanController(DutBase.WlanControllerBase):
     def _Initialize(self, component_name, **kwargs):

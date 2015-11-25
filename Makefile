@@ -4,13 +4,19 @@
 
 SHELL := bash
 
+PYTHON=python
+
 PYLINTRC=pylintrc
 PYLINT_OPTIONS=--rcfile=$(PYLINTRC) --msg-template='{path}:{line}: {msg_id}: {msg}'
 
 LINT_BLACKLIST=
-
 LINT_FILES=$(shell find . -name '*.py' -type f | sort)
 LINT_WHITELIST=$(filter-out $(LINT_BLACKLIST),$(LINT_FILES))
+
+UNITTEST_RUNNER=./unittest_runner.py
+UNITTEST_BLACKLIST=
+UNITTEST_FILES=$(shell find . -name '*_unittest.py' | sort)
+UNITTEST_WHITELIST=$(filter-out $(UNITTEST_BLACKLIST), $(UNITTEST_FILES))
 
 default:
 
@@ -33,4 +39,8 @@ lint:
 	echo ...no lint errors! You are awesome!; \
 	rm -f $$out
 
-.PHONY: .phony
+test:
+	@set -e
+	$(PYTHON) $(UNITTEST_RUNNER) $(UNITTEST_WHITELIST)
+
+.PHONY: lint test

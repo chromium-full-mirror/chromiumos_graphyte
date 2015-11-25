@@ -23,7 +23,7 @@ class DutBase(object):
     self.controllers = {
         'WLAN': self.WlanControllerBase(self),
         'BLUETOOTH': self.BluetoothControllerBase(self),
-        'ZIGBEE': self.ZigbeeControllerBase(self)}
+        '802_15_4': self.ZigbeeControllerBase(self)}
     self.rf_type = None
 
   def __getattr__(self, name):
