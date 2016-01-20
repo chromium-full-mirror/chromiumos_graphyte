@@ -40,29 +40,42 @@ import yaml
 from .utils import SearchConfig
 
 class PortConfig(object):
-  def __init__(self, config_file):
-    with open(SearchConfig(config_file), 'r') as f:
+  def __init__(self, config_file=None):
+    self.port_config = None
+    self._pathloss_table = {}
+    if config_file:
+      self.LoadConfigFile(config_file)
+
+  def LoadConfigFile(self, config_file):
+    file_path = SearchConfig(config_file)
+    logging.info('Load port config file: %s', file_path)
+    with open(file_path, 'r') as f:
       config = yaml.load(f)
     self.port_config = config['port_config']
 
     # Load the pathloss table for each antenna
-    self._pathloss_table = {}
     for component_config in self.port_config.itervalues():
       for antenna_config in component_config:
         for config_table in antenna_config.itervalues():
           filename, title = config_table['pathloss']
-          config_table['pathloss'] = self.Loadpathloss(filename, title)
+          config_table['pathloss'] = self.LoadPathloss(filename, title)
 
-  def Loadpathloss(self, filename, title):
+  def LoadPathloss(self, filename, title):
     """Lazy loading the pathloss file."""
     if filename not in self._pathloss_table:
       self._pathloss_table[filename] = {}
       with open(SearchConfig(filename), 'r') as csv_file:
         for table in csv.DictReader(csv_file):
-          title = table['title']
+          _title = table['title']
           del table['title']
-          self._pathloss_table[filename][title] = self._ConvertPathloss(table)
-    return self._pathloss_table[filename].get(title, None)
+          table = self._ConvertPathloss(table)
+          if not table:
+            raise ValueError('%s Pathloss %s is empty.' % (filename, _title))
+          self._pathloss_table[filename][_title] = table
+
+    if title not in self._pathloss_table[filename]:
+      raise ValueError('Pathloss %s is not found in %s' % (title, filename))
+    return self._pathloss_table[filename][title]
 
   def _ConvertPathloss(self, pathloss):
     """Filter the empty entry, then convert the frequency to int, and convert
