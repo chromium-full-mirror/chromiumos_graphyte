@@ -35,6 +35,7 @@ path2 is {2402: 21.0, 2404: 20.3}
 
 import csv
 import logging
+import sys
 import yaml
 
 from .utils import SearchConfig
@@ -85,7 +86,7 @@ class PortConfig(object):
       if not value:
         continue
       ret[int(key)] = float(value)
-    return ret
+    return PathlossTable(ret)
 
   def QueryPortConfig(self, component_name, tx_or_rx):
     """Return the port config of the certain component.
@@ -105,6 +106,62 @@ class PortConfig(object):
 
   def GetIterator(self):
     return self.port_config.iteritems()
+
+
+class PathlossTable(object):
+  """The pathloss table which can calculate the pathloss by frequency.
+
+  Format of table:
+    {frequency(int): pathloss(float)}
+  Usage:
+    table = PathlossTable({2000: 1.0, 2400: 3.1})
+    pathloss = table[2014]
+  """
+  def __init__(self, table):
+    self.table = table
+
+  def __nonzero__(self):
+    return len(self.table) > 0
+
+  def __getitem__(self, freq):
+    """Return the pathloss of the frequency.
+
+    If the frequency is recorded at the table, then return the value directly.
+    If not, calculate the value using the linear interpolation with the nearest
+    points.
+
+    Args:
+      freq: the frequency unit in MHz, int type.
+    """
+    if not self.table:
+      raise KeyError('Table is empty.')
+    if not isinstance(freq, int):
+      raise TypeError('Frequency should be int type')
+    if freq <= 0:
+      raise KeyError('Frequency cannot be negative.')
+    if freq in self.table:
+      return self.table[freq]
+
+    upper_dist = sys.maxint
+    lower_dist = sys.maxint
+    upper_freq = None
+    lower_freq = None
+    for k in self.table:
+      if k > freq and k - freq < upper_dist:
+        upper_dist = k - freq
+        upper_freq = k
+      elif k < freq and freq - k < lower_dist:
+        lower_dist = freq - k
+        lower_freq = k
+
+    if upper_freq is None:
+      return self.table[lower_freq]
+    if lower_freq is None:
+      return self.table[upper_freq]
+
+    loss = (self.table[upper_freq] * lower_dist +
+            self.table[lower_freq] * upper_dist) / (lower_dist + upper_dist)
+    return loss
 
 
 def main():
