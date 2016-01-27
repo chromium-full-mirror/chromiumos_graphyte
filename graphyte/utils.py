@@ -55,8 +55,8 @@ def IsInBound(values, bound):
     if value is None:
       return False
     lower_bound, upper_bound = bound
-    return ((lower_bound is None or value > lower_bound) and
-            (upper_bound is None or value < upper_bound))
+    return ((lower_bound is None or value >= lower_bound) and
+            (upper_bound is None or value <= upper_bound))
 
   if type(values) != list:
     values = [values]
