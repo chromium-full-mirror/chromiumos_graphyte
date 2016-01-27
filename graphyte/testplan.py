@@ -12,15 +12,17 @@ dut plugin and instrument plugin to verify the port mapping and the names used
 in the testplan.
 
 The format of the CSV file.
-The first column is '#' is for the config.
-The format: #, key, value
+The first column is '@config' is for the config.
+The format: @config, key, value
 
-The first column is '@' is for the header containing the names of arguments and
-result. There is another '@' between the arguments and the results.
-The format: @, arg_key1, arg_key2, ..., @, result_key1, result_key2, ...
+The first column is '@title' is for the header containing the names of arguments
+and result. There is another '@result' between the arguments and the results.
+The format:
+  @title, arg_key1, arg_key2, ..., @result, result_key1, result_key2, ...
 
 Other rows contain a test case. Before these row there should be a valid header.
-The format: , arg_value1, arg_value2, ...,, result_value1, result_value2, ...
+The format:
+  , arg_value1, arg_value2, ...,, result_value1, result_value2, ...
 
 We probably can add a line starting with a comment character. If that appears
 in the first column, we ignore the rest of the line.
@@ -51,7 +53,9 @@ ARG_CHECKER = {
     'data_rate':      ListChecker([int] + ['MCS' + str(i) for i in range(10)]),
     'nss':            ListChecker([None, 1, 2, 3, 4]),
     'chain_mask':     ListChecker([1, 2, 4, 8]),
-    'power_level':    ListChecker([int]),
+    'rx_num_packet':  ListChecker([int]),
+    'power_level':    ListChecker([int])}
+RESULT_CHECKER = {
     'evm':            _RESULT_CHECKER,
     'avg_power':      _RESULT_CHECKER,
     'freq_error':     _RESULT_CHECKER,
@@ -59,11 +63,42 @@ ARG_CHECKER = {
 HEADER_CHECKER = {
     'order_by': ListChecker(ARG_CHECKER.keys())}
 
+CONFIG_MARKER = '@config'
+TITLE_MARKER = '@title'
+RESULT_MARKER = '@result'
+
 
 class TestPlan(object):
-  def __init__(self, config_file):
+  """Generate the test plan from CSV file.
+
+  The class parse the CSV file and generate a list of test cases.
+
+  Usage:
+    test_plan = TestPlan(config_file)
+    if not test_plan:
+      print 'Error: Failed to load the config file.'
+    for test_case in test_plan:
+      print 'test_case: %s' % test_case.GetCanonicalName()
+  """
+
+  def __init__(self, config_file=None):
     self.test_cases = []
     self.test_config = {}
+    if config_file:
+      self.LoadConfigFile(config_file)
+
+  def __len__(self):
+    """Return the count of the test cases.
+
+    we implement __len__ and __getitem__ to make TestPlan behave like a
+    read-only list.
+    """
+    return len(self.test_cases)
+
+  def __getitem__(self, index):
+    return self.test_cases[index]
+
+  def LoadConfigFile(self, config_file):
     try:
       self.ParseCsvFile(config_file)
     except ValueError:
@@ -75,48 +110,65 @@ class TestPlan(object):
       cmp_key = lambda test_case: test_case.ResolveAttr(order_by)
       self.test_cases.sort(key=cmp_key)
 
-  def __getitem__(self, index):
-    return self.test_cases[index]
-
   def ParseCsvFile(self, config_file):
+    def _LogErrorAndRaise(row_idx, msg):
+      msg = 'Row %d: %s' % (row_idx, msg)
+      logging.error(msg)
+      raise ValueError(msg)
+
     logging.info('Loading test config file: %s', config_file)
     with open(SearchConfig(config_file)) as csv_file:
       reader = csv.reader(csv_file)
       header = None
       split_idx = None
-      for row in reader:
+      for row_idx, row in enumerate(reader, start=1):
         row = StripRow(row)
         if len(row) == 0:
           continue
 
-        # General config starts with #
-        if row[0] == '#':
+        # General config starts with '@config'
+        if row[0] == CONFIG_MARKER:
+          if len(row) != 3:
+            _LogErrorAndRaise(row_idx,
+                              'The format of config row should be: '
+                              '@config, <key>, <value>')
           key, value = row[1], row[2]
           data = Parse(value, HEADER_CHECKER.get(key))
           self.test_config[key] = data
           logging.debug('test_config: %s', self.test_config)
-        # Header starts with @, arguments and results is splitted by @
-        elif row[0] == '@':
+        # Header starts with '@title', arguments and results is splitted by
+        # '@result'
+        elif row[0] == TITLE_MARKER:
           header = row[1:]
           try:
-            split_idx = header.index('@')
-            arg_header, result_header = header[:split_idx], header[split_idx+1:]
+            split_idx = header.index(RESULT_MARKER)
           except ValueError:
-            logging.error('The header should have second @ for result')
-            header = None
-            continue
+            _LogErrorAndRaise(row_idx, '%s is missing' % RESULT_MARKER)
+          arg_header, result_header = header[:split_idx], header[split_idx+1:]
+          unknown_args = set(arg_header) - set(ARG_CHECKER.keys())
+          if unknown_args:
+            _LogErrorAndRaise(row_idx, 'Unknown arguments: %s' % unknown_args)
+          unknown_result = set(result_header) - set(RESULT_CHECKER.keys())
+          if unknown_result:
+            _LogErrorAndRaise(row_idx, 'Unknown result: %s' % unknown_result)
         # Each line represents a group of test cases
         else:
           if header is None:
-            logging.error('There should be valid header before content.')
-            continue
+            _LogErrorAndRaise(
+                row_idx, 'There should be valid title before content.')
           value = row[1:]
-          arg_data = map(Parse, value[:split_idx],
-                         map(ARG_CHECKER.get, arg_header))
-          arg_table = dict(zip(arg_header, arg_data))
-          result_data = map(Parse, value[split_idx+1:],
-                            map(ARG_CHECKER.get, result_header))
-          result_limit = dict(zip(result_header, result_data))
+          if len(value) != len(header):
+            _LogErrorAndRaise(
+                row_idx, 'The length of data is different from the header.')
+          try:
+            arg_data = map(Parse, value[:split_idx],
+                           map(ARG_CHECKER.get, arg_header))
+            arg_table = dict(zip(arg_header, arg_data))
+            result_data = map(Parse, value[split_idx+1:],
+                              map(RESULT_CHECKER.get, result_header))
+            result_limit = dict(zip(result_header, result_data))
+          except ValueError as ex:
+            _LogErrorAndRaise(row_idx, str(ex))
           # Generate the test cases with all combination of arguments
           for key in arg_table:
             if type(arg_table[key]) is not list:
@@ -220,7 +272,7 @@ def main():
   config_file = 'sample_testplan.csv'
   test_plan = TestPlan(config_file)
   for test_case in test_plan:
-    logging.info('test_case: %s', test_case)
+    logging.info('test_case: %s', test_case.GetCanonicalName())
 
 
 if __name__ == '__main__':

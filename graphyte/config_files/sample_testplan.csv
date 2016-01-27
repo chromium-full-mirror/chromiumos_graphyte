@@ -1,7 +1,7 @@
-#,Test plan version,1,,,,,,,,,,,,,
-#,order_by,"[component_name, center_freq]",,,,,,,,,,,,,
+@config,Test plan version,1,,,,,,,,,,,,,
+@config,order_by,"[component_name, center_freq]",,,,,,,,,,,,,
 ,,,,,,,,,,,,,,,
-@,component_name,rf_type,standard,format,test_type,center_freq,bandwidth,data_rate,nss,chain_mask,power_level,@,evm,avg_power,freq_error
+@title,component_name,rf_type,standard,format,test_type,center_freq,bandwidth,data_rate,nss,chain_mask,power_level,@result,evm,avg_power,freq_error
 ,WLAN_2G,WLAN,B,DSSS,TX_MOD,"[2412, 2437, 2462]",20,1,None,"[1, 2, 4]",18,,"(None,-25)","(16,20)","(0,20)"
 ,WLAN_2G,WLAN,B,CCK,TX_MOD,"[2412, 2437, 2462]",20,11,None,"[1, 2, 4]",18,,"(None,-25)","(16,20)","(0,20)"
 ,WLAN_2G,WLAN,G,OFDM,TX_MOD,"[2412, 2437, 2462]",20,54,None,"[1, 2, 4]",18,,"(None,-25)","(16,20)","(0,20)"
@@ -10,7 +10,7 @@
 ,WLAN_2G,WLAN,N,OFDM,TX_MOD,"[2412, 2437, 2462]",20,MCS7,None,"[1, 2, 4]",20,,"(None,-25)","(18,22)","(0,20)"
 ,WLAN_2G,WLAN,N,OFDM,TX_MOD,2422,40,MCS7,None,"[1, 2, 4]",20,,"(None,-25)","(18,22)","(0,20)"
 ,,,,,,,,,,,,,,,
-@,component_name,rf_type,standard,format,test_type,center_freq,bandwidth,data_rate,nss,chain_mask,power_level,rx_num_packets,@,rx_per,
+@title,component_name,rf_type,standard,format,test_type,center_freq,bandwidth,data_rate,nss,chain_mask,power_level,rx_num_packet,@result,rx_per,
 ,WLAN_2G,WLAN,B,CCK,RX_PER,"[2412, 2437, 2462]",20,11,None,"[1, 2, 4]",-90,100,,"(0,10)",
 ,WLAN_2G,WLAN,G,OFDM,RX_PER,"[2412, 2437, 2462]",20,54,None,"[1, 2, 4]",-85,100,,"(0,10)",
 ,WLAN_2G,WLAN,N,OFDM,RX_PER,"[2412, 2437, 2462]",20,MCS7,None,"[1, 2, 4]",-84,100,,"(0,10)",
@@ -18,7 +18,7 @@
 ,WLAN_2G,WLAN,N,OFDM,RX_PER,"[2412, 2437, 2462]",20,MCS7,None,"[1, 2, 4]",-82,100,,"(0,10)",
 ,WLAN_2G,WLAN,N,OFDM,RX_PER,2422,40,MCS7,None,"[1, 2, 4]",-81,100,,"(0,10)",
 ,,,,,,,,,,,,,,,
-@,component_name,rf_type,standard,format,test_type,center_freq,bandwidth,data_rate,nss,chain_mask,power_level,@,evm,avg_power,freq_error
+@title,component_name,rf_type,standard,format,test_type,center_freq,bandwidth,data_rate,nss,chain_mask,power_level,@result,evm,avg_power,freq_error
 ,WLAN_5G,WLAN,A,OFDM,TX_MOD,"[5180, 5825]",20,54,None,"[1, 2, 4]",18,,"(None,-25)","(16,20)","(0,20)"
 ,WLAN_5G,WLAN,N,OFDM,TX_MOD,"[5180, 5825]",20,MCS7,None,"[1, 2, 4]",18,,"(None,-25)","(16,20)","(0,20)"
 ,WLAN_5G,WLAN,N,OFDM,TX_MOD,"[5180, 5825]",40,MCS7,None,"[1, 2, 4]",18,,"(None,-25)","(16,20)","(0,20)"
@@ -26,7 +26,7 @@
 ,WLAN_5G,WLAN,AC,OFDM,TX_MOD,"[5180, 5825]",40,MCS9,1,"[1, 2, 4]",20,,"(None,-25)","(18,22)","(0,20)"
 ,WLAN_5G,WLAN,AC,OFDM,TX_MOD,"[5180, 5825]",80,MCS9,1,"[1, 2, 4]",20,,"(None,-25)","(18,22)","(0,20)"
 ,,,,,,,,,,,,,,,
-@,component_name,rf_type,standard,format,test_type,center_freq,bandwidth,data_rate,nss,chain_mask,power_level,rx_num_packets,@,rx_per,
+@title,component_name,rf_type,standard,format,test_type,center_freq,bandwidth,data_rate,nss,chain_mask,power_level,rx_num_packet,@result,rx_per,
 ,WLAN_5G,WLAN,A,OFDM,RX_PER,"[5180, 5825]",20,54,None,"[1, 2, 4]",-68,100,,"(0,10)",
 ,WLAN_5G,WLAN,N,OFDM,RX_PER,"[5180, 5825]",20,MCS7,None,"[1, 2, 4]",-67,100,,"(0,10)",
 ,WLAN_5G,WLAN,N,OFDM,RX_PER,"[5180, 5825]",40,MCS7,None,"[1, 2, 4]",-66,100,,"(0,10)",

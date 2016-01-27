@@ -9,7 +9,6 @@ We implement a parse function to convert string to required data type, and data
 checkers for checking the data is valid.
 """
 
-import logging
 import re
 import types
 
@@ -20,11 +19,21 @@ BUILDER_DICT = {'[': list, '(': tuple}
 
 
 def Parse(string, checker=None):
-  """Convert the string to the python type. We only support tuple, list, None,
-  int, float, and str. There are some restrictions for input:
+  """Convert the string to the python type.
+
+  We only support tuple, list, None, int, float, and str.
+  There are some restrictions for input:
   1. str only contains [0-9A-Za-z_]
   2. nested structure is not allowed.
   3. Ignore all space.
+
+  Args:
+    string: The string to be parsed.
+    checker: The rule of the result. None if no rule for the result.
+  Returns:
+    The parsed result.
+  Raise:
+    ValueError: if the result does not meet the rule.
   """
   def _ParseLiteral(string):
     string = string.strip()
@@ -40,7 +49,7 @@ def Parse(string, checker=None):
       pass
     match = re.match(r'\w+', string)
     if not match or match.group(0) != string:
-      raise ValueError
+      raise ValueError('String cannot be parsed as literal: %s', string)
     return string
 
   def _Parse(string):
@@ -52,13 +61,12 @@ def Parse(string, checker=None):
     else:
       left, items, right = string[0], string[1:-1], string[-1]
       if right != RIGHT_BRACKETS_DICT[left]:
-        raise ValueError
+        raise ValueError('The right bracket is not found: %s', string)
       return BUILDER_DICT[left](map(_ParseLiteral, items.split(',')))
 
   result = _Parse(string)
   if checker is not None and checker.CheckData(result) is False:
-    logging.error('result %s is not in checker %s', result, checker)
-    raise ValueError
+    raise ValueError('result %s is not in checker %s' % (result, checker))
   return result
 
 
