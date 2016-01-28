@@ -54,7 +54,7 @@ ARG_CHECKER = {
     'nss':            ListChecker([None, 1, 2, 3, 4]),
     'chain_mask':     ListChecker([1, 2, 4, 8]),
     'rx_num_packet':  ListChecker([int]),
-    'power_level':    ListChecker([int])}
+    'power_level':    ListChecker([int, float])}
 RESULT_CHECKER = {
     'evm':            _RESULT_CHECKER,
     'avg_power':      _RESULT_CHECKER,
