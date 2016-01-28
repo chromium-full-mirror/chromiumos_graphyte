@@ -18,7 +18,8 @@ class TestPlanTest(unittest.TestCase):
     self.test_plan = testplan.TestPlan()
 
   def tearDown(self):
-    os.remove(self.temp_path)
+    if os.path.exists(self.temp_path):
+      os.remove(self.temp_path)
 
   def _WriteCSVContent(self, content):
     with open(self.temp_path, 'w') as f:
@@ -123,3 +124,8 @@ class TestPlanTest(unittest.TestCase):
 
     with self.assertRaises(ValueError):
       self.test_plan.ParseCsvFile(self.temp_path)
+
+  def testLoadSampleTestPlan(self):
+    sample_file = 'sample_testplan.csv'
+    self.test_plan = testplan.TestPlan(sample_file)
+    self.assertTrue(len(self.test_plan) > 0)
