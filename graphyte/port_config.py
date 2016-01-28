@@ -104,6 +104,21 @@ class PortConfig(object):
                         component_name, tx_or_rx)
       raise ex
 
+  def GetPortConfig(self, component_name, tx_or_rx, antenna_idx=0):
+    try:
+      return self.port_config[component_name][antenna_idx][tx_or_rx]
+    except KeyError as ex:
+      logging.exception('There is no component "%s", antenna_idx "%s",'
+                        'TX/RX "%s" in port config',
+                        component_name, antenna_idx, tx_or_rx)
+      raise ex
+
+  def GetPortMapping(self, **kwarg):
+    return self.GetPortConfig(**kwarg)['port_mapping']
+
+  def GetPathloss(self, **kwarg):
+    return self.GetPortConfig(**kwarg)['pathloss']
+
   def GetIterator(self):
     return self.port_config.iteritems()
 
