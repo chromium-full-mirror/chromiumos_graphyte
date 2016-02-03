@@ -126,8 +126,8 @@ class PortConfig(object):
 class PathlossTable(object):
   """The pathloss table which can calculate the pathloss by frequency.
 
-  Format of table:
-    {frequency(int): pathloss(float)}
+  The format is a dict which key is frequency unit in MHz, and the value is
+  power loss in dB.
   Usage:
     table = PathlossTable({2000: 1.0, 2400: 3.1})
     pathloss = table[2014]

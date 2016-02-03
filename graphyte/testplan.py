@@ -44,7 +44,6 @@ TITLE_MARKER = '@title'
 RESULT_MARKER = '@result'
 
 
-# TODO(akahuang): Update after we support MIMO
 REQUIRED_ARG_CHECKER = {
     'component_name': ListChecker([str]),
     'rf_type':        ListChecker(['WLAN', 'BLUETOOTH', '802_15_4']),
@@ -58,7 +57,7 @@ RF_ARG_CHECKER = {
         'data_rate':      ListChecker([1, 2, 5.5, 11,
                                        6, 9, 12, 18, 24, 36, 48, 54] +
                                       ['MCS' + str(i) for i in range(10)]),
-        'chain_mask':     ListChecker([1, 2, 4, 8]),
+        'chain_mask':     ListChecker(range(1, 16)),  # 4x4 MIMO supported
         'nss':            ListChecker([None, 1, 2, 3, 4]),
         'long_preamble':  ListChecker([0, 1]),
         'rx_num_packets': ListChecker([int])},
@@ -198,6 +197,26 @@ class TestCase(object):
   """The test case. It contains the arguments of a RF test."""
 
   def __init__(self, args, result_limit):
+    """Initialize the test case.
+
+    Arg:
+      args: A dict of the test arguments. The key 'rf_type', 'test_type' and
+          'component_name' are essential.
+          Example:
+          {
+            'component_name': 'WLAN_2G',
+            'rf_type': 'WLAN',
+            'test_type': 'TX_MOD',
+            'center_freq': 2412
+          }
+      result_limit: A dict of the test result. The values are a tuple of lower
+          bound and upper bound.
+          Example:
+          {
+            'evm': (None, -25),
+            'avg_power': (16, 20)
+          }
+    """
     self.rf_type = args.get('rf_type', 'MISSING')
     self.test_type = args.get('test_type', 'MISSING')
     self.tx_or_rx = self.test_type.split('_')[0]

@@ -69,10 +69,21 @@ def UnopenedTemporaryFile(**kwargs):
       os.unlink(path)
 
 
-def IsInBound(values, bound):
-  """Check the values meet the bound or not.
-  value might be list for MIMO case.
+def IsInBound(results, bound):
+  """Check the results meet the bound or not.
+
+  Args:
+    results: A number for SISO case, or a dict for MIMO case. The values of the
+      dict should be numbers.
+    bound: A tuple of the lower bound and uppper bound. The bound is a value or
+      None.
+
+  Returns:
+    True if all the result are between the lower bound and upper bound.
   """
+  def _CheckNumberType(value):
+    return isinstance(value, int) or isinstance(value, float)
+
   def _OneValueInBound(value, bound):
     if value is None:
       return False
@@ -80,6 +91,11 @@ def IsInBound(values, bound):
     return ((lower_bound is None or value >= lower_bound) and
             (upper_bound is None or value <= upper_bound))
 
-  if type(values) != list:
-    values = [values]
-  return all([_OneValueInBound(value, bound) for value in values])
+  if isinstance(results, dict):
+    value_list = results.values()
+  else:
+    value_list = [results]
+  if not all([_CheckNumberType(value) for value in value_list]):
+    logging.error('The type of the result %s is invalid.', results)
+    return False
+  return all([_OneValueInBound(value, bound) for value in value_list])

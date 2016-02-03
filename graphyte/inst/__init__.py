@@ -98,18 +98,19 @@ class InstBase(object):
     self._SetPortConfig(port_mapping, pathloss)
 
   def _SetPortConfig(self, port_mapping, pathloss):
-    """Set the port mapping and the path loss for the active component.
+    """Set the port mapping and the pathloss table for the active component.
     Because a component might be multiple antenna, the port mapping and the path
     loss are the list.
     Arg:
       port_mapping: The port name for each antenna.
         The format is <port name>:<port number>
-        eg: ['VSA0:0', 'VSA1:0', 'VSA2:0']
-      pathloss: the path loss for each antenna.
-        The format is a dict which key is frequency, value is power loss in dB.
-        eg: [{'2440': '20.4', '2412': '20.4'},
-             {'2440': '20.2', '2412': '20.5'},
-             {'2440': '20.1', '2412': '20.6'}]
+        Example:
+          ['VSA0:0', 'VSA1:0', 'VSA2:0']
+      pathloss: A list of port_config.PathlossTable for each antenna.
+        Example:
+          [PathlossTable({'2440': '20.4', '2412': '20.4'}),
+           PathlossTable({'2440': '20.2', '2412': '20.5'}),
+           PathlossTable({'2440': '20.1', '2412': '20.6'})]
     """
     raise NotImplementedError
 
@@ -137,9 +138,44 @@ class InstBase(object):
 
     def TxGetResult(self, test):
       results = self._TxGetResult(**test.ToDict())
+      # TODO(akahuang): Check the structure of the results.
       return (test.IsTestPass(results), results)
 
     def _TxGetResult(self, result_limit, **kwargs):
+      """Wait for measurement to be completed and return the test result.
+
+      Args:
+        result_limit: A dict of the test result.
+        The values are a tuple of the lower bound and upper bound.
+        Example:
+          {
+            'test_result1': (None, -25),
+            'test_result2': (16, 20)
+          }
+        kwargs: The remaining arguments of the test case.
+
+      Returns:
+        A dict which keys are the same as the result_limit.
+        The values is one number for SISO case, or a dict mapping from
+        the antenna index to value for MIMO case. If a value is returned for
+        MIMO case, we consider the results for each antenna are all the same.
+        Example for SISO case:
+        {
+          'test_result1': -20,
+          'test_result2': 21
+        }
+        Example for 2x2 MIMO case:
+        {
+          'test_result1': {
+            0: -20,
+            1: -30
+          },
+          'test_result2': {
+            0: 17,
+            1: 18
+          }
+        }
+      """
       raise NotImplementedError
 
     def RxConfig(self, test):

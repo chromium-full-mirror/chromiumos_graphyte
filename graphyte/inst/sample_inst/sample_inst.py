@@ -72,7 +72,7 @@ class Inst(InstBase):
       result = _MakePassResult(result_limit)
       if len(self.chain_list) > 1:
         for key, value in result.iteritems():
-          result[key] = [value for _ in self.chain_list]
+          result[key] = {idx: value for idx in self.chain_list}
       return result
 
     def _RxConfig(self, **kwargs):
