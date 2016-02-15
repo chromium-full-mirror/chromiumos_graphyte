@@ -6,8 +6,10 @@
 
 """Utils class and functions. """
 
+from contextlib import contextmanager
 import logging
 import os
+import tempfile
 
 from .default_setting import CONFIG_DIR, LOG_DIR
 
@@ -45,6 +47,26 @@ def PrepareOutputFile(file_path):
     logging.debug('%s folder is not existed, create it.', dir_path)
     os.mkdir(os.path.dirname(file_path))
   return file_path
+
+
+@contextmanager
+def UnopenedTemporaryFile(**kwargs):
+  """Yields an unopened temporary file.
+
+  The file is not opened, and it is deleted when the context manager
+  is closed if it still exists at that moment.
+
+  Args:
+    Any allowable arguments to tempfile.mkstemp (e.g., prefix,
+      suffix, dir).
+  """
+  f, path = tempfile.mkstemp(**kwargs)
+  os.close(f)
+  try:
+    yield path
+  finally:
+    if os.path.exists(path):
+      os.unlink(path)
 
 
 def IsInBound(values, bound):

@@ -64,25 +64,8 @@ class Graphyte(object):
       graphyte_config = yaml.load(f)
 
     # Load Dut and Inst class
-    dut_name = graphyte_config['dut']
-    module = __import__('dut.%s.%s' % (dut_name, dut_name), globals(),
-                        level=1, fromlist=['Dut'])
-    dut_dir = os.path.join(GRAPHYTE_DIR, 'dut', dut_name)
-    dut_config_file = SearchConfig(graphyte_config['dut_config'], dut_dir)
-    with open(dut_config_file, 'r') as f:
-      dut_config = yaml.load(f)
-    logging.info('DUT %s, config: %s', dut_name, dut_config)
-    self.dut = module.Dut(dut_config)
-
-    inst_name = graphyte_config['inst']
-    module = __import__('inst.%s.%s' % (inst_name, inst_name), globals(),
-                        level=1, fromlist=['Inst'])
-    inst_dir = os.path.join(GRAPHYTE_DIR, 'inst', inst_name)
-    inst_config_file = SearchConfig(graphyte_config['inst_config'], inst_dir)
-    with open(inst_config_file, 'r') as f:
-      inst_config = yaml.load(f)
-    logging.info('Inst %s, config: %s', inst_name, inst_config)
-    self.inst = module.Inst(inst_config)
+    self.dut = self._LoadDevice(graphyte_config, 'dut')
+    self.inst = self._LoadDevice(graphyte_config, 'inst')
 
     # Load test plan
     self.testplans = TestPlan(graphyte_config['test_plan'])
@@ -99,6 +82,29 @@ class Graphyte(object):
 
   def __del__(self):
     self.TerminateDevices()
+
+  def _LoadDevice(self, graphyte_config, device_type):
+    """Dynamically load the device instance by the global config.
+
+    Args:
+      graphyte_config: the global config.
+      device_type: 'dut' or 'inst'
+    Returns:
+      The device instance.
+    """
+    class_name_mapping = {'dut': 'Dut',
+                          'inst': 'Inst'}
+    module_name = graphyte_config[device_type]
+    class_name = class_name_mapping[device_type]
+    module = __import__('%s.%s.%s' % (device_type, module_name, module_name),
+                        globals(), level=1, fromlist=[class_name])
+    device_dir = os.path.join(GRAPHYTE_DIR, device_type, module_name)
+    config_file = SearchConfig(graphyte_config['%s_config' % device_type],
+                               device_dir)
+    with open(config_file, 'r') as f:
+      config = yaml.load(f)
+    logging.info('Loading %s: %s, config: %s', device_type, module_name, config)
+    return module.__dict__[class_name](config)
 
   def SetLogging(self, log_file, verbose, append_mode, console_output):
     level = logging.DEBUG if verbose else logging.INFO

@@ -11,6 +11,8 @@ implement.
 
 import logging
 
+from .. import link
+
 
 # TODO(akahuang): confirm the API of each function
 class InstBase(object):
@@ -19,14 +21,16 @@ class InstBase(object):
   chip. We can control different RF chip by assigning the rf_type, and delegate
   to the assigned controller."""
 
+  name = 'Virtual instrument Plugin'
+  need_link = False
+
   def __init__(self, args):
-    self.name = 'Virtual instrument Plugin'
     self.args = args
-    self.controllers = {
-        'WLAN': self.WlanControllerBase(self),
-        'BLUETOOTH': self.BluetoothControllerBase(self),
-        '802_15_4': self.ZigbeeControllerBase(self)}
+    if self.need_link:
+      self.link = link.Create(args['link_options'])
     self.rf_type = None
+    self.controllers = {}
+    self.SetRFController()
 
     # Active component record the current (component_name, tx_or_rx)
     # for port mapping and pathloss.
@@ -50,6 +54,15 @@ class InstBase(object):
     the plugin itself.
     """
     logging.info(self.name)
+
+  def SetRFController(self):
+    """Set the controller for supported RF type.
+
+    Every child class should implement this method."""
+    self.controllers = {
+        'WLAN': self.WlanControllerBase(self),
+        'BLUETOOTH': self.BluetoothControllerBase(self),
+        '802_15_4': self.ZigbeeControllerBase(self)}
 
   def Initialize(self):
     raise NotImplementedError

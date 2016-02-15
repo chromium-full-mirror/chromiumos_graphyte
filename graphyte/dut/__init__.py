@@ -10,6 +10,7 @@ This is the virtual DUT class which every DUT plugin should implement.
 
 import logging
 
+from .. import link
 
 class DutBase(object):
   """The abstract DUT class that every DUT plugin should inherit it.
@@ -17,14 +18,16 @@ class DutBase(object):
   chip. We can control different RF chip by assigning the rf_type, and delegate
   to the assigned controller."""
 
+  name = 'Virtual DUT Plugin'
+  need_link = False
+
   def __init__(self, args):
-    self.name = 'Virtual DUT Plugin'
     self.args = args
-    self.controllers = {
-        'WLAN': self.WlanControllerBase(self),
-        'BLUETOOTH': self.BluetoothControllerBase(self),
-        '802_15_4': self.ZigbeeControllerBase(self)}
     self.rf_type = None
+    if self.need_link:
+      self.link = link.Create(args['link_options'])
+    self.controllers = {}
+    self.SetRFController()
 
   def __getattr__(self, name):
     """Delegate to the active controller, that is recorded at rf_type."""
@@ -36,6 +39,21 @@ class DutBase(object):
 
   def SetRf(self, rf_type):
     self.rf_type = rf_type
+
+  def SetRFController(self):
+    """Set the controller for supported RF type.
+
+    Create the controllers for each supported RF type, and place them into
+    self.controllers.
+
+    For example:
+      def SetRFController(self):
+        self.controllers = {
+            'WLAN': self.WlanControllerBase(self),
+            'BLUETOOTH': self.BluetoothControllerBase(self),
+            '802_15_4': self.ZigbeeControllerBase(self)}
+    """
+    raise NotImplementedError
 
   # TODO(akahuang): confirm the API of each function
   class ControllerBase(object):

@@ -4,4 +4,5 @@
 
 config_name: Sample DUT Config
 
-ip_address: 192.168.86.1
+link_options:
+  link_class: ADBLink
