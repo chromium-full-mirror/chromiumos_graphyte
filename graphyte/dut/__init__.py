@@ -12,7 +12,7 @@ import logging
 
 from .. import link
 
-class DutBase(object):
+class DUTBase(object):
   """The abstract DUT class that every DUT plugin should inherit it.
   It contains several RF controllers, and each controller corresponds one RF
   chip. We can control different RF chip by assigning the rf_type, and delegate
@@ -34,10 +34,10 @@ class DutBase(object):
     try:
       return getattr(self.controllers[self.rf_type], name)
     except:
-      logging.exception('Failed in DutBase __getattr__')
+      logging.exception('Failed in DUTBase __getattr__')
       raise NotImplementedError
 
-  def SetRf(self, rf_type):
+  def SetRF(self, rf_type):
     self.rf_type = rf_type
 
   def SetRFController(self):

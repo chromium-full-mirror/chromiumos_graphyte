@@ -8,7 +8,7 @@
 
 import logging
 
-from .. import DutBase
+from .. import DUTBase
 
 
 def _MakePassResult(result_limit):
@@ -24,7 +24,7 @@ def _MakePassResult(result_limit):
                for key, bound in result_limit.iteritems()])
 
 
-class Dut(DutBase):
+class DUT(DUTBase):
   name = 'Mock DUT Plugin'
 
   def SetRFController(self):
@@ -33,7 +33,7 @@ class Dut(DutBase):
         'BLUETOOTH': self.BluetoothController(self),
         '802_15_4': self.ZigbeeController(self)}
 
-  class WlanController(DutBase.WlanControllerBase):
+  class WlanController(DUTBase.WlanControllerBase):
     def _Initialize(self, component_name, **kwargs):
       logging.info('DUT Wlan Initialize: %s', component_name)
 
@@ -62,7 +62,7 @@ class Dut(DutBase):
       logging.info('DUT Wlan RxGetResult')
       return _MakePassResult(result_limit)
 
-  class BluetoothController(DutBase.BluetoothControllerBase):
+  class BluetoothController(DUTBase.BluetoothControllerBase):
     def _Initialize(self, component_name, **kwargs):
       logging.info('DUT Bluetooth Initialize: %s', component_name)
 
@@ -91,7 +91,7 @@ class Dut(DutBase):
       logging.info('DUT Bluetooth RxGetResult')
       return _MakePassResult(result_limit)
 
-  class ZigbeeController(DutBase.ZigbeeControllerBase):
+  class ZigbeeController(DUTBase.ZigbeeControllerBase):
     def _Initialize(self, component_name, **kwargs):
       logging.info('DUT Zigbee Initialize: %s', component_name)
 

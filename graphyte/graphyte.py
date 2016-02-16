@@ -63,7 +63,7 @@ class Graphyte(object):
     with open(config_path, 'r') as f:
       graphyte_config = yaml.load(f)
 
-    # Load Dut and Inst class
+    # Load DUT and Inst class
     self.dut = self._LoadDevice(graphyte_config, 'dut')
     self.inst = self._LoadDevice(graphyte_config, 'inst')
 
@@ -92,7 +92,7 @@ class Graphyte(object):
     Returns:
       The device instance.
     """
-    class_name_mapping = {'dut': 'Dut',
+    class_name_mapping = {'dut': 'DUT',
                           'inst': 'Inst'}
     module_name = graphyte_config[device_type]
     class_name = class_name_mapping[device_type]
@@ -153,11 +153,11 @@ class Graphyte(object):
     except Exception:
       logging.exception('Terminate devices failed')
 
-  def SetRf(self, rf_type):
+  def SetRF(self, rf_type):
     logging.info('Set RF type: %s', rf_type)
     self.rf_type = rf_type
-    self.dut.SetRf(rf_type)
-    self.inst.SetRf(rf_type)
+    self.dut.SetRF(rf_type)
+    self.inst.SetRF(rf_type)
 
   def RunTest(self, test_case):
     logging.info('Running test: \n%s', test_case)
@@ -165,7 +165,7 @@ class Graphyte(object):
     if test_case.rf_type != self.rf_type:
       if self.rf_type is not None:
         self.dut.Terminate()
-      self.SetRf(test_case.rf_type)
+      self.SetRF(test_case.rf_type)
       self.dut.Initialize(test_case)
 
     self.inst.SetPortConfig(test_case)

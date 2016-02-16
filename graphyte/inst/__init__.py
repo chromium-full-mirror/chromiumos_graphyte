@@ -45,7 +45,7 @@ class InstBase(object):
       logging.exception('Failed in InstBase __getattr__')
       raise NotImplementedError
 
-  def SetRf(self, rf_type):
+  def SetRF(self, rf_type):
     self.rf_type = rf_type
 
   def Info(self):
