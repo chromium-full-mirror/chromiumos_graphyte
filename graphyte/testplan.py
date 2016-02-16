@@ -39,33 +39,48 @@ from .utils import IsInBound
 from .utils import SearchConfig
 
 
-_RESULT_CHECKER = TupleChecker(([None, int, float],  # lower bound
-                                [None, int, float])) # upper bound
-# TODO(akahuang): Update after we support MIMO
-ARG_CHECKER = {
-    'component_name': ListChecker([str]),
-    'rf_type':        ListChecker(['WLAN', 'BLUETOOTH', '802_15_4']),
-    'standard':       ListChecker(['A', 'AC', 'B', 'G', 'N']),
-    'format':         ListChecker(['DSSS', 'CCK', 'OFDM', 'O_QPSK']),
-    'test_type':      ListChecker(['TX_MOD', 'RX_PER']),
-    'center_freq':    ListChecker([lambda freq: 2400 < freq < 6000]),
-    'bandwidth':      ListChecker([20, 40, 80, 160]),
-    'data_rate':      ListChecker([int] + ['MCS' + str(i) for i in range(10)]),
-    'nss':            ListChecker([None, 1, 2, 3, 4]),
-    'chain_mask':     ListChecker([1, 2, 4, 8]),
-    'rx_num_packets': ListChecker([int]),
-    'power_level':    ListChecker([int, float])}
-RESULT_CHECKER = {
-    'evm':            _RESULT_CHECKER,
-    'avg_power':      _RESULT_CHECKER,
-    'freq_error':     _RESULT_CHECKER,
-    'rx_per':         _RESULT_CHECKER}
-HEADER_CHECKER = {
-    'order_by': ListChecker(ARG_CHECKER.keys())}
-
 CONFIG_MARKER = '@config'
 TITLE_MARKER = '@title'
 RESULT_MARKER = '@result'
+
+
+# TODO(akahuang): Update after we support MIMO
+REQUIRED_ARG_CHECKER = {
+    'component_name': ListChecker([str]),
+    'rf_type':        ListChecker(['WLAN', 'BLUETOOTH', '802_15_4']),
+    'test_type':      ListChecker(['TX_MOD', 'RX_PER']),
+    'center_freq':    ListChecker([lambda freq: 2400 < freq < 6000]),
+    'power_level':    ListChecker([int, float])}
+RF_ARG_CHECKER = {
+    'WLAN': {
+        'standard':       ListChecker(['A', 'AC', 'B', 'G', 'N']),
+        'format':         ListChecker(['DSSS', 'CCK', 'OFDM', 'O_QPSK']),
+        'bandwidth':      ListChecker([20, 40, 80, 160]),
+        'data_rate':      ListChecker([int] +
+                                      ['MCS' + str(i) for i in range(10)]),
+        'chain_mask':     ListChecker([1, 2, 4, 8]),
+        'nss':            ListChecker([None, 1, 2, 3, 4]),
+        'long_preamble':  ListChecker([0, 1]),
+        'rx_num_packets': ListChecker([int])},
+    'BLUETOOTH': {
+        'format':         ListChecker(['BDR', 'EDR', 'LE']),
+        'data_rate':      ListChecker([1, 2, 3])},
+    '802_15_4': {}}
+
+def _GenerateResultChecker(results):
+  result_checker = TupleChecker(([None, int, float],  # lower bound
+                                 [None, int, float])) # upper bound
+  return dict((result, result_checker) for result in results)
+
+RF_RESULT_CHECKER = {
+    'WLAN': _GenerateResultChecker(
+        ['evm', 'avg_power', 'freq_error', 'lo_leakage', 'mask_margin',
+         'spectral_flatness', 'obw', 'phase_noise', 'rx_per']),
+    'BLUETOOTH': _GenerateResultChecker(['avg_power']),
+    '802_15_4': _GenerateResultChecker(['avg_power'])}
+
+HEADER_CHECKER = {
+    'order_by': ListChecker(REQUIRED_ARG_CHECKER.keys())}
 
 
 class TestPlan(object):
@@ -145,12 +160,6 @@ class TestPlan(object):
           except ValueError:
             _LogErrorAndRaise(row_idx, '%s is missing' % RESULT_MARKER)
           arg_header, result_header = header[:split_idx], header[split_idx+1:]
-          unknown_args = set(arg_header) - set(ARG_CHECKER.keys())
-          if unknown_args:
-            _LogErrorAndRaise(row_idx, 'Unknown arguments: %s' % unknown_args)
-          unknown_result = set(result_header) - set(RESULT_CHECKER.keys())
-          if unknown_result:
-            _LogErrorAndRaise(row_idx, 'Unknown result: %s' % unknown_result)
         # Each line represents a group of test cases
         else:
           if header is None:
@@ -161,48 +170,88 @@ class TestPlan(object):
             _LogErrorAndRaise(
                 row_idx, 'The length of data is different from the header.')
           try:
-            arg_data = map(Parse, value[:split_idx],
-                           map(ARG_CHECKER.get, arg_header))
+            arg_data = [Parse(data) for data in value[:split_idx]]
             arg_table = dict(zip(arg_header, arg_data))
-            result_data = map(Parse, value[split_idx+1:],
-                              map(RESULT_CHECKER.get, result_header))
+            result_data = [Parse(data) for data in value[split_idx+1:]]
             result_limit = dict(zip(result_header, result_data))
           except ValueError as ex:
             _LogErrorAndRaise(row_idx, str(ex))
           # Generate the test cases with all combination of arguments
           for key in arg_table:
-            if type(arg_table[key]) is not list:
+            if not isinstance(arg_table[key], list):
               arg_table[key] = [arg_table[key]]
           arg_keys = arg_table.keys()
           logging.debug('arg_keys: %s', arg_keys)
           for arg_values in itertools.product(*arg_table.values()):
             logging.debug('arg_values: %s', arg_values)
             args = dict(zip(arg_keys, arg_values))
-            self.test_cases.append(TestCase(args, result_limit))
+            try:
+              self.test_cases.append(TestCase(args, result_limit))
+            except ValueError as ex:
+              _LogErrorAndRaise(row_idx, str(ex))
 
 
 class TestCase(object):
   """The test case. It contains the arguments of a RF test."""
 
   def __init__(self, args, result_limit):
-    self.rf_type = args['rf_type']
-    self.test_type = args['test_type']
+    self.rf_type = args.get('rf_type', 'MISSING')
+    self.test_type = args.get('test_type', 'MISSING')
     self.tx_or_rx = self.test_type.split('_')[0]
     self.args = args
     self.result_limit = result_limit
+    self.Verify()
 
   def __str__(self):
     return 'RF: %s, Type: %s\nArgs: %s\nResults: %s' % (
         self.rf_type, self.test_type, self.args, self.result_limit)
 
+  def Verify(self):
+    """Verify the test case is valid or not.
+
+    1. Check the RF type is valid.
+    2. Check all required arguments are existed.
+    3. Check all required and the RF-specific arguments and valid.
+    4. Check there is result and all results are valid.
+
+    Raises:
+      ValueError if the test case is not valid.
+    """
+    def _VerifyData(checker, data):
+      for key, value in data.items():
+        if key not in checker:
+          raise ValueError('%s is not a valid result for %s.' %
+                           (key, self.rf_type))
+        if not checker[key].CheckData(value):
+          raise ValueError('"%s" is not valid for %s.' % (value, key))
+
+    # Check the RF type is valid.
+    if not REQUIRED_ARG_CHECKER['rf_type'].CheckData(self.rf_type):
+      raise ValueError('%s is not a valid RF type.' % self.rf_type)
+    # Check all required arguments are existed.
+    unknown_args = set(REQUIRED_ARG_CHECKER.keys()) - set(self.args.keys())
+    if unknown_args:
+      raise ValueError('%s is not a valid argument.' % unknown_args)
+    # Check all required and the RF-specific arguments and valid.
+    arg_checker = REQUIRED_ARG_CHECKER.copy()
+    arg_checker.update(RF_ARG_CHECKER[self.rf_type])
+    _VerifyData(arg_checker, self.args)
+    # Check there is result and all results are valid.
+    if not self.result_limit:
+      raise ValueError('There is no result.')
+    result_checker = RF_RESULT_CHECKER[self.rf_type]
+    _VerifyData(result_checker, self.result_limit)
+
   def GetCanonicalName(self):
     """Return the name of the test case. It should contain important arguments
     information in a certain order.
     """
-    arg_order = ['component_name', 'test_type', 'rf_type', 'center_freq',
-                 'format', 'standard', 'data_rate', 'bandwidth', 'chain_mask']
-    # TODO(akahung): confirm the argument below needed or not.
-    #        'power_level', 'rx_num_packets', 'nss'
+    rf_arg_order = {
+        'WLAN': ['format', 'standard', 'data_rate', 'bandwidth', 'chain_mask'],
+        'BLUETOOTH': ['format', 'data_rate'],
+        '802_15_4': []}
+    arg_order = ['rf_type', 'component_name', 'test_type', 'center_freq']
+    arg_order += rf_arg_order[self.rf_type]
     args = self.ToDict()
     if args.get('bandwidth'):
       args['bandwidth'] = 'BW-' + str(args['bandwidth'])
