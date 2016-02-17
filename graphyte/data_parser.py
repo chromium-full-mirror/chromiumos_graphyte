@@ -89,8 +89,11 @@ class LiteralChecker(CheckerBase):
       rules = [rules]
     self.rules = rules
 
-  def __str__(self):
+  def RuleStr(self):
     return str(self.rules)
+
+  def __str__(self):
+    return 'LiteralChecker(%s)' % self.RuleStr()
 
   @staticmethod
   def _IsMatch(data, rule):
@@ -119,6 +122,12 @@ class TupleChecker(CheckerBase):
     for rules in rules_list:
       self.checkers.append(LiteralChecker(rules))
 
+  def RuleStr(self):
+    return ', '.join([checker.RuleStr() for checker in self.checkers])
+
+  def __str__(self):
+    return 'TupleChecker(%s)' % self.RuleStr()
+
   def CheckData(self, data):
     if type(data) != tuple or len(data) != len(self.checkers):
       return False
@@ -136,6 +145,12 @@ class ListChecker(CheckerBase):
   """
   def __init__(self, rules):
     self.checker = LiteralChecker(rules)
+
+  def RuleStr(self):
+    return self.checker.RuleStr()
+
+  def __str__(self):
+    return 'ListChecker(%s)' % self.RuleStr()
 
   def CheckData(self, data):
     if type(data) != list:

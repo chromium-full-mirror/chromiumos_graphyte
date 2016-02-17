@@ -58,6 +58,10 @@ class LiteralCheckerTest(unittest.TestCase):
   def setUp(self):
     self.checker = data_parser.LiteralChecker([int, 'a', None])
 
+  def testCheckerStr(self):
+    self.assertEqual(
+        "LiteralChecker([<type 'int'>, 'a', None])", str(self.checker))
+
   def testValidData(self):
     self.assertTrue(self.checker.CheckData(123))
     self.assertTrue(self.checker.CheckData(-55))
@@ -74,6 +78,10 @@ class ListCheckerTest(unittest.TestCase):
   def setUp(self):
     self.checker = data_parser.ListChecker([int, 'a', None])
 
+  def testCheckerStr(self):
+    self.assertEqual(
+        "ListChecker([<type 'int'>, 'a', None])", str(self.checker))
+
   def testValidData(self):
     self.assertTrue(self.checker.CheckData([123, -55, 'a', None]))
     self.assertTrue(self.checker.CheckData(123))
@@ -87,6 +95,11 @@ class ListCheckerTest(unittest.TestCase):
 class TupleCheckerTest(unittest.TestCase):
   def setUp(self):
     self.checker = data_parser.TupleChecker([[int, None], ['hello', float]])
+
+  def testCheckerStr(self):
+    self.assertEqual(
+        "TupleChecker([<type 'int'>, None], ['hello', <type 'float'>])",
+        str(self.checker))
 
   def testValidData(self):
     self.assertTrue(self.checker.CheckData((None, 'hello')))
