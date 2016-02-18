@@ -68,7 +68,9 @@ class Graphyte(object):
     self.inst = self._LoadDevice(graphyte_config, 'inst')
 
     # Load test plan
-    self.testplans = TestPlan(graphyte_config['test_plan'])
+    self.testplan = TestPlan(graphyte_config['test_plan'])
+    if not self.testplan:
+      raise ValueError('Load test plan failed.')
     self.rf_type = None
 
     # Load port config, including port mapping and path loss
@@ -129,7 +131,7 @@ class Graphyte(object):
     """
     self.all_tests_pass = True
     self.InitialzeDevices()
-    for test_case in self.testplans:
+    for test_case in self.testplan:
       self.RunTest(test_case)
     self.TerminateDevices()
     logging.info('All tests are pass? %s', self.all_tests_pass)
