@@ -54,17 +54,20 @@ REQUIRED_ARG_CHECKER = {
 RF_ARG_CHECKER = {
     'WLAN': {
         'standard':       ListChecker(['A', 'AC', 'B', 'G', 'N']),
-        'format':         ListChecker(['DSSS', 'CCK', 'OFDM', 'O_QPSK']),
         'bandwidth':      ListChecker([20, 40, 80, 160]),
-        'data_rate':      ListChecker([int] +
+        'data_rate':      ListChecker([1, 2, 5.5, 11,
+                                       6, 9, 12, 18, 24, 36, 48, 54] +
                                       ['MCS' + str(i) for i in range(10)]),
         'chain_mask':     ListChecker([1, 2, 4, 8]),
         'nss':            ListChecker([None, 1, 2, 3, 4]),
         'long_preamble':  ListChecker([0, 1]),
         'rx_num_packets': ListChecker([int])},
     'BLUETOOTH': {
-        'format':         ListChecker(['BDR', 'EDR', 'LE']),
-        'data_rate':      ListChecker([1, 2, 3])},
+        'packet_type': ListChecker(
+            ['NULL', 'POLL', 'FHS', 'DM1', 'DH1', '2DH1', 'HV1', 'HV2', '2EV3',
+             'HV3', 'EV3', '3EV3', 'DV', '3DH1', 'AUX1', 'DM3', '2DH3', 'DH3',
+             '3DH3', 'EV4', '2EV5', 'EV5', '3EV5', 'DM5', '2DH5', 'DH5', '3DH5',
+             'LE', 'ID', 'IDLE'])},
     '802_15_4': {}}
 
 def _GenerateResultChecker(results):

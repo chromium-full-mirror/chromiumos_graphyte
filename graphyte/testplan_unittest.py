@@ -19,12 +19,12 @@ class TestPlanTest(unittest.TestCase):
 
     self.valid_args = [
         '@title', 'component_name', 'rf_type', 'test_type', 'center_freq',
-        'power_level', 'standard', 'format', 'bandwidth', 'data_rate',
-        'chain_mask', 'nss', 'long_preamble']
+        'power_level', 'standard', 'bandwidth', 'data_rate', 'chain_mask',
+        'nss', 'long_preamble']
     self.valid_args_value = [
         '', 'WLAN_2G', 'WLAN', 'TX_MOD', '[2412, 2437]',
-        '18', 'B', 'DSSS', '20', '1',
-        '[1, 2]', 'None', '0']
+        '18', 'B', '20', '1', '[1, 2]',
+        'None', '0']
     self.valid_results = [
         '@result', 'evm', 'avg_power', 'freq_error', 'lo_leakage',
         'mask_margin', 'spectral_flatness', 'obw', 'phase_noise']
