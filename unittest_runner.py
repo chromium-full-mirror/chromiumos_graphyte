@@ -4,6 +4,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+import logging
 import os
 import sys
 import tempfile
@@ -26,6 +27,7 @@ def LogFilePath(dir_name, filename):
 
 
 def main(argv):
+  logging.disable(logging.CRITICAL)  # Ignore all logging output from unittest.
   temp_dir = tempfile.mkdtemp()
   total_tests = 0
   passed_tests = 0
