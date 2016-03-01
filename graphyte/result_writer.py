@@ -25,11 +25,10 @@ class ResultWriter(object):
     self.fout.close()
 
   def WriteResult(self, test_case, result):
-    test_name = test_case.GetCanonicalName()
     for result_name, bound in test_case.result_limit.iteritems():
       value = result.get(result_name)
       data = {
-          'test_item': test_name,
+          'test_item': str(test_case),
           'power_level': test_case.args.get('power_level'),
           'result_name': result_name,
           'lower_bound': str(bound[0]),

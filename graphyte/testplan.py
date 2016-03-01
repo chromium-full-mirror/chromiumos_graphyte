@@ -4,12 +4,11 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-"""The testplans module.
+"""The testplan module.
 
-The test plan module will go through the CSV file (the format of which is
-defined below) and put them to a dictionary. The testplan can also use the
-dut plugin and instrument plugin to verify the port mapping and the names used
-in the testplan.
+The testplan module will go through the CSV file (the format of which is
+defined below) and put them to a TestPlan object, which acts like a read-only
+list of the TestCase.
 
 The format of the CSV file.
 The first column is '@config' is for the config.
@@ -24,8 +23,8 @@ Other rows contain a test case. Before these row there should be a valid header.
 The format:
   , arg_value1, arg_value2, ...,, result_value1, result_value2, ...
 
-We probably can add a line starting with a comment character. If that appears
-in the first column, we ignore the rest of the line.
+We use the number sign(#) as the comment character.
+If the first column starts from #, we ignore the rest of the line.
 """
 
 import csv
@@ -44,58 +43,23 @@ TITLE_MARKER = '@title'
 RESULT_MARKER = '@result'
 
 
-REQUIRED_ARG_CHECKER = {
-    'component_name': ListChecker([str]),
-    'rf_type':        ListChecker(['WLAN', 'BLUETOOTH', '802_15_4']),
-    'test_type':      ListChecker(['TX_MOD', 'RX_PER']),
-    'center_freq':    ListChecker([lambda freq: 2400 < freq < 6000]),
-    'power_level':    ListChecker([int, float])}
-RF_ARG_CHECKER = {
-    'WLAN': {
-        'standard':       ListChecker(['A', 'AC', 'B', 'G', 'N']),
-        'bandwidth':      ListChecker([20, 40, 80, 160]),
-        'data_rate':      ListChecker([1, 2, 5.5, 11,
-                                       6, 9, 12, 18, 24, 36, 48, 54] +
-                                      ['MCS' + str(i) for i in range(10)]),
-        'chain_mask':     ListChecker(range(1, 16)),  # 4x4 MIMO supported
-        'nss':            ListChecker([None, 1, 2, 3, 4]),
-        'long_preamble':  ListChecker([0, 1]),
-        'rx_num_packets': ListChecker([int])},
-    'BLUETOOTH': {
-        'packet_type': ListChecker(
-            ['NULL', 'POLL', 'FHS', 'DM1', 'DH1', '2DH1', 'HV1', 'HV2', '2EV3',
-             'HV3', 'EV3', '3EV3', 'DV', '3DH1', 'AUX1', 'DM3', '2DH3', 'DH3',
-             '3DH3', 'EV4', '2EV5', 'EV5', '3EV5', 'DM5', '2DH5', 'DH5', '3DH5',
-             'LE', 'ID', 'IDLE'])},
-    '802_15_4': {}}
-
-def _GenerateResultChecker(results):
-  result_checker = TupleChecker(([None, int, float],  # lower bound
-                                 [None, int, float])) # upper bound
-  return dict((result, result_checker) for result in results)
-
-RF_RESULT_CHECKER = {
-    'WLAN': _GenerateResultChecker(
-        ['evm', 'avg_power', 'freq_error', 'lo_leakage', 'mask_margin',
-         'spectral_flatness', 'obw', 'phase_noise', 'rx_per']),
-    'BLUETOOTH': _GenerateResultChecker(['avg_power']),
-    '802_15_4': _GenerateResultChecker(['avg_power'])}
 
 HEADER_CHECKER = {
-    'order_by': ListChecker(REQUIRED_ARG_CHECKER.keys())}
+    'order_by': ListChecker(['component_name', 'rf_type', 'test_type',
+                             'center_freq', 'power_level'])}
 
 
 class TestPlan(object):
   """Generate the test plan from CSV file.
 
-  The class parse the CSV file and generate a list of test cases.
+  The class parses the CSV file and generates a list of test cases.
 
   Usage:
     test_plan = TestPlan(config_file)
     if not test_plan:
       print 'Error: Failed to load the config file.'
     for test_case in test_plan:
-      print 'test_case: %s' % test_case.GetCanonicalName()
+      print 'test_case: %s' % str(test_case)
   """
 
   def __init__(self, config_file=None):
@@ -117,7 +81,7 @@ class TestPlan(object):
 
   def LoadConfigFile(self, config_file):
     try:
-      self.ParseCsvFile(config_file)
+      self.ParseCSVFile(config_file)
     except ValueError:
       logging.exception('Parsing csv file %s error.', config_file)
       self.test_cases = []
@@ -127,7 +91,7 @@ class TestPlan(object):
       cmp_key = lambda test_case: test_case.ResolveAttr(order_by)
       self.test_cases.sort(key=cmp_key)
 
-  def ParseCsvFile(self, config_file):
+  def ParseCSVFile(self, config_file):
     def _LogErrorAndRaise(row_idx, msg):
       msg = 'Row %d: %s' % (row_idx, msg)
       logging.error(msg)
@@ -143,8 +107,10 @@ class TestPlan(object):
         if len(row) == 0:
           continue
 
+        if row[0].startswith('#'):
+          continue
         # General config starts with '@config'
-        if row[0] == CONFIG_MARKER:
+        elif row[0] == CONFIG_MARKER:
           if len(row) != 3:
             _LogErrorAndRaise(row_idx,
                               'The format of config row should be: '
@@ -188,18 +154,319 @@ class TestPlan(object):
             logging.debug('arg_values: %s', arg_values)
             args = dict(zip(arg_keys, arg_values))
             try:
-              self.test_cases.append(TestCase(args, result_limit))
+              self.test_cases.extend(CreateTestCase(args, result_limit))
             except ValueError as ex:
               _LogErrorAndRaise(row_idx, str(ex))
+
+
+def CreateTestCase(args, result_limit):
+  """Create the test case according to the RF type.
+
+  Since the verification and the generation of the test case for each RF type
+  are slightly different, we use the simple factory pattern to create the test
+  case.
+
+  Args:
+    args: the arguments of the test case.
+    result_limit: the result limit of the test case.
+  Return:
+    a list of the test case.
+  """
+  factory_map = {
+      'WLAN': WLANTestCaseFactory(),
+      'BLUETOOTH': BluetoothTestCaseFactory(),
+      '802_15_4': ZigbeeTestCaseFactory()}
+  try:
+    factory = factory_map[args['rf_type']]
+  except KeyError:
+    raise ValueError('Invalid args %s: unsupported RF type.' % args)
+  return factory.Create(args, result_limit)
+
+
+class TestCaseFactory(object):
+  """The abstract class for generating a test case of the certain RF type.
+
+  The class is mainly for verifying the arguments and the result limit are
+  valid, and then creating the test case.
+  """
+
+  def Create(self, args, result_limit):
+    self._VerifyArgAndResult(args, result_limit)
+    return self._Create(args, result_limit)
+
+  def _VerifyArgAndResult(self, args, result_limit):
+    """Verify the test case is valid or not.
+
+    1. Check the RF type is correct.
+    2. Check all required arguments exist and are valid.
+    3. Check there is at least one result and all results are valid.
+
+    Raises:
+      ValueError if the test case is not valid.
+    """
+    raise NotImplementedError
+
+  def _Create(self, args, result_limit):
+    name = self._GenerateCanonicalName(args)
+    return [TestCase(name, args, result_limit)]
+
+  @property
+  def canonical_arg_order(self):
+    """The argument order of the canonical name.
+
+    Returns:
+      a list of the argument name.
+    """
+    raise NotImplementedError
+
+  def _GenerateCanonicalName(self, args):
+    arg_values = [args[key] for key in self.canonical_arg_order if key in args]
+    return ' '.join(map(str, arg_values))
+
+  @staticmethod
+  def VerifyArguments(checker_dict, args):
+    """Verify all arguments are valid.
+
+    If the keys of args are not the same as checker_dict, or there is any value
+    is not valid, then raise the ValueError exception.
+
+    Args:
+      checker_dict: a dict which keys are the valid args and values are
+                    corresponding data checkers. For example:
+        {
+          'rf_type': ListChecker(['WLAN', 'BLUETOOTH', '802_15_4']),
+          'test_type': ListChecker(['TX_MOD', 'RX_PER'])
+        }
+      args: the arguments of the test case.
+    Raises:
+      ValueError if args does not pass the verification.
+    """
+    if set(args.keys()) != set(checker_dict.keys()):
+      missing_keys = list(set(checker_dict.keys()) - set(args.keys()))
+      unknown_keys = list(set(args.keys()) - set(checker_dict.keys()))
+      err_str = 'The keys of arguments are not valid.'
+      if missing_keys:
+        err_str += ' The keys %s are missing.' % (missing_keys)
+      if unknown_keys:
+        err_str += ' The keys %s are unknown.' % (unknown_keys)
+      raise ValueError(err_str)
+    for key, value in args.items():
+      if not checker_dict[key].CheckData(value):
+        raise ValueError('"%s" is not valid for %s.' % (value, key))
+
+  @staticmethod
+  def _VerifyResults(result_list, result_limit):
+    """Verify all results are valid.
+
+    If there is key of result_limit not in result_list, or the value is not
+    valid, then raise the ValueError exception.
+
+    Args:
+      result_list: a list of all valid result keys.
+      result_limit: the result limit of the test case.
+    Raises:
+      ValueError if data is not passed the verification.
+    """
+    result_checker = TupleChecker(([None, int, float],  # lower bound
+                                   [None, int, float]))  # upper bound
+
+    if not result_limit:
+      raise ValueError('There is no result.')
+    unknown_keys = set(result_limit.keys()) - set(result_list)
+    if unknown_keys:
+      raise ValueError('The keys %s are unknown.' % list(unknown_keys))
+    for key, value in result_limit.items():
+      if not result_checker.CheckData(value):
+        raise ValueError('"%s" is not valid for %s.' % (value, key))
+
+
+class WLANTestCaseFactory(TestCaseFactory):
+  RF_TYPE = 'WLAN'
+
+  REQUIRED_ARG_CHECKER = {
+      'rf_type':        ListChecker([RF_TYPE]),
+      'component_name': ListChecker([str]),
+      'test_type':      ListChecker(['TX_MOD', 'RX_PER']),
+      'center_freq':    ListChecker([lambda freq: 2400 < freq < 6000]),
+      'power_level':    ListChecker([int, float]),
+      'standard':       ListChecker(['A', 'AC', 'B', 'G', 'N']),
+      'bandwidth':      ListChecker([20, 40, 80, 160]),
+      'data_rate':      ListChecker([1, 2, 5.5, 11,
+                                     6, 9, 12, 18, 24, 36, 48, 54] +
+                                    ['MCS' + str(i) for i in range(10)]),
+      'chain_mask':     ListChecker(range(1, 16)),  # 4x4 MIMO supported
+      'nss':            ListChecker([None, 1, 2, 3, 4]),
+      'long_preamble':  ListChecker([0, 1])}
+  RX_ARG_CHECKER = {
+      'rx_num_packets': ListChecker([int])}
+  TX_RESULTS = ['evm', 'avg_power', 'freq_error', 'lo_leakage', 'mask_margin',
+                'spectral_flatness', 'obw', 'phase_noise']
+  RX_RESULTS = ['rx_per']
+
+  def _VerifyArgAndResult(self, args, result_limit):
+    # TODO(akahuang): standard to data_rate mapping
+    # Check the RF type is valid.
+    if self.RF_TYPE != args['rf_type']:
+      raise ValueError('%s is not a valid RF type.' % args['rf_type'])
+    # Check all required arguments are valid.
+    arg_checker = self.REQUIRED_ARG_CHECKER.copy()
+    if args.get('test_type') == 'RX_PER':
+      arg_checker.update(self.RX_ARG_CHECKER)
+    TestCaseFactory.VerifyArguments(arg_checker, args)
+    # Check there is result and all results are valid.
+    if args['test_type'] == 'TX_MOD':  # TODO(akahuang): Use Tx/Rx to determine
+      result_list = self.TX_RESULTS
+    else:
+      result_list = self.RX_RESULTS
+    TestCaseFactory._VerifyResults(result_list, result_limit)
+
+  @property
+  def canonical_arg_order(self):
+    return [
+        'rf_type', 'component_name', 'test_type', 'center_freq',
+        'standard', 'data_rate', 'bandwidth', 'chain_mask']
+
+  def _GenerateCanonicalName(self, args):
+    args = args.copy()  # do not change the original argument.
+    args['bandwidth'] = 'BW-' + str(args['bandwidth'])
+    chain_list = ChainMaskToList(args['chain_mask'])
+    args['chain_mask'] = 'ANTENNA-' + ','.join(map(str, chain_list))
+    return super(WLANTestCaseFactory, self)._GenerateCanonicalName(args)
+
+
+class BluetoothTestCaseFactory(TestCaseFactory):
+  RF_TYPE = 'BLUETOOTH'
+  REQUIRED_ARG_CHECKER = {
+      'rf_type':        ListChecker([RF_TYPE]),
+      'component_name': ListChecker([str]),
+      'test_type':      ListChecker(['TX_MOD', 'RX_PER']),
+      'center_freq':    ListChecker([lambda freq: 2400 < freq < 2500]),
+      'power_level':    ListChecker([int, float]),
+      'packet_type':    ListChecker(['DH1', 'DH3', 'DH5', '2DH1', '2DH3',
+                                     '2DH5', '3DH1', '3DH3', '3DH5', 'LE'])}
+  COMMON_RESULTS = [
+      'avg_power', 'freq_deviation', 'acp_5', 'acp_4', 'acp_3', 'acp_2',
+      'acp_1', 'acp0', 'acp1', 'acp2', 'acp3', 'acp4', 'acp5']
+  FORMAT_RESULT_CHECKER = {
+      'BDR': ['bandwidth_20db', 'delta_f2_f1'],
+      'EDR': ['edr_evm_avg', 'edr_evm_peak', 'edr_extreme_omega_0',
+              'edr_extreme_omega_i0', 'edr_omega_i', 'edr_power_diff',
+              'edr_prob_evm_99_pass'],
+      'LE': ['freq_offset', 'delta_f0_fn_max', 'delta_f1_avg', 'delta_f1_f0',
+             'delta_f2_f1_avg', 'delta_f2_avg', 'delta_f2_max',
+             'delta_fn_fn5_max']}
+  RX_RESULTS = ['rx_ber']
+
+  # TODO(akahuang): Fill them after confirmation.
+  BIT_PATTERN_RESULTS = {
+      'PRBS9': ['avg_power', 'bandwidth_20db'],
+      'F0': ['freq_deviation', 'delta_f1_avg'],
+      'AA': ['delta_f2_avg', 'delta_f2_max']}
+
+  def _DetermineFormat(self, packet_type):
+    """Determine the bluetooth format of the packet type.
+
+    Args:
+      packet_type: the Bluetooth packet type.
+    Returns:
+      one of 'LE', 'BDR', or 'EDR'.
+    """
+    if packet_type == 'LE':
+      return 'LE'
+    # The Bluetooth packet types are in the format: nXYm
+    # n means modulation type. no number is 1Mbps (basic data rate).
+    # 2 is 2Mbps, 3 is 3Mbps modulation (enhanced data rate).
+    # Hence the packet type starts from '2' or '3' is EDR, otherwise is BDR.
+    if packet_type[0] in ['2', '3']:
+      return 'EDR'
+    return 'BDR'
+
+  def _VerifyArgAndResult(self, args, result_limit):
+    # Check the RF type is valid.
+    if self.RF_TYPE != args['rf_type']:
+      raise ValueError('%s is not a valid RF type.' % args['rf_type'])
+    # Check all required arguments are valid.
+    TestCaseFactory.VerifyArguments(self.REQUIRED_ARG_CHECKER, args)
+    # Check there is result and all results are valid.
+    if args['test_type'] == 'TX_MOD':  # TODO(akahuang): Use Tx/Rx to determine
+      result_list = self.COMMON_RESULTS[:]
+      packet_format = self._DetermineFormat(args['packet_type'])
+      result_list += self.FORMAT_RESULT_CHECKER[packet_format]
+    else:
+      result_list = self.RX_RESULTS
+    TestCaseFactory._VerifyResults(result_list, result_limit)
+
+  def _Create(self, args, result_limit):
+    """Create the bluetooth test case.
+
+    In BDR and LE, the bit pattern of the packet are different from results.
+    We add the 'bit_pattern' argument and split into different test cases.
+    """
+    name = self._GenerateCanonicalName(args)
+    packet_format = self._DetermineFormat(args['packet_type'])
+    if packet_format == 'EDR':
+      args['bit_pattern'] = None
+      return [TestCase(name, args, result_limit)]
+    # Split the test case by the bit pattern.
+    ret = []
+    for bit_pattern, result_list in self.BIT_PATTERN_RESULTS.items():
+      filtered_result = dict(
+          (k, v) for k, v in result_limit.items() if k in result_list)
+      if filtered_result:
+        copy_args = args.copy()
+        copy_args['bit_pattern'] = bit_pattern
+        ret.append(TestCase(name, copy_args, filtered_result))
+    return ret
+
+  @property
+  def canonical_arg_order(self):
+    return ['rf_type', 'component_name', 'test_type', 'center_freq',
+            'packet_type']
+
+
+class ZigbeeTestCaseFactory(TestCaseFactory):
+  RF_TYPE = '802_15_4'
+  REQUIRED_ARG_CHECKER = {
+      'rf_type':        ListChecker([RF_TYPE]),
+      'component_name': ListChecker([str]),
+      'test_type':      ListChecker(['TX_MOD', 'RX_PER']),
+      'center_freq':    ListChecker([lambda freq: 2400 < freq < 6000]),
+      'power_level':    ListChecker([int, float])}
+  RX_ARG_CHECKER = {
+      'rx_num_packets': ListChecker([int])}
+
+  TX_RESULTS = ['avg_power', 'evm_all', 'evm_offset', 'freq_error']
+  RX_RESULTS = ['rx_per']
+
+  def _VerifyArgAndResult(self, args, result_limit):
+    # Check the RF type is valid.
+    if self.RF_TYPE != args['rf_type']:
+      raise ValueError('%s is not a valid RF type.' % args['rf_type'])
+    # Check all required arguments are valid.
+    arg_checker = self.REQUIRED_ARG_CHECKER.copy()
+    if args.get('test_type') == 'RX_PER':
+      arg_checker.update(self.RX_ARG_CHECKER)
+    TestCaseFactory.VerifyArguments(arg_checker, args)
+    # Check there is result and all results are valid.
+    if args['test_type'] == 'TX_MOD':  # TODO(akahuang): Use Tx/Rx to determine
+      result_list = self.TX_RESULTS
+    else:
+      result_list = self.RX_RESULTS
+    TestCaseFactory._VerifyResults(result_list, result_limit)
+
+  @property
+  def canonical_arg_order(self):
+    return ['rf_type', 'component_name', 'test_type', 'center_freq']
 
 
 class TestCase(object):
   """The test case. It contains the arguments of a RF test."""
 
-  def __init__(self, args, result_limit):
+  def __init__(self, name, args, result_limit):
     """Initialize the test case.
 
     Arg:
+      name: A string that should contain important arguments information.
       args: A dict of the test arguments. The key 'rf_type', 'test_type' and
           'component_name' are essential.
           Example:
@@ -222,66 +489,10 @@ class TestCase(object):
     self.tx_or_rx = self.test_type.split('_')[0]
     self.args = args
     self.result_limit = result_limit
-    self.Verify()
+    self.name = name
 
   def __str__(self):
-    return 'RF: %s, Type: %s\nArgs: %s\nResults: %s' % (
-        self.rf_type, self.test_type, self.args, self.result_limit)
-
-  def Verify(self):
-    """Verify the test case is valid or not.
-
-    1. Check the RF type is valid.
-    2. Check all required arguments are existed.
-    3. Check all required and the RF-specific arguments and valid.
-    4. Check there is result and all results are valid.
-
-    Raises:
-      ValueError if the test case is not valid.
-    """
-    def _VerifyData(checker, data):
-      for key, value in data.items():
-        if key not in checker:
-          raise ValueError('%s is not a valid result for %s.' %
-                           (key, self.rf_type))
-        if not checker[key].CheckData(value):
-          raise ValueError('"%s" is not valid for %s.' % (value, key))
-
-    # Check the RF type is valid.
-    if not REQUIRED_ARG_CHECKER['rf_type'].CheckData(self.rf_type):
-      raise ValueError('%s is not a valid RF type.' % self.rf_type)
-    # Check all required arguments are existed.
-    unknown_args = set(REQUIRED_ARG_CHECKER.keys()) - set(self.args.keys())
-    if unknown_args:
-      raise ValueError('%s is not a valid argument.' % unknown_args)
-    # Check all required and the RF-specific arguments and valid.
-    arg_checker = REQUIRED_ARG_CHECKER.copy()
-    arg_checker.update(RF_ARG_CHECKER[self.rf_type])
-    _VerifyData(arg_checker, self.args)
-    # Check there is result and all results are valid.
-    if not self.result_limit:
-      raise ValueError('There is no result.')
-    result_checker = RF_RESULT_CHECKER[self.rf_type]
-    _VerifyData(result_checker, self.result_limit)
-
-  def GetCanonicalName(self):
-    """Return the name of the test case. It should contain important arguments
-    information in a certain order.
-    """
-    rf_arg_order = {
-        'WLAN': ['format', 'standard', 'data_rate', 'bandwidth', 'chain_mask'],
-        'BLUETOOTH': ['format', 'data_rate'],
-        '802_15_4': []}
-    arg_order = ['rf_type', 'component_name', 'test_type', 'center_freq']
-    arg_order += rf_arg_order[self.rf_type]
-    args = self.ToDict()
-    if args.get('bandwidth'):
-      args['bandwidth'] = 'BW-' + str(args['bandwidth'])
-    if args.get('chain_mask'):
-      chain_list = ChainMaskToList(args['chain_mask'])
-      args['chain_mask'] = 'ANTENNA-' + ','.join(map(str, chain_list))
-    arg_values = [args.get(key) for key in arg_order if args.get(key)]
-    return ' '.join(map(str, arg_values))
+    return self.name
 
   def ResolveAttr(self, arg_keys):
     """Returns the value in args. It's used for sorting the test cases."""
@@ -337,13 +548,13 @@ def StripRow(row):
     row.pop()
   return row
 
-
+# TODO(akahuang): Implement the CSV file check and CSV template generation.
 def main():
   logging.basicConfig(level=logging.INFO)
   config_file = 'sample_testplan.csv'
   test_plan = TestPlan(config_file)
   for test_case in test_plan:
-    logging.info('test_case: %s', test_case.GetCanonicalName())
+    logging.info('test_case: %s', str(test_case))
 
 
 if __name__ == '__main__':
