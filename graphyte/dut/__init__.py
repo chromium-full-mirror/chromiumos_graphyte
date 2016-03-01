@@ -55,7 +55,6 @@ class DUTBase(object):
     """
     raise NotImplementedError
 
-  # TODO(akahuang): confirm the API of each function
   class ControllerBase(object):
     """The abstract DUT controller class that every controller in DUT plugin
     shoule inherit it. We use wrapped function for each API, that give us
@@ -78,7 +77,7 @@ class DUTBase(object):
     def _Terminate(self, **kwargs):
       raise NotImplementedError
 
-    def TxSetMode(self, test):
+    def TxConfig(self, test):
       """The test case details are passed in the test_params dictionary.
       However, we can decide to have other parameters in case someone
       wants to override (Not sure if we will keep these parameters going ahead).
@@ -86,18 +85,9 @@ class DUTBase(object):
       If the test_params is NULL/False, then the rest of the parameters
       can be used
       """
-      return self._TxSetMode(**test.ToDict())
+      return self._TxConfig(**test.ToDict())
 
-    def _TxSetMode(self, **kwargs):
-      raise NotImplementedError
-
-    def TxSetPower(self, test):
-      """Set the power of the interface to power, if its not zero.
-      If power=0, then use it from the params passed in the test_params.
-      """
-      return self._TxSetPower(**test.ToDict())
-
-    def _TxSetPower(self, power_level=0, **kwargs):
+    def _TxConfig(self, **kwargs):
       raise NotImplementedError
 
     def TxStart(self, test):
@@ -119,10 +109,10 @@ class DUTBase(object):
     def _TxStop(self, **kwargs):
       raise NotImplementedError
 
-    def RxSetMode(self, test):
-      return self._RxSetMode(**test.ToDict())
+    def RxConfig(self, test):
+      return self._RxConfig(**test.ToDict())
 
-    def _RxSetMode(self, **kwargs):
+    def _RxConfig(self, **kwargs):
       raise NotImplementedError
 
     def RxClearResult(self, test):
@@ -139,26 +129,56 @@ class DUTBase(object):
       raise NotImplementedError
 
   class WlanControllerBase(ControllerBase):
-    def _TxSetMode(self, channel=0, signal_type=None, chain_mask=0, payload=0,
-                   **kwargs):
+    def _TxConfig(self, component_name, rf_type, test_type, center_freq,
+                  power_level, standard, bandwidth, data_rate, chain_mask, nss,
+                  long_preamble, **kwargs):
       raise NotImplementedError
 
-    def _RxSetMode(self, channel=0, signal_type=None, chain_mask=0, payload=0,
-                   **kwargs):
+    def _TxStart(self, component_name, rf_type, test_type, center_freq,
+                 power_level, standard, bandwidth, data_rate, chain_mask, nss,
+                 long_preamble, **kwargs):
+      raise NotImplementedError
+
+    def _RxConfig(self, component_name, rf_type, test_type, center_freq,
+                  power_level, standard, bandwidth, data_rate, chain_mask, nss,
+                  long_preamble, rx_num_packets, **kwargs):
+      raise NotImplementedError
+
+    def _RxClearResult(self, component_name, rf_type, test_type, center_freq,
+                       power_level, standard, bandwidth, data_rate, chain_mask,
+                       nss, long_preamble, rx_num_packets, **kwargs):
       raise NotImplementedError
 
   class BluetoothControllerBase(ControllerBase):
-    def _TxSetMode(self, channel=0, packet_type=None, payload=0,
-                   payload_type=None, **kwargs):
+    def _TxConfig(self, component_name, rf_type, test_type, center_freq,
+                  power_level, packet_type, bit_pattern, **kwargs):
       raise NotImplementedError
 
-    def _RxSetMode(self, channel=0, packet_type=None, **kwargs):
+    def _TxStart(self, component_name, rf_type, test_type, center_freq,
+                 power_level, packet_type, bit_pattern, **kwargs):
+      raise NotImplementedError
+
+    def _RxConfig(self, component_name, rf_type, test_type, center_freq,
+                  power_level, packet_type, bit_pattern, **kwargs):
+      raise NotImplementedError
+
+    def _RxClearResult(self, component_name, rf_type, test_type, center_freq,
+                       power_level, packet_type, bit_pattern, **kwargs):
       raise NotImplementedError
 
   class ZigbeeControllerBase(ControllerBase):
-    def _TxSetMode(self, channel=0, packet_type=None, payload=0, **kwargs):
+    def _TxConfig(self, component_name, rf_type, test_type, center_freq,
+                  power_level, **kwargs):
       raise NotImplementedError
 
-    def _RxSetMode(self, channel=0, packet_type=None, **kwargs):
+    def _TxStart(self, component_name, rf_type, test_type, center_freq,
+                 power_level, **kwargs):
       raise NotImplementedError
 
+    def _RxConfig(self, component_name, rf_type, test_type, center_freq,
+                  power_level, rx_num_packets, **kwargs):
+      raise NotImplementedError
+
+    def _RxClearResult(self, component_name, rf_type, test_type, center_freq,
+                       power_level, rx_num_packets, **kwargs):
+      raise NotImplementedError

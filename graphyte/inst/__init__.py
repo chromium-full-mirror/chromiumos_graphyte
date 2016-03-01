@@ -14,7 +14,6 @@ import logging
 from .. import link
 
 
-# TODO(akahuang): confirm the API of each function
 class InstBase(object):
   """The abstract instrument class that every instrument plugin should inherit
   it. It contains several RF controllers, and each controller corresponds one RF
@@ -130,12 +129,6 @@ class InstBase(object):
     def _TxConfig(self, **kwargs):
       raise NotImplementedError
 
-    def TxMeasure(self, test):
-      return self._TxMeasure(**test.ToDict())
-
-    def _TxMeasure(self, **kwargs):
-      raise NotImplementedError
-
     def TxGetResult(self, test):
       results = self._TxGetResult(**test.ToDict())
       # TODO(akahuang): Check the structure of the results.
@@ -196,14 +189,58 @@ class InstBase(object):
     def _RxStop(self, **kwargs):
       raise NotImplementedError
 
-  # pylint: disable=W0223
   class WlanControllerBase(ControllerBase):
-    pass
+    def _TxConfig(self, component_name, rf_type, test_type, center_freq,
+                  power_level, standard, bandwidth, data_rate, chain_mask, nss,
+                  long_preamble, **kwargs):
+      raise NotImplementedError
 
-  # pylint: disable=W0223
+    def _TxGetResult(self, component_name, rf_type, test_type, center_freq,
+                     power_level, standard, bandwidth, data_rate, chain_mask,
+                     nss, long_preamble, result_limit, **kwargs):
+      raise NotImplementedError
+
+    def _RxConfig(self, component_name, rf_type, test_type, center_freq,
+                  power_level, standard, bandwidth, data_rate, chain_mask, nss,
+                  long_preamble, rx_num_packets, **kwargs):
+      raise NotImplementedError
+
+    def _RxGenerate(self, component_name, rf_type, test_type, center_freq,
+                    power_level, standard, bandwidth, data_rate, chain_mask,
+                    nss, long_preamble, rx_num_packets, **kwargs):
+      raise NotImplementedError
+
   class BluetoothControllerBase(ControllerBase):
-    pass
+    def _TxConfig(self, component_name, rf_type, test_type, center_freq,
+                  power_level, packet_type, bit_pattern, **kwargs):
+      raise NotImplementedError
 
-  # pylint: disable=W0223
+    def _TxGetResult(self, component_name, rf_type, test_type, center_freq,
+                     power_level, packet_type, bit_pattern, result_limit,
+                     **kwargs):
+      raise NotImplementedError
+
+    def _RxConfig(self, component_name, rf_type, test_type, center_freq,
+                  power_level, packet_type, bit_pattern, **kwargs):
+      raise NotImplementedError
+
+    def _RxGenerate(self, component_name, rf_type, test_type, center_freq,
+                    power_level, packet_type, bit_pattern, **kwargs):
+      raise NotImplementedError
+
   class ZigbeeControllerBase(ControllerBase):
-    pass
+    def _TxConfig(self, component_name, rf_type, test_type, center_freq,
+                  power_level, **kwargs):
+      raise NotImplementedError
+
+    def _TxGetResult(self, component_name, rf_type, test_type, center_freq,
+                     power_level, result_limit, **kwargs):
+      raise NotImplementedError
+
+    def _RxConfig(self, component_name, rf_type, test_type, center_freq,
+                  power_level, rx_num_packets, **kwargs):
+      raise NotImplementedError
+
+    def _RxGenerate(self, component_name, rf_type, test_type, center_freq,
+                    power_level, rx_num_packets, **kwargs):
+      raise NotImplementedError

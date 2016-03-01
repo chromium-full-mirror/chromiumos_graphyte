@@ -183,19 +183,18 @@ class Graphyte(object):
     self.result_writer.WriteResult(test_case, result)
 
   def RunTxTest(self, test_case):
-    self.dut.TxSetMode(test_case)
-    self.dut.TxSetPower(test_case)
+    self.dut.TxConfig(test_case)
     self.inst.TxConfig(test_case)
     self.dut.TxStart(test_case)
-    self.inst.TxMeasure(test_case)
     result = self.inst.TxGetResult(test_case)
     self.dut.TxStop(test_case)
     return result
 
   def RunRxTest(self, test_case):
-    self.dut.RxSetMode(test_case)
-    self.dut.RxClearResult(test_case)
+    self.dut.RxConfig(test_case)
     self.inst.RxConfig(test_case)
+    self.dut.RxClearResult(test_case)
     self.inst.RxGenerate(test_case)
     result = self.dut.RxGetResult(test_case)
+    self.inst.RxStop(test_case)
     return result

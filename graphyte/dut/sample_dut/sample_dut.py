@@ -40,22 +40,27 @@ class DUT(DUTBase):
     def _Terminate(self, **kwargs):
       logging.info('DUT Wlan Terminate')
 
-    def _TxSetMode(self, **kwargs):
-      logging.info('DUT Wlan TxSetMode')
+    def _TxConfig(self, component_name, rf_type, test_type, center_freq,
+                  power_level, standard, bandwidth, data_rate, chain_mask, nss,
+                  long_preamble, **kwargs):
+      logging.info('DUT Wlan TxConfig')
 
-    def _TxSetPower(self, power_level=0, **kwargs):
-      logging.info('DUT Wlan TxSetPower. Power level: %s', power_level)
-
-    def _TxStart(self, **kwargs):
+    def _TxStart(self, component_name, rf_type, test_type, center_freq,
+                 power_level, standard, bandwidth, data_rate, chain_mask, nss,
+                 long_preamble, **kwargs):
       logging.info('DUT Wlan TxStart')
 
     def _TxStop(self, **kwargs):
       logging.info('DUT Wlan TxStop')
 
-    def _RxSetMode(self, **kwargs):
-      logging.info('DUT Wlan RxSetMode')
+    def _RxConfig(self, component_name, rf_type, test_type, center_freq,
+                  power_level, standard, bandwidth, data_rate, chain_mask, nss,
+                  long_preamble, rx_num_packets, **kwargs):
+      logging.info('DUT Wlan RxConfig')
 
-    def _RxClearResult(self, **kwargs):
+    def _RxClearResult(self, component_name, rf_type, test_type, center_freq,
+                       power_level, standard, bandwidth, data_rate, chain_mask,
+                       nss, long_preamble, rx_num_packets, **kwargs):
       logging.info('DUT Wlan RxClearResult')
 
     def _RxGetResult(self, result_limit, **kwargs):
@@ -69,22 +74,23 @@ class DUT(DUTBase):
     def _Terminate(self, **kwargs):
       logging.info('DUT Bluetooth Terminate')
 
-    def _TxSetMode(self, **kwargs):
-      logging.info('DUT Bluetooth TxSetMode')
+    def _TxConfig(self, component_name, rf_type, test_type, center_freq,
+                  power_level, packet_type, bit_pattern, **kwargs):
+      logging.info('DUT Bluetooth TxConfig')
 
-    def _TxSetPower(self, power_level=0, **kwargs):
-      logging.info('DUT Bluetooth TxSetPower. Power level: %s', power_level)
-
-    def _TxStart(self, **kwargs):
+    def _TxStart(self, component_name, rf_type, test_type, center_freq,
+                 power_level, packet_type, bit_pattern, **kwargs):
       logging.info('DUT Bluetooth TxStart')
 
     def _TxStop(self, **kwargs):
       logging.info('DUT Bluetooth TxStop')
 
-    def _RxSetMode(self, **kwargs):
-      logging.info('DUT Bluetooth RxSetMode')
+    def _RxConfig(self, component_name, rf_type, test_type, center_freq,
+                  power_level, packet_type, bit_pattern, **kwargs):
+      logging.info('DUT Bluetooth RxConfig')
 
-    def _RxClearResult(self, **kwargs):
+    def _RxClearResult(self, component_name, rf_type, test_type, center_freq,
+                       power_level, packet_type, bit_pattern, **kwargs):
       logging.info('DUT Bluetooth RxClearResult')
 
     def _RxGetResult(self, result_limit, **kwargs):
@@ -98,22 +104,23 @@ class DUT(DUTBase):
     def _Terminate(self, **kwargs):
       logging.info('DUT Zigbee Terminate')
 
-    def _TxSetMode(self, **kwargs):
-      logging.info('DUT Zigbee TxSetMode')
+    def _TxConfig(self, component_name, rf_type, test_type, center_freq,
+                  power_level, **kwargs):
+      logging.info('DUT Zigbee TxConfig')
 
-    def _TxSetPower(self, power_level=0, **kwargs):
-      logging.info('DUT Zigbee TxSetPower. Power level: %s', power_level)
-
-    def _TxStart(self, **kwargs):
+    def _TxStart(self, component_name, rf_type, test_type, center_freq,
+                 power_level, **kwargs):
       logging.info('DUT Zigbee TxStart')
 
     def _TxStop(self, **kwargs):
       logging.info('DUT Zigbee TxStop')
 
-    def _RxSetMode(self, **kwargs):
-      logging.info('DUT Zigbee RxSetMode')
+    def _RxConfig(self, component_name, rf_type, test_type, center_freq,
+                  power_level, rx_num_packets, **kwargs):
+      logging.info('DUT Zigbee RxConfig')
 
-    def _RxClearResult(self, **kwargs):
+    def _RxClearResult(self, component_name, rf_type, test_type, center_freq,
+                       power_level, rx_num_packets, **kwargs):
       logging.info('DUT Zigbee RxClearResult')
 
     def _RxGetResult(self, result_limit, **kwargs):
