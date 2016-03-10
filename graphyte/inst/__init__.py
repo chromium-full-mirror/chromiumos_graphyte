@@ -129,6 +129,12 @@ class InstBase(object):
     def _TxConfig(self, **kwargs):
       raise NotImplementedError
 
+    def TxMeasure(self, test):
+      return self._TxMeasure(**test.ToDict())
+
+    def _TxMeasure(self, **kwargs):
+      raise NotImplementedError
+
     def TxGetResult(self, test):
       results = self._TxGetResult(**test.ToDict())
       # TODO(akahuang): Check the structure of the results.
@@ -195,6 +201,11 @@ class InstBase(object):
                   long_preamble, **kwargs):
       raise NotImplementedError
 
+    def _TxMeasure(self, component_name, rf_type, test_type, center_freq,
+                   power_level, standard, bandwidth, data_rate, chain_mask,
+                   nss, long_preamble, result_limit, **kwargs):
+      raise NotImplementedError
+
     def _TxGetResult(self, component_name, rf_type, test_type, center_freq,
                      power_level, standard, bandwidth, data_rate, chain_mask,
                      nss, long_preamble, result_limit, **kwargs):
@@ -215,6 +226,11 @@ class InstBase(object):
                   power_level, packet_type, bit_pattern, **kwargs):
       raise NotImplementedError
 
+    def _TxMeasure(self, component_name, rf_type, test_type, center_freq,
+                   power_level, packet_type, bit_pattern, result_limit,
+                   **kwargs):
+      raise NotImplementedError
+
     def _TxGetResult(self, component_name, rf_type, test_type, center_freq,
                      power_level, packet_type, bit_pattern, result_limit,
                      **kwargs):
@@ -231,6 +247,10 @@ class InstBase(object):
   class ZigbeeControllerBase(ControllerBase):
     def _TxConfig(self, component_name, rf_type, test_type, center_freq,
                   power_level, **kwargs):
+      raise NotImplementedError
+
+    def _TxMeasure(self, component_name, rf_type, test_type, center_freq,
+                   power_level, result_limit, **kwargs):
       raise NotImplementedError
 
     def _TxGetResult(self, component_name, rf_type, test_type, center_freq,

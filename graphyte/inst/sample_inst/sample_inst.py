@@ -66,6 +66,11 @@ class Inst(InstBase):
       logging.info('Wlan TxConfig')
       self.chain_list = ChainMaskToList(kwargs.get('chain_mask'))
 
+    def _TxMeasure(self, component_name, rf_type, test_type, center_freq,
+                   power_level, standard, bandwidth, data_rate, chain_mask,
+                   nss, long_preamble, result_limit, **kwargs):
+      logging.info('Wlan TxMeasure')
+
     def _TxGetResult(self, component_name, rf_type, test_type, center_freq,
                      power_level, standard, bandwidth, data_rate, chain_mask,
                      nss, long_preamble, result_limit, **kwargs):
@@ -95,6 +100,11 @@ class Inst(InstBase):
                   power_level, packet_type, bit_pattern, **kwargs):
       logging.info('Bluetooth TxConfig')
 
+    def _TxMeasure(self, component_name, rf_type, test_type, center_freq,
+                   power_level, packet_type, bit_pattern, result_limit,
+                   **kwargs):
+      logging.info('Bluetooth TxMeasure')
+
     def _TxGetResult(self, component_name, rf_type, test_type, center_freq,
                      power_level, packet_type, bit_pattern, result_limit,
                      **kwargs):
@@ -116,6 +126,10 @@ class Inst(InstBase):
     def _TxConfig(self, component_name, rf_type, test_type, center_freq,
                   power_level, **kwargs):
       logging.info('Zigbee TxConfig')
+
+    def _TxMeasure(self, component_name, rf_type, test_type, center_freq,
+                   power_level, result_limit, **kwargs):
+      logging.info('Zigbee TxMeasure')
 
     def _TxGetResult(self, component_name, rf_type, test_type, center_freq,
                      power_level, result_limit, **kwargs):
