@@ -357,11 +357,14 @@ class BluetoothTestCaseFactory(TestCaseFactory):
              'delta_fn_fn5_max']}
   RX_RESULTS = ['rx_ber']
 
-  # TODO(akahuang): Fill them after confirmation.
   BIT_PATTERN_RESULTS = {
-      'PRBS9': ['avg_power', 'bandwidth_20db'],
+      'PRBS9': ['avg_power', 'bandwidth_20db', 'acp_5', 'acp_4', 'acp_3',
+                'acp_2', 'acp_1', 'acp0', 'acp1', 'acp2', 'acp3', 'acp4',
+                'acp5', 'freq_offset'],
       'F0': ['freq_deviation', 'delta_f1_avg'],
-      'AA': ['delta_f2_avg', 'delta_f2_max']}
+      'AA': ['delta_f2_avg', 'delta_f2_max', 'delta_f1_f0', 'delta_f2_f1_avg',
+             'delta_f2_f1', 'delta_f0_fn_max', 'delta_fn_fn5_max']}
+
 
   def _DetermineFormat(self, packet_type):
     """Determine the bluetooth format of the packet type.

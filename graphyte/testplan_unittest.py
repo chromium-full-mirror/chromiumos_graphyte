@@ -303,9 +303,34 @@ class BluetoothTestPlanTest(unittest.TestCase):
         '', 'BT', 'BLUETOOTH', 'TX_MOD', '2412',
         '18', 'DH5']
     valid_results = [
-        '@result', 'avg_power', 'bandwidth_20db']
+        '@result', 'avg_power', 'bandwidth_20db', 'acp_5', 'acp_4',
+        'acp_3', 'acp_2', 'acp_1', 'acp0', 'acp1',
+        'acp2', 'acp3', 'acp4', 'acp5']
     valid_result_value = [
-        '', '(16,20)', '(0,20)']
+        '', '(16,20)', '(0,20)', '(0,20)', '(0,20)',
+        '(0,20)', '(0,20)', '(0,20)', '(0,20)', '(0,20)',
+        '(0,20)', '(0,20)', '(0,20)', '(0,20)']
+
+    self._WriteCSVContent([
+        self.valid_args + valid_results,
+        valid_args_value + valid_result_value])
+
+    self.test_plan.ParseCSVFile(self.temp_path)
+    self.assertTrue(len(self.test_plan) == 1)
+    self.assertTrue(self.test_plan[0].args['bit_pattern'] == 'PRBS9')
+
+  def testLEBitPatternPRBS9(self):
+    valid_args_value = [
+        '', 'BT', 'BLUETOOTH', 'TX_MOD', '2412',
+        '18', 'LE']
+    valid_results = [
+        '@result', 'avg_power', 'freq_offset', 'acp_5', 'acp_4',
+        'acp_3', 'acp_2', 'acp_1', 'acp0', 'acp1',
+        'acp2', 'acp3', 'acp4', 'acp5']
+    valid_result_value = [
+        '', '(16,20)', '(0,20)', '(0,20)', '(0,20)',
+        '(0,20)', '(0,20)', '(0,20)', '(0,20)', '(0,20)',
+        '(0,20)', '(0,20)', '(0,20)', '(0,20)']
 
     self._WriteCSVContent([
         self.valid_args + valid_results,
@@ -335,11 +360,30 @@ class BluetoothTestPlanTest(unittest.TestCase):
   def testBitPatternAA(self):
     valid_args_value = [
         '', 'BT', 'BLUETOOTH', 'TX_MOD', '2412',
+        '18', 'DH1']
+    valid_results = [
+        '@result', 'delta_f2_f1']
+    valid_result_value = [
+        '', '(16,20)']
+
+    self._WriteCSVContent([
+        self.valid_args + valid_results,
+        valid_args_value + valid_result_value])
+
+    self.test_plan.ParseCSVFile(self.temp_path)
+    self.assertTrue(len(self.test_plan) == 1)
+    self.assertTrue(self.test_plan[0].args['bit_pattern'] == 'AA')
+
+  def testLEBitPatternAA(self):
+    valid_args_value = [
+        '', 'BT', 'BLUETOOTH', 'TX_MOD', '2412',
         '18', 'LE']
     valid_results = [
-        '@result', 'delta_f2_avg', 'delta_f2_max']
+        '@result', 'delta_f2_avg', 'delta_f2_max', 'delta_f1_f0',
+        'delta_f2_f1_avg', 'delta_f0_fn_max', 'delta_fn_fn5_max']
     valid_result_value = [
-        '', '(16,20)', '(0,20)']
+        '', '(16,20)', '(0,20)', '(16,20)',
+        '(16,20)', '(0,20)', '(16,20)']
 
     self._WriteCSVContent([
         self.valid_args + valid_results,
