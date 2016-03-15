@@ -408,7 +408,7 @@ class BluetoothTestCaseFactory(TestCaseFactory):
     name = self._GenerateCanonicalName(args)
     packet_format = self._DetermineFormat(args['packet_type'])
     if packet_format == 'EDR':
-      args['bit_pattern'] = None
+      args['bit_pattern'] = 'PRBS9'
       return [TestCase(name, args, result_limit)]
     # Split the test case by the bit pattern.
     ret = []

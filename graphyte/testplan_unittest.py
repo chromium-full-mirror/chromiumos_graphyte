@@ -298,6 +298,23 @@ class BluetoothTestPlanTest(unittest.TestCase):
       self.test_plan.ParseCSVFile(self.temp_path)
     self.assertTrue(len(self.test_plan) == 0)
 
+  def testEDRBitPattern(self):
+    valid_args_value = [
+        '', 'BT', 'BLUETOOTH', 'TX_MOD', '2412',
+        '18', '2DH5']
+    valid_results = [
+        '@result', 'avg_power', 'edr_evm_avg', 'edr_evm_peak']
+    valid_result_value = [
+        '', '(16,20)', '(0,20)', '(0,20)']
+
+    self._WriteCSVContent([
+        self.valid_args + valid_results,
+        valid_args_value + valid_result_value])
+
+    self.test_plan.ParseCSVFile(self.temp_path)
+    self.assertTrue(len(self.test_plan) == 1)
+    self.assertTrue(self.test_plan[0].args['bit_pattern'] == 'PRBS9')
+
   def testBitPatternPRBS9(self):
     valid_args_value = [
         '', 'BT', 'BLUETOOTH', 'TX_MOD', '2412',
