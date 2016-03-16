@@ -43,9 +43,6 @@ class Inst(InstBase):
   def SelfCalibrate(self, calibration_type='full'):
     logging.info('Inst SelfCalibrate')
 
-  def AutoLevel(self, ports):
-    logging.info('Inst AutoLevel')
-
   def _SetPortConfig(self, port_mapping, pathloss):
     logging.info('Inst _SetPortConfig')
 
