@@ -4,7 +4,10 @@
 # found in the LICENSE file.
 
 import inspect
+import subprocess
+import tempfile
 
+CalledProcessError = subprocess.CalledProcessError
 
 MODULE_PATH_MAPPING = {
     'ADBLink': 'links.adb',
@@ -66,6 +69,76 @@ class DeviceLink(object):
       A boolean indicating if target DUT is ready.
     """
     raise NotImplementedError
+
+  def Call(self, *args, **kargs):
+    """Executes a command on DUT, using subprocess.call convention.
+
+    The arguments are explained in Shell.
+
+    Returns:
+      Exit code from executed command.
+    """
+    process = self.Shell(*args, **kargs)
+    process.wait()
+    return process.returncode
+
+  def CheckCall(self, command, stdin=None, stdout=None, stderr=None):
+    """Executes a command on DUT, using subprocess.check_call convention.
+
+    Args:
+      command: A string or a list of strings for command to execute.
+      stdin: A file object to override standard input.
+      stdout: A file object to override standard output.
+      stderr: A file object to override standard error.
+
+    Returns:
+      Exit code from executed command.
+
+    Raises:
+      CalledProcessError if the exit code is non-zero.
+    """
+    exit_code = self.Call(command, stdin, stdout, stderr)
+    if exit_code != 0:
+      raise CalledProcessError(returncode=exit_code, cmd=command)
+    return exit_code
+
+  def CheckOutput(self, command, stdin=None, stderr=None):
+    """Executes a command on DUT, using subprocess.check_output convention.
+
+    Args:
+      command: A string or a list of strings for command to execute.
+      stdin: A file object to override standard input.
+      stdout: A file object to override standard output.
+      stderr: A file object to override standard error.
+
+    Returns:
+      The output on STDOUT from executed command.
+
+    Raises:
+      CalledProcessError if the exit code is non-zero.
+    """
+    with tempfile.TemporaryFile() as stdout:
+      exit_code = self.Call(command, stdin, stdout, stderr)
+      stdout.flush()
+      stdout.seek(0)
+      output = stdout.read()
+    if exit_code != 0:
+      raise CalledProcessError(
+          returncode=exit_code, cmd=command, output=output)
+    return output
+
+  def CallOutput(self, *args, **kargs):
+    """Runs the command on DUT and return data from standard output if success.
+
+    Returns:
+      If command exits with zero (success), return the standard output;
+      otherwise None. If the command didn't output anything then the result is
+      empty string.
+    """
+    try:
+      return self.CheckOutput(*args, **kargs)
+    except CalledProcessError:
+      return None
 
 
 def _GetLinkClass(class_name):
