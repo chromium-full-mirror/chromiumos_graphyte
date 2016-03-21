@@ -2,10 +2,10 @@
 @config,order_by,"[component_name, center_freq]"
 
 @title,component_name,rf_type,test_type,center_freq,power_level,standard,bandwidth,data_rate,chain_mask,nss,long_preamble,@result,evm,avg_power,freq_error,lo_leakage,mask_margin,spectral_flatness,obw,phase_noise
-,WLAN_2G,WLAN,TX_MOD,"[2412, 2437, 2462]",18,B,20,1,"[1, 2, 3]",None,0,,"(None,-25)","(16,20)","(0,20)","(0,20)","(0,20)","(0,20)","(0,20)","(-20,20)"
+,WLAN_2G,WLAN,TX,"[2412, 2437, 2462]",18,B,20,1,"[1, 2, 3]",None,0,,"(None,-25)","(16,20)","(0,20)","(0,20)","(0,20)","(0,20)","(0,20)","(-20,20)"
 
 @title,component_name,rf_type,test_type,center_freq,power_level,standard,bandwidth,data_rate,chain_mask,nss,long_preamble,rx_num_packets,@result,rx_per
-,WLAN_2G,WLAN,RX_PER,"[2412, 2437, 2462]",-90,B,20,11,"[1, 2, 3]",None,0,100,,"(0,10)"
+,WLAN_2G,WLAN,RX,"[2412, 2437, 2462]",-90,B,20,11,"[1, 2, 3]",None,0,100,,"(0,10)"
 
 @title,component_name,rf_type,test_type,center_freq,power_level,packet_type,@result,avg_power
-,BLUETOOTH,BLUETOOTH,TX_MOD,"[2412, 2437, 2462]",18,"[DH5, 3DH5, LE]",,"(16,20)"
+,BLUETOOTH,BLUETOOTH,TX,"[2412, 2437, 2462]",18,"[DH5, 3DH5, LE]",,"(16,20)"

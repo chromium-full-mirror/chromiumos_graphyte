@@ -91,29 +91,29 @@ class PortConfig(object):
       ret[int(key)] = float(value)
     return PathlossTable(ret)
 
-  def QueryPortConfig(self, component_name, tx_or_rx):
+  def QueryPortConfig(self, component_name, test_type):
     """Return the port config of the certain component.
     Args:
       component_name: the coponent name.
-      tx_or_rx: 'TX' or 'RX'
+      test_type: 'TX' or 'RX'
     Return:
       List of the port config, for multiple antenna.
     """
     try:
-      return [antenna_config[tx_or_rx]
+      return [antenna_config[test_type]
               for antenna_config in self.port_config[component_name]]
     except KeyError as ex:
       logging.exception('There is no component "%s", TX/RX "%s" in port config',
-                        component_name, tx_or_rx)
+                        component_name, test_type)
       raise ex
 
-  def GetPortConfig(self, component_name, tx_or_rx, antenna_idx=0):
+  def GetPortConfig(self, component_name, test_type, antenna_idx=0):
     try:
-      return self.port_config[component_name][antenna_idx][tx_or_rx]
+      return self.port_config[component_name][antenna_idx][test_type]
     except KeyError as ex:
       logging.exception('There is no component "%s", antenna_idx "%s",'
                         'TX/RX "%s" in port config',
-                        component_name, antenna_idx, tx_or_rx)
+                        component_name, antenna_idx, test_type)
       raise ex
 
   def GetPortMapping(self, **kwarg):
@@ -188,10 +188,10 @@ def main():
     print 'Component: %s' % component_name
     for antenna_idx, antenna_config in enumerate(antennas_config):
       print ' Antenna %d:' % antenna_idx
-      for tx_or_rx in ['TX', 'RX']:
-        print '  port Config for %s: ' % tx_or_rx
-        print '  pathloss: %s' % antenna_config[tx_or_rx]['pathloss']
-        print '  port_mapping: %s' % antenna_config[tx_or_rx]['port_mapping']
+      for test_type in ['TX', 'RX']:
+        print '  port Config for %s: ' % test_type
+        print '  pathloss: %s' % antenna_config[test_type]['pathloss']
+        print '  port_mapping: %s' % antenna_config[test_type]['port_mapping']
 
   print port_config.QueryPortConfig('WLAN_2G', 'TX')
 

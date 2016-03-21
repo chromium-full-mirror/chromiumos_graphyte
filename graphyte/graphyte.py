@@ -177,7 +177,7 @@ class Graphyte(object):
         'TX': self.RunTxTest,
         'RX': self.RunRxTest}
     try:
-      is_pass, result = function_map[test_case.tx_or_rx](test_case)
+      is_pass, result = function_map[test_case.test_type](test_case)
     except Exception:
       logging.exception('RunTest error. test_case: %s', test_case)
       is_pass, result = False, {}

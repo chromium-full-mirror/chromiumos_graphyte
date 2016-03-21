@@ -31,7 +31,7 @@ class InstBase(object):
     self.controllers = {}
     self.SetRFController()
 
-    # Active component record the current (component_name, tx_or_rx)
+    # Active component record the current (component_name, test_type)
     # for port mapping and pathloss.
     self.port_config_table = None
     self.active_component = (None, None)
@@ -80,16 +80,16 @@ class InstBase(object):
 
   def SetPortConfig(self, test):
     component_name = test.args['component_name']
-    tx_or_rx = test.tx_or_rx
+    test_type = test.test_type
 
-    if self.active_component == (component_name, tx_or_rx):
+    if self.active_component == (component_name, test_type):
       logging.debug('The port config is the same, ignored')
       return
     logging.info('Set the port config for component: %s %s',
-                 component_name, tx_or_rx)
-    self.active_component = (component_name, tx_or_rx)
+                 component_name, test_type)
+    self.active_component = (component_name, test_type)
     active_port_config = self.port_config_table.QueryPortConfig(
-        component_name, tx_or_rx)
+        component_name, test_type)
     port_mapping = [config['port_mapping'] for config in active_port_config]
     pathloss = [config['pathloss'] for config in active_port_config]
     logging.debug('Port mapping: %s', port_mapping)

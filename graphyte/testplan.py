@@ -43,7 +43,6 @@ TITLE_MARKER = '@title'
 RESULT_MARKER = '@result'
 
 
-
 HEADER_CHECKER = {
     'order_by': ListChecker(['component_name', 'rf_type', 'test_type',
                              'center_freq', 'power_level'])}
@@ -202,6 +201,7 @@ class TestCaseFactory(object):
     3. Check there is at least one result and all results are valid.
 
     Raises:
+      KeyError if the required arguments are missing.
       ValueError if the test case is not valid.
     """
     raise NotImplementedError
@@ -235,7 +235,7 @@ class TestCaseFactory(object):
                     corresponding data checkers. For example:
         {
           'rf_type': ListChecker(['WLAN', 'BLUETOOTH', '802_15_4']),
-          'test_type': ListChecker(['TX_MOD', 'RX_PER'])
+          'test_type': ListChecker(['TX', 'RX'])
         }
       args: the arguments of the test case.
     Raises:
@@ -286,7 +286,7 @@ class WLANTestCaseFactory(TestCaseFactory):
   REQUIRED_ARG_CHECKER = {
       'rf_type':        ListChecker([RF_TYPE]),
       'component_name': ListChecker([str]),
-      'test_type':      ListChecker(['TX_MOD', 'RX_PER']),
+      'test_type':      ListChecker(['TX', 'RX']),
       'center_freq':    ListChecker([lambda freq: 2400 < freq < 6000]),
       'power_level':    ListChecker([int, float]),
       'standard':       ListChecker(['A', 'AC', 'B', 'G', 'N']),
@@ -310,11 +310,11 @@ class WLANTestCaseFactory(TestCaseFactory):
       raise ValueError('%s is not a valid RF type.' % args['rf_type'])
     # Check all required arguments are valid.
     arg_checker = self.REQUIRED_ARG_CHECKER.copy()
-    if args.get('test_type') == 'RX_PER':
+    if args['test_type'] == 'RX':
       arg_checker.update(self.RX_ARG_CHECKER)
     TestCaseFactory.VerifyArguments(arg_checker, args)
     # Check there is result and all results are valid.
-    if args['test_type'] == 'TX_MOD':  # TODO(akahuang): Use Tx/Rx to determine
+    if args['test_type'] == 'TX':
       result_list = self.TX_RESULTS
     else:
       result_list = self.RX_RESULTS
@@ -339,7 +339,7 @@ class BluetoothTestCaseFactory(TestCaseFactory):
   REQUIRED_ARG_CHECKER = {
       'rf_type':        ListChecker([RF_TYPE]),
       'component_name': ListChecker([str]),
-      'test_type':      ListChecker(['TX_MOD', 'RX_PER']),
+      'test_type':      ListChecker(['TX', 'RX']),
       'center_freq':    ListChecker([lambda freq: 2400 < freq < 2500]),
       'power_level':    ListChecker([int, float]),
       'packet_type':    ListChecker(['DH1', 'DH3', 'DH5', '2DH1', '2DH3',
@@ -391,7 +391,7 @@ class BluetoothTestCaseFactory(TestCaseFactory):
     # Check all required arguments are valid.
     TestCaseFactory.VerifyArguments(self.REQUIRED_ARG_CHECKER, args)
     # Check there is result and all results are valid.
-    if args['test_type'] == 'TX_MOD':  # TODO(akahuang): Use Tx/Rx to determine
+    if args['test_type'] == 'TX':
       result_list = self.COMMON_RESULTS[:]
       packet_format = self._DetermineFormat(args['packet_type'])
       result_list += self.FORMAT_RESULT_CHECKER[packet_format]
@@ -432,7 +432,7 @@ class ZigbeeTestCaseFactory(TestCaseFactory):
   REQUIRED_ARG_CHECKER = {
       'rf_type':        ListChecker([RF_TYPE]),
       'component_name': ListChecker([str]),
-      'test_type':      ListChecker(['TX_MOD', 'RX_PER']),
+      'test_type':      ListChecker(['TX', 'RX']),
       'center_freq':    ListChecker([lambda freq: 2400 < freq < 6000]),
       'power_level':    ListChecker([int, float])}
   RX_ARG_CHECKER = {
@@ -447,11 +447,11 @@ class ZigbeeTestCaseFactory(TestCaseFactory):
       raise ValueError('%s is not a valid RF type.' % args['rf_type'])
     # Check all required arguments are valid.
     arg_checker = self.REQUIRED_ARG_CHECKER.copy()
-    if args.get('test_type') == 'RX_PER':
+    if args['test_type'] == 'RX':
       arg_checker.update(self.RX_ARG_CHECKER)
     TestCaseFactory.VerifyArguments(arg_checker, args)
     # Check there is result and all results are valid.
-    if args['test_type'] == 'TX_MOD':  # TODO(akahuang): Use Tx/Rx to determine
+    if args['test_type'] == 'TX':
       result_list = self.TX_RESULTS
     else:
       result_list = self.RX_RESULTS
@@ -476,7 +476,7 @@ class TestCase(object):
           {
             'component_name': 'WLAN_2G',
             'rf_type': 'WLAN',
-            'test_type': 'TX_MOD',
+            'test_type': 'TX',
             'center_freq': 2412
           }
       result_limit: A dict of the test result. The values are a tuple of lower
@@ -487,9 +487,8 @@ class TestCase(object):
             'avg_power': (16, 20)
           }
     """
-    self.rf_type = args.get('rf_type', 'MISSING')
-    self.test_type = args.get('test_type', 'MISSING')
-    self.tx_or_rx = self.test_type.split('_')[0]
+    self.rf_type = args['rf_type']
+    self.test_type = args['test_type']
     self.args = args
     self.result_limit = result_limit
     self.name = name

@@ -22,7 +22,7 @@ class WLANTestPlanTest(unittest.TestCase):
         'power_level', 'standard', 'bandwidth', 'data_rate', 'chain_mask',
         'nss', 'long_preamble']
     self.valid_args_value = [
-        '', 'WLAN_2G', 'WLAN', 'TX_MOD', '[2412, 2437]',
+        '', 'WLAN_2G', 'WLAN', 'TX', '[2412, 2437]',
         '18', 'B', '20', '1', '[1, 2]',
         'None', '0']
     self.valid_results = [
@@ -196,7 +196,7 @@ class BluetoothTestPlanTest(unittest.TestCase):
 
   def testBDRValidValue(self):
     valid_args_value = [
-        '', 'BT', 'BLUETOOTH', 'TX_MOD', '[2412, 2437]',
+        '', 'BT', 'BLUETOOTH', 'TX', '[2412, 2437]',
         '18', 'DH5']
     valid_results = [
         '@result', 'bandwidth_20db', 'delta_f2_f1']
@@ -212,7 +212,7 @@ class BluetoothTestPlanTest(unittest.TestCase):
 
   def testEDRValidValue(self):
     valid_args_value = [
-        '', 'BT', 'BLUETOOTH', 'TX_MOD', '[2412, 2437]',
+        '', 'BT', 'BLUETOOTH', 'TX', '[2412, 2437]',
         '18', '3DH5']
     valid_results = [
         '@result', 'edr_evm_avg', 'edr_evm_peak', 'edr_extreme_omega_0',
@@ -230,7 +230,7 @@ class BluetoothTestPlanTest(unittest.TestCase):
 
   def testLEValidValue(self):
     valid_args_value = [
-        '', 'BT', 'BLUETOOTH', 'TX_MOD', '[2412, 2437]',
+        '', 'BT', 'BLUETOOTH', 'TX', '[2412, 2437]',
         '18', 'LE']
     valid_results = [
         '@result', 'freq_offset', 'delta_f0_fn_max', 'delta_f1_avg',
@@ -249,7 +249,7 @@ class BluetoothTestPlanTest(unittest.TestCase):
 
   def testBDRInvalidValue(self):
     valid_args_value = [
-        '', 'BT', 'BLUETOOTH', 'TX_MOD', '[2412, 2437]',
+        '', 'BT', 'BLUETOOTH', 'TX', '[2412, 2437]',
         '18', 'DH5']
     invalid_results = [
         '@result', 'edr_evm_avg', 'freq_offset']
@@ -266,7 +266,7 @@ class BluetoothTestPlanTest(unittest.TestCase):
 
   def testEDRInvalidValue(self):
     valid_args_value = [
-        '', 'BT', 'BLUETOOTH', 'TX_MOD', '[2412, 2437]',
+        '', 'BT', 'BLUETOOTH', 'TX', '[2412, 2437]',
         '18', 'DH5']
     invalid_results = [
         '@result', 'bandwidth_20db', 'freq_offset']
@@ -283,7 +283,7 @@ class BluetoothTestPlanTest(unittest.TestCase):
 
   def testLEInvalidValue(self):
     valid_args_value = [
-        '', 'BT', 'BLUETOOTH', 'TX_MOD', '[2412, 2437]',
+        '', 'BT', 'BLUETOOTH', 'TX', '[2412, 2437]',
         '18', 'DH5']
     invalid_results = [
         '@result', 'bandwidth_20db', 'edr_evm_avg']
@@ -300,7 +300,7 @@ class BluetoothTestPlanTest(unittest.TestCase):
 
   def testEDRBitPattern(self):
     valid_args_value = [
-        '', 'BT', 'BLUETOOTH', 'TX_MOD', '2412',
+        '', 'BT', 'BLUETOOTH', 'TX', '2412',
         '18', '2DH5']
     valid_results = [
         '@result', 'avg_power', 'edr_evm_avg', 'edr_evm_peak']
@@ -317,7 +317,7 @@ class BluetoothTestPlanTest(unittest.TestCase):
 
   def testBitPatternPRBS9(self):
     valid_args_value = [
-        '', 'BT', 'BLUETOOTH', 'TX_MOD', '2412',
+        '', 'BT', 'BLUETOOTH', 'TX', '2412',
         '18', 'DH5']
     valid_results = [
         '@result', 'avg_power', 'bandwidth_20db', 'acp_5', 'acp_4',
@@ -338,7 +338,7 @@ class BluetoothTestPlanTest(unittest.TestCase):
 
   def testLEBitPatternPRBS9(self):
     valid_args_value = [
-        '', 'BT', 'BLUETOOTH', 'TX_MOD', '2412',
+        '', 'BT', 'BLUETOOTH', 'TX', '2412',
         '18', 'LE']
     valid_results = [
         '@result', 'avg_power', 'freq_offset', 'acp_5', 'acp_4',
@@ -359,7 +359,7 @@ class BluetoothTestPlanTest(unittest.TestCase):
 
   def testBitPatternF0(self):
     valid_args_value = [
-        '', 'BT', 'BLUETOOTH', 'TX_MOD', '2412',
+        '', 'BT', 'BLUETOOTH', 'TX', '2412',
         '18', 'LE']
     valid_results = [
         '@result', 'freq_deviation', 'delta_f1_avg']
@@ -376,7 +376,7 @@ class BluetoothTestPlanTest(unittest.TestCase):
 
   def testBitPatternAA(self):
     valid_args_value = [
-        '', 'BT', 'BLUETOOTH', 'TX_MOD', '2412',
+        '', 'BT', 'BLUETOOTH', 'TX', '2412',
         '18', 'DH1']
     valid_results = [
         '@result', 'delta_f2_f1']
@@ -393,7 +393,7 @@ class BluetoothTestPlanTest(unittest.TestCase):
 
   def testLEBitPatternAA(self):
     valid_args_value = [
-        '', 'BT', 'BLUETOOTH', 'TX_MOD', '2412',
+        '', 'BT', 'BLUETOOTH', 'TX', '2412',
         '18', 'LE']
     valid_results = [
         '@result', 'delta_f2_avg', 'delta_f2_max', 'delta_f1_f0',
@@ -412,7 +412,7 @@ class BluetoothTestPlanTest(unittest.TestCase):
 
   def testSplitByBitPattern(self):
     valid_args_value = [
-        '', 'BT', 'BLUETOOTH', 'TX_MOD', '2412',
+        '', 'BT', 'BLUETOOTH', 'TX', '2412',
         '18', 'LE']
     valid_results = [
         '@result', 'avg_power',  # bit_pattern is PRBS9
