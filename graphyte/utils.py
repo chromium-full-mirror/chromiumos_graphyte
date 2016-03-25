@@ -8,6 +8,7 @@
 
 from contextlib import contextmanager
 import logging
+import math
 import os
 import tempfile
 
@@ -99,3 +100,23 @@ def IsInBound(results, bound):
     logging.error('The type of the result %s is invalid.', results)
     return False
   return all([_OneValueInBound(value, bound) for value in value_list])
+
+
+def CalculateAverage(values, average_type='Linear'):
+  """Calculate the average value.
+
+  Args:
+    values: A list of float value.
+    average_type: one of 'Linear', '10Log10', '20Log10'.
+  Returns: the average value.
+  """
+  length = len(values)
+  values = map(float, values)
+  if average_type == 'Linear':
+    return sum(values) / length
+  else:
+    deno = {'10Log10': 10,
+            '20Log10': 20}[average_type]
+    actual_values = [math.pow(10, value / deno) for value in values]
+    average_value = sum(actual_values) / length
+    return deno * math.log10(average_value)

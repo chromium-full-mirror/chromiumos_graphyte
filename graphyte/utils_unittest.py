@@ -4,6 +4,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+import math
 import unittest
 
 from . import utils
@@ -49,3 +50,24 @@ class IsInBoundTest(unittest.TestCase):
     self.assertFalse(utils.IsInBound('TEST', bound))
     self.assertFalse(utils.IsInBound({'test1': 'WRONG RESULT'}, bound))
 
+
+class CalculateAverageTest(unittest.TestCase):
+  def setUp(self):
+    self.values = [1.0, 3.0, 8.0]
+    self.answer = 4.0
+
+  def testLinearAverage(self):
+    self.assertEquals(self.answer,
+                      utils.CalculateAverage(self.values, 'Linear'))
+
+  def testLogAverage10(self):
+    db_10 = lambda x: 10 * math.log10(x)
+    answer = db_10(self.answer)
+    values = map(db_10, self.values)
+    self.assertEquals(answer, utils.CalculateAverage(values, '10Log10'))
+
+  def testLogAverage20(self):
+    db_20 = lambda x: 20 * math.log10(x)
+    answer = db_20(self.answer)
+    values = map(db_20, self.values)
+    self.assertEquals(answer, utils.CalculateAverage(values, '20Log10'))
