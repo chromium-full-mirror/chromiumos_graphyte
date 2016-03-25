@@ -60,21 +60,22 @@ class Graphyte(object):
     logging.info('Starting Graphyte....')
 
     config_path = SearchConfig(config_file, GRAPHYTE_DIR)
+    config_dir = os.path.dirname(config_path)
     with open(config_path, 'r') as f:
       graphyte_config = yaml.load(f)
 
     # Load DUT and Inst class
-    self.dut = self._LoadDevice(graphyte_config, 'dut')
-    self.inst = self._LoadDevice(graphyte_config, 'inst')
+    self.dut = self._LoadDevice(graphyte_config, 'dut', config_dir)
+    self.inst = self._LoadDevice(graphyte_config, 'inst', config_dir)
 
     # Load test plan
-    self.testplan = TestPlan(graphyte_config['test_plan'])
+    self.testplan = TestPlan(graphyte_config['test_plan'], config_dir)
     if not self.testplan:
       raise ValueError('Load test plan failed.')
     self.rf_type = None
 
     # Load port config, including port mapping and path loss
-    self.port_config = PortConfig(graphyte_config['port_config'])
+    self.port_config = PortConfig(graphyte_config['port_config'], config_dir)
 
     # Open a result writer
     self.result_writer = ResultWriter(result_file)
@@ -85,12 +86,13 @@ class Graphyte(object):
   def __del__(self):
     self.TerminateDevices()
 
-  def _LoadDevice(self, graphyte_config, device_type):
+  def _LoadDevice(self, graphyte_config, device_type, config_dir):
     """Dynamically load the device instance by the global config.
 
     Args:
       graphyte_config: the global config.
       device_type: 'dut' or 'inst'
+      config_dir: the directory of the graphyte config file.
     Returns:
       The device instance.
     """
@@ -102,7 +104,7 @@ class Graphyte(object):
                         globals(), level=1, fromlist=[class_name])
     device_dir = os.path.join(GRAPHYTE_DIR, device_type, module_name)
     config_file = SearchConfig(graphyte_config['%s_config' % device_type],
-                               device_dir)
+                               [device_dir, config_dir])
     with open(config_file, 'r') as f:
       config = yaml.load(f)
     logging.info('Loading %s: %s, config: %s', device_type, module_name, config)

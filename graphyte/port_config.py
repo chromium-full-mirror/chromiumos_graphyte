@@ -35,20 +35,23 @@ path2 is {2402: 21.0, 2404: 20.3}
 
 import csv
 import logging
+import os
 import sys
 import yaml
 
 from .utils import SearchConfig
 
 class PortConfig(object):
-  def __init__(self, config_file=None):
+  def __init__(self, config_file=None, search_dirs=None):
+    self.config_dir = None
     self.port_config = None
     self._pathloss_table = {}
     if config_file:
-      self.LoadConfigFile(config_file)
+      self.LoadConfigFile(config_file, search_dirs)
 
-  def LoadConfigFile(self, config_file):
-    file_path = SearchConfig(config_file)
+  def LoadConfigFile(self, config_file, search_dirs):
+    file_path = SearchConfig(config_file, search_dirs)
+    self.config_dir = os.path.dirname(file_path)
     logging.info('Load port config file: %s', file_path)
     with open(file_path, 'r') as f:
       config = yaml.load(f)
@@ -65,7 +68,7 @@ class PortConfig(object):
     """Lazy loading the pathloss file."""
     if filename not in self._pathloss_table:
       self._pathloss_table[filename] = {}
-      with open(SearchConfig(filename), 'r') as csv_file:
+      with open(SearchConfig(filename, self.config_dir), 'r') as csv_file:
         for table in csv.DictReader(csv_file):
           _title = table['title']
           del table['title']

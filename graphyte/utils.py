@@ -28,8 +28,9 @@ def SearchConfig(filepath, search_dirs=None):
       search_dirs = [search_dirs]
     possible_dirs += search_dirs
   for possible_dir in possible_dirs:
-    if os.path.exists(os.path.join(possible_dir, filepath)):
-      return os.path.join(possible_dir, filepath)
+    path = os.path.abspath(os.path.join(possible_dir, filepath))
+    if os.path.exists(path):
+      return path
   logging.error('Cannot find config file: %s', filepath)
   raise IOError
 

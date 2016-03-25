@@ -62,11 +62,11 @@ class TestPlan(object):
       print 'test_case: %s' % str(test_case)
   """
 
-  def __init__(self, config_file=None):
+  def __init__(self, config_file=None, search_dirs=None):
     self.test_cases = []
     self.test_config = {}
     if config_file:
-      self.LoadConfigFile(config_file)
+      self.LoadConfigFile(config_file, search_dirs)
 
   def __len__(self):
     """Return the count of the test cases.
@@ -79,9 +79,9 @@ class TestPlan(object):
   def __getitem__(self, index):
     return self.test_cases[index]
 
-  def LoadConfigFile(self, config_file):
+  def LoadConfigFile(self, config_file, search_dirs=None):
     try:
-      self.ParseCSVFile(config_file)
+      self.ParseCSVFile(config_file, search_dirs)
     except ValueError:
       logging.exception('Parsing csv file %s error.', config_file)
       self.test_cases = []
@@ -91,14 +91,14 @@ class TestPlan(object):
       cmp_key = lambda test_case: test_case.ResolveAttr(order_by)
       self.test_cases.sort(key=cmp_key)
 
-  def ParseCSVFile(self, config_file):
+  def ParseCSVFile(self, config_file, search_dirs=None):
     def _LogErrorAndRaise(row_idx, msg):
       msg = 'Row %d: %s' % (row_idx, msg)
       logging.error(msg)
       raise ValueError(msg)
 
     logging.info('Loading test config file: %s', config_file)
-    with open(SearchConfig(config_file)) as csv_file:
+    with open(SearchConfig(config_file, search_dirs)) as csv_file:
       reader = csv.reader(csv_file)
       header = None
       split_idx = None
