@@ -330,7 +330,7 @@ class WLANTestCaseFactory(TestCaseFactory):
     args = args.copy()  # do not change the original argument.
     args['bandwidth'] = 'BW-' + str(args['bandwidth'])
     chain_list = ChainMaskToList(args['chain_mask'])
-    args['chain_mask'] = 'ANTENNA-' + ','.join(map(str, chain_list))
+    args['chain_mask'] = 'ANTENNA-' + ''.join(map(str, chain_list))
     return super(WLANTestCaseFactory, self)._GenerateCanonicalName(args)
 
 
