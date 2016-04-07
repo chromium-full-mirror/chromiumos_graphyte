@@ -113,11 +113,21 @@ def CalculateAverage(values, average_type='Linear'):
   """
   length = len(values)
   values = map(float, values)
+  if length == 0:
+    return float('nan')
+  if length == 1:
+    return values[0]
   if average_type == 'Linear':
     return sum(values) / length
   else:
     deno = {'10Log10': 10,
             '20Log10': 20}[average_type]
-    actual_values = [math.pow(10, value / deno) for value in values]
-    average_value = sum(actual_values) / length
-    return deno * math.log10(average_value)
+    try:
+      actual_values = [math.pow(10, value / deno) for value in values]
+      average_value = sum(actual_values) / length
+      return deno * math.log10(average_value)
+    except ValueError:
+      return float('-inf')
+    except OverflowError:
+      logging.warning('The values exceed the range. Return NaN.')
+      return float('nan')

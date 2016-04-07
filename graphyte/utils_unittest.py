@@ -71,3 +71,22 @@ class CalculateAverageTest(unittest.TestCase):
     answer = db_20(self.answer)
     values = map(db_20, self.values)
     self.assertEquals(answer, utils.CalculateAverage(values, '20Log10'))
+
+  def testEmptyList(self):
+    ret = utils.CalculateAverage([], 'Linear')
+    self.assertTrue(math.isnan(ret))
+
+  def testOneItem(self):
+    value = 1234.5678
+    ret = utils.CalculateAverage([value], 'Linear')
+    self.assertEquals(value, ret)
+    ret = utils.CalculateAverage([value], '10Log10')
+    self.assertEquals(value, ret)
+    ret = utils.CalculateAverage([value], '20Log10')
+    self.assertEquals(value, ret)
+
+  def testExtremeValue(self):
+    ret = utils.CalculateAverage([-10000, -10000], '10Log10')
+    self.assertEquals(float('-inf'), ret)
+    ret = utils.CalculateAverage([10000, 10000], '10Log10')
+    self.assertTrue(math.isnan(ret))
