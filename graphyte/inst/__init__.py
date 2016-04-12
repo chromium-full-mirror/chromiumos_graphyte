@@ -72,9 +72,6 @@ class InstBase(object):
   def SelfCalibrate(self, calibration_type='full'):
     raise NotImplementedError
 
-  def AutoLevel(self, ports):
-    raise NotImplementedError
-
   def InitPortConfig(self, port_config_table):
     self.port_config_table = port_config_table
 
