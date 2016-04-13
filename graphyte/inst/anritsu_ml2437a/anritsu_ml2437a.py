@@ -35,7 +35,7 @@ class RFController(InstBase.ControllerBase):
     else:
       result = power + self.inst.current_pathloss[0][center_freq]
 
-    self.result = {'avg_power': power}
+    self.result = {'avg_power': result}
 
   def _TxGetResult(self, result_limit, **kwargs):
     return self.result
