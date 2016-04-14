@@ -5,7 +5,7 @@
 # found in the LICENSE file.
 
 """Handle the port config, including the port mapping and the pathloss.
-We load the port config from yaml file, which format is:
+We load the port config from json file, which format is:
 {
   <component_name>: [ // List is represented for the multiple antenna
     { // First antenna
@@ -34,10 +34,10 @@ path2 is {2402: 21.0, 2404: 20.3}
 """
 
 import csv
+import json
 import logging
 import os
 import sys
-import yaml
 
 from .utils import SearchConfig
 
@@ -54,7 +54,7 @@ class PortConfig(object):
     self.config_dir = os.path.dirname(file_path)
     logging.info('Load port config file: %s', file_path)
     with open(file_path, 'r') as f:
-      config = yaml.load(f)
+      config = json.load(f)
     self.port_config = config['port_config']
 
     # Load the pathloss table for each antenna
@@ -183,7 +183,7 @@ class PathlossTable(object):
 
 
 def main():
-  port_config = PortConfig('sample_port_config.yaml')
+  port_config = PortConfig('sample_port_config.json')
   for component_name, antennas_config in port_config.GetIterator():
     print 'Component: %s' % component_name
     for antenna_idx, antenna_config in enumerate(antennas_config):

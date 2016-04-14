@@ -27,9 +27,8 @@ setup(
         PROJECT_NAME + '.inst.sample_inst'],
     package_data={
         PROJECT_NAME: ['config_files/*'],
-        PROJECT_NAME + '.dut.sample_dut': ['*.yaml'],
-        PROJECT_NAME + '.inst.anritsu_ml2437a': ['*.yaml'],
-        PROJECT_NAME + '.inst.sample_inst': ['*.yaml']},
+        PROJECT_NAME + '.dut.sample_dut': ['*.json'],
+        PROJECT_NAME + '.inst.anritsu_ml2437a': ['*.json'],
+        PROJECT_NAME + '.inst.sample_inst': ['*.json']},
     scripts=['graphyte_main.py'],
-    install_requires=['pyyaml'],
     )

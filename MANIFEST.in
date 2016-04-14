@@ -1,2 +1,2 @@
 recursive-include graphyte *.csv
-recursive-include graphyte *.yaml
+recursive-include graphyte *.json
