@@ -12,13 +12,13 @@ from graphyte import graphyte
 def main():
   parser = ArgumentParser()
   parser.add_argument('--config-file', dest='config_file', action='store',
-                      type=str, default=graphyte.DEFAULT_CONFIG_FILE,
-                      help='The path of config file')
+                      type=str, help='The path of config file')
   parser.add_argument('-v', '--verbose', dest='verbose', action='store_true',
                       help='Enable debug logging', default=False)
   parser.add_argument('--log-file', dest='log_file', action='store',
-                      type=str, default=graphyte.DEFAULT_LOG_FILE,
-                      help='The path of log file')
+                      type=str, help='The path of log file')
+  parser.add_argument('--result-file', dest='result_file', action='store',
+                      type=str, help='The path of result file')
   parser.add_argument('--quiet', dest='console_output',
                       action='store_false', default=True,
                       help='Not output to console')
