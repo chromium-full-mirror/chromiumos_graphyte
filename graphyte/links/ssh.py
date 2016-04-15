@@ -5,11 +5,11 @@
 
 """Implementation of graphyte.link.DeviceLink using SSH."""
 
-import logging
 import pipes
 import subprocess
 
 from .. import link
+from ..default_setting import logger
 from ..utils import UnopenedTemporaryFile
 
 
@@ -95,7 +95,7 @@ class SSHLink(link.DeviceLink):
       command = ['ssh'] + options + [remote_sig] + map(pipes.quote, command)
       shell = False
 
-    logging.debug('SSHLink: Run [%r]', command)
+    logger.debug('SSHLink: Run [%r]', command)
     return subprocess.Popen(command, shell=shell, close_fds=True, stdin=stdin,
                             stdout=stdout, stderr=stderr)
 

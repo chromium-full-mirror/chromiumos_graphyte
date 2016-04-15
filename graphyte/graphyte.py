@@ -23,6 +23,7 @@ from .default_setting import DEFAULT_CONFIG_FILE
 from .default_setting import DEFAULT_LOG_FILE
 from .default_setting import DEFAULT_RESULT_FILE
 from .default_setting import GRAPHYTE_DIR
+from .default_setting import logger
 from .result_writer import ResultWriter
 from .port_config import PortConfig
 from .testplan import TestPlan
@@ -60,7 +61,7 @@ class Graphyte(object):
     result_file = result_file or DEFAULT_RESULT_FILE
 
     self.SetLogging(log_file, verbose, append_mode, console_output)
-    logging.info('Starting Graphyte....')
+    logger.info('Starting Graphyte....')
 
     config_path = SearchConfig(config_file, GRAPHYTE_DIR)
     config_dir = os.path.dirname(config_path)
@@ -110,25 +111,25 @@ class Graphyte(object):
                                [device_dir, config_dir])
     with open(config_file, 'r') as f:
       config = json.load(f)
-    logging.info('Loading %s: %s, config: %s', device_type, module_name, config)
+    logger.info('Loading %s: %s, config: %s', device_type, module_name, config)
     return module.__dict__[class_name](config)
 
   def SetLogging(self, log_file, verbose, append_mode, console_output):
     level = logging.DEBUG if verbose else logging.INFO
     mode = 'a' if append_mode else 'w'
     log_file = PrepareOutputFile(log_file)
-    log_format = '[%(levelname)s] %(filename)s:%(lineno)d %(message)s'
-    logging.basicConfig(
-        level=level,
-        format=log_format,
-        datefmt='%H:%M:%S',
-        filename=log_file,
-        filemode=mode)
+    fmt = '[%(levelname)s] %(asctime)s %(filename)s:%(lineno)d %(message)s'
+    date_fmt = '%H:%M:%S'
+    formatter = logging.Formatter(fmt, date_fmt)
+
+    logger.setLevel(level)
+    file_handler = logging.FileHandler(log_file, mode)
+    file_handler.setFormatter(formatter)
+    logger.addHandler(file_handler)
     if console_output:
       console_handler = logging.StreamHandler()
-      console_handler.setLevel(level)
-      console_handler.setFormatter(logging.Formatter(log_format))
-      logging.getLogger().addHandler(console_handler)
+      console_handler.setFormatter(formatter)
+      logger.addHandler(console_handler)
 
   def Run(self):
     """The main method of the class.
@@ -139,7 +140,7 @@ class Graphyte(object):
     for test_case in self.testplan:
       self.RunTest(test_case)
     self.TerminateDevices()
-    logging.info('All tests are pass? %s', self.all_tests_pass)
+    logger.info('All tests are pass? %s', self.all_tests_pass)
     self.result_writer.WriteTotalResult(self.all_tests_pass)
     return self.all_tests_pass
 
@@ -150,7 +151,7 @@ class Graphyte(object):
       self.inst.SelfCalibrate()
       self.inst.InitPortConfig(self.port_config)
     except Exception:
-      logging.exception('Initialize devices failed')
+      logger.exception('Initialize devices failed')
 
   def TerminateDevices(self):
     try:
@@ -158,16 +159,16 @@ class Graphyte(object):
       self.inst.Terminate()
       self.dut.Terminate()
     except Exception:
-      logging.exception('Terminate devices failed')
+      logger.exception('Terminate devices failed')
 
   def SetRF(self, rf_type):
-    logging.info('Set RF type: %s', rf_type)
+    logger.info('Set RF type: %s', rf_type)
     self.rf_type = rf_type
     self.dut.SetRF(rf_type)
     self.inst.SetRF(rf_type)
 
   def RunTest(self, test_case):
-    logging.info('Running test: \n%s', test_case)
+    logger.info('Running test: \n%s', test_case)
     # Initialize the device if the RF is changed.
     if test_case.rf_type != self.rf_type:
       if self.rf_type is not None:
@@ -182,7 +183,7 @@ class Graphyte(object):
     try:
       is_pass, result = function_map[test_case.test_type](test_case)
     except Exception:
-      logging.exception('RunTest error. test_case: %s', test_case)
+      logger.exception('RunTest error. test_case: %s', test_case)
       is_pass, result = False, {}
     self.all_tests_pass &= is_pass
     self.result_writer.WriteResult(test_case, result)

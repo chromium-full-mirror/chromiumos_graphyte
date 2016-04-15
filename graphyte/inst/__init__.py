@@ -9,9 +9,8 @@ This is the virtual instrument class which every instrument plugin should
 implement.
 """
 
-import logging
-
 from .. import link
+from ..default_setting import logger
 
 
 class InstBase(object):
@@ -41,7 +40,7 @@ class InstBase(object):
     try:
       return getattr(self.controllers[self.rf_type], name)
     except:
-      logging.exception('Failed in InstBase __getattr__')
+      logger.exception('Failed in InstBase __getattr__')
       raise NotImplementedError
 
   def SetRF(self, rf_type):
@@ -52,7 +51,7 @@ class InstBase(object):
     Right now not much useful. It may be used to print information about
     the plugin itself.
     """
-    logging.info(self.name)
+    logger.info(self.name)
 
   def SetRFController(self):
     """Set the controller for supported RF type.
@@ -80,17 +79,17 @@ class InstBase(object):
     test_type = test.test_type
 
     if self.active_component == (component_name, test_type):
-      logging.debug('The port config is the same, ignored')
+      logger.debug('The port config is the same, ignored')
       return
-    logging.info('Set the port config for component: %s %s',
-                 component_name, test_type)
+    logger.info('Set the port config for component: %s %s',
+                component_name, test_type)
     self.active_component = (component_name, test_type)
     active_port_config = self.port_config_table.QueryPortConfig(
         component_name, test_type)
     port_mapping = [config['port_mapping'] for config in active_port_config]
     pathloss = [config['pathloss'] for config in active_port_config]
-    logging.debug('Port mapping: %s', port_mapping)
-    logging.debug('Path loss: %s', pathloss)
+    logger.debug('Port mapping: %s', port_mapping)
+    logger.debug('Path loss: %s', pathloss)
     self._SetPortConfig(port_mapping, pathloss)
 
   def _SetPortConfig(self, port_mapping, pathloss):

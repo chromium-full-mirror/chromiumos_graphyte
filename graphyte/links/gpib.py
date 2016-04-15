@@ -10,10 +10,10 @@ backend driver.
 """
 
 import time
-import logging
 import visa
 
 from .. import link
+from ..default_setting import logger
 
 
 class GPIBLink(link.DeviceLink):
@@ -96,7 +96,7 @@ class GPIBLink(link.DeviceLink):
 
     if isinstance(command, list):
       command = ' '.join([str(arg) for arg in command])
-    logging.debug('GPIB Write: %s', command)
+    logger.debug('GPIB Write: %s', command)
     return_code = self.device.write(command)
     # The return value should be (byte size, Status code), but PyVisa-py only
     # returns the status code while successful.

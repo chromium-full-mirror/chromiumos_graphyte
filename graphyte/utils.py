@@ -7,12 +7,13 @@
 """Utils class and functions. """
 
 from contextlib import contextmanager
-import logging
 import math
 import os
 import tempfile
 
-from .default_setting import CONFIG_DIR, LOG_DIR
+from .default_setting import CONFIG_DIR
+from .default_setting import LOG_DIR
+from .default_setting import logger
 
 
 def SearchConfig(filepath, search_dirs=None):
@@ -31,7 +32,7 @@ def SearchConfig(filepath, search_dirs=None):
     path = os.path.abspath(os.path.join(possible_dir, filepath))
     if os.path.exists(path):
       return path
-  logging.error('Cannot find config file: %s', filepath)
+  logger.error('Cannot find config file: %s', filepath)
   raise IOError
 
 
@@ -41,12 +42,12 @@ def PrepareOutputFile(file_path):
   2. Check if the directory exists. If not, create the folder first.
   """
   if not os.path.isabs(file_path):
-    logging.debug('file path %s is not absolute, assign to default log folder',
-                  file_path)
+    logger.debug('file path %s is not absolute, assign to default log folder',
+                 file_path)
     file_path = os.path.join(LOG_DIR, file_path)
   dir_path = os.path.dirname(file_path)
   if not os.path.isdir(dir_path):
-    logging.debug('%s folder is not existed, create it.', dir_path)
+    logger.debug('%s folder is not existed, create it.', dir_path)
     os.mkdir(os.path.dirname(file_path))
   return file_path
 
@@ -98,7 +99,7 @@ def IsInBound(results, bound):
   else:
     value_list = [results]
   if not all([_CheckNumberType(value) for value in value_list]):
-    logging.error('The type of the result %s is invalid.', results)
+    logger.error('The type of the result %s is invalid.', results)
     return False
   return all([_OneValueInBound(value, bound) for value in value_list])
 
@@ -129,5 +130,5 @@ def CalculateAverage(values, average_type='Linear'):
     except ValueError:
       return float('-inf')
     except OverflowError:
-      logging.warning('The values exceed the range. Return NaN.')
+      logger.warning('The values exceed the range. Return NaN.')
       return float('nan')

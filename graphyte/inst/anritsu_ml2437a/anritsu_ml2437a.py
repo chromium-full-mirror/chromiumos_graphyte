@@ -7,9 +7,9 @@
 """The Anritsu ML2437A power meter. """
 
 import re
-import logging
 
 from .. import InstBase
+from ...default_setting import logger
 from ...testplan import ChainMaskToList
 from ...utils import CalculateAverage
 
@@ -66,7 +66,7 @@ class Inst(InstBase):
         '802_15_4': RFController(self)}
 
   def Initialize(self):
-    logging.info('Inst Initialize')
+    logger.info('Inst Initialize')
     if not self.link.IsReady():
       raise InstrumentNotReady
     self.link.CheckCall('*RST')
@@ -87,7 +87,7 @@ class Inst(InstBase):
     pass
 
   def SetFrequency(self, freq_mhz):
-    logging.info('Set frequency to %d MHz', freq_mhz)
+    logger.info('Set frequency to %d MHz', freq_mhz)
     self.link.CheckCall('CFFRQ A, %s' % (freq_mhz * 1e6))
     output = self.link.CheckOutput('CFFRQ? A')
     try:
@@ -101,7 +101,7 @@ class Inst(InstBase):
     try:
       for _ in range(self.sample_number):
         results.append(float(self.link.CheckOutput('O 1')))
-      logging.debug('Fetch power: %s', results)
+      logger.debug('Fetch power: %s', results)
     except Exception:
       return None
     return CalculateAverage(results, '10Log10')
