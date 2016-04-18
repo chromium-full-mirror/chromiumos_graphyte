@@ -34,8 +34,7 @@ class Graphyte(object):
   """The graphyte module.
   Instantiating the class does everything now. Refer to the constructor below.
   """
-  def __init__(self, config_file=DEFAULT_CONFIG_FILE,
-               log_file=DEFAULT_LOG_FILE, result_file=DEFAULT_RESULT_FILE,
+  def __init__(self, config_file=None, log_file=None, result_file=None,
                verbose=False, console_output=False, append_mode=False):
     """The constructor for this module does most of it right now.
     - Load the graphyte.settings file to find the modules to load.
@@ -56,6 +55,10 @@ class Graphyte(object):
     The interaction with the dut and the instrument plugin is dipicted in
     the flow diagram.
     """
+    config_file = config_file or DEFAULT_CONFIG_FILE
+    log_file = log_file or DEFAULT_LOG_FILE
+    result_file = result_file or DEFAULT_RESULT_FILE
+
     self.SetLogging(log_file, verbose, append_mode, console_output)
     logging.info('Starting Graphyte....')
 
