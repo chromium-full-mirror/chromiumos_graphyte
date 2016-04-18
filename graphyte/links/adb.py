@@ -5,12 +5,12 @@
 
 """Implementation of graphyte.link.DeviceLink using ADB."""
 
-import logging
 import pipes
 import subprocess
 import uuid
 
 from .. import link
+from ..default_setting import logger
 from ..utils import UnopenedTemporaryFile
 
 
@@ -40,7 +40,7 @@ class ADBProcess(object):
     # implementation in ADBLink).
     result = subprocess.check_output('adb logcat -d -b main -s %s' %
                                      self._session_id, shell=True).strip()
-    logging.debug('%s: Exit Results = %s', type(self), result)
+    logger.debug('%s: Exit Results = %s', type(self), result)
 
     # Format: I/session_id(PID): EXITCODE
     # Example: I/64eeb606-fdcf-11e4-b63f-80c16efb89a5( 3439): 0
@@ -108,7 +108,7 @@ class ADBLink(link.DeviceLink):
 
     command = ['adb', 'shell', '( %s ) %s; log -t %s $?' %
                (command, redirections, session_id)]
-    logging.debug('ADBLink: Run %r', command)
+    logger.debug('ADBLink: Run %r', command)
     return ADBProcess(subprocess.Popen(command, shell=False, close_fds=True,
                                        stdin=stdin, stdout=stdout,
                                        stderr=stderr), session_id)

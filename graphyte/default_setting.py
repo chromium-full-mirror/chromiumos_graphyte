@@ -6,6 +6,7 @@
 
 """Store the global settings of the project."""
 
+import logging
 import os
 
 GRAPHYTE_DIR = os.path.dirname(os.path.realpath(__file__))
@@ -15,3 +16,5 @@ LOG_DIR = os.path.join(GRAPHYTE_DIR, 'log_files')
 DEFAULT_CONFIG_FILE = os.path.join(CONFIG_DIR, 'sample_graphyte_config.json')
 DEFAULT_LOG_FILE = os.path.join(LOG_DIR, 'graphyte.log')
 DEFAULT_RESULT_FILE = os.path.join(LOG_DIR, 'result.csv')
+
+logger = logging.getLogger('Graphyte')  # pylint: disable=invalid-name

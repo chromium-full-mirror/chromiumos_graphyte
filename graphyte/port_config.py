@@ -35,10 +35,10 @@ path2 is {2402: 21.0, 2404: 20.3}
 
 import csv
 import json
-import logging
 import os
 import sys
 
+from .default_setting import logger
 from .utils import SearchConfig
 
 class PortConfig(object):
@@ -52,7 +52,7 @@ class PortConfig(object):
   def LoadConfigFile(self, config_file, search_dirs):
     file_path = SearchConfig(config_file, search_dirs)
     self.config_dir = os.path.dirname(file_path)
-    logging.info('Load port config file: %s', file_path)
+    logger.info('Load port config file: %s', file_path)
     with open(file_path, 'r') as f:
       config = json.load(f)
     self.port_config = config['port_config']
@@ -103,17 +103,17 @@ class PortConfig(object):
       return [antenna_config[test_type]
               for antenna_config in self.port_config[component_name]]
     except KeyError as ex:
-      logging.exception('There is no component "%s", TX/RX "%s" in port config',
-                        component_name, test_type)
+      logger.exception('There is no component "%s", TX/RX "%s" in port config',
+                       component_name, test_type)
       raise ex
 
   def GetPortConfig(self, component_name, test_type, antenna_idx=0):
     try:
       return self.port_config[component_name][antenna_idx][test_type]
     except KeyError as ex:
-      logging.exception('There is no component "%s", antenna_idx "%s",'
-                        'TX/RX "%s" in port config',
-                        component_name, antenna_idx, test_type)
+      logger.exception('There is no component "%s", antenna_idx "%s",'
+                       'TX/RX "%s" in port config',
+                       component_name, antenna_idx, test_type)
       raise ex
 
   def GetPortMapping(self, **kwarg):

@@ -6,9 +6,8 @@
 
 """The mock DUT class. """
 
-import logging
-
 from .. import DUTBase
+from ...default_setting import logger
 
 
 def _MakePassResult(result_limit):
@@ -35,94 +34,94 @@ class DUT(DUTBase):
 
   class WlanController(DUTBase.WlanControllerBase):
     def _Initialize(self, component_name, **kwargs):
-      logging.info('DUT Wlan Initialize: %s', component_name)
+      logger.info('DUT Wlan Initialize: %s', component_name)
 
     def _Terminate(self, **kwargs):
-      logging.info('DUT Wlan Terminate')
+      logger.info('DUT Wlan Terminate')
 
     def _TxConfig(self, component_name, rf_type, test_type, center_freq,
                   power_level, standard, bandwidth, data_rate, chain_mask, nss,
                   long_preamble, **kwargs):
-      logging.info('DUT Wlan TxConfig')
+      logger.info('DUT Wlan TxConfig')
 
     def _TxStart(self, component_name, rf_type, test_type, center_freq,
                  power_level, standard, bandwidth, data_rate, chain_mask, nss,
                  long_preamble, **kwargs):
-      logging.info('DUT Wlan TxStart')
+      logger.info('DUT Wlan TxStart')
 
     def _TxStop(self, **kwargs):
-      logging.info('DUT Wlan TxStop')
+      logger.info('DUT Wlan TxStop')
 
     def _RxConfig(self, component_name, rf_type, test_type, center_freq,
                   power_level, standard, bandwidth, data_rate, chain_mask, nss,
                   long_preamble, rx_num_packets, **kwargs):
-      logging.info('DUT Wlan RxConfig')
+      logger.info('DUT Wlan RxConfig')
 
     def _RxClearResult(self, component_name, rf_type, test_type, center_freq,
                        power_level, standard, bandwidth, data_rate, chain_mask,
                        nss, long_preamble, rx_num_packets, **kwargs):
-      logging.info('DUT Wlan RxClearResult')
+      logger.info('DUT Wlan RxClearResult')
 
     def _RxGetResult(self, result_limit, **kwargs):
-      logging.info('DUT Wlan RxGetResult')
+      logger.info('DUT Wlan RxGetResult')
       return _MakePassResult(result_limit)
 
   class BluetoothController(DUTBase.BluetoothControllerBase):
     def _Initialize(self, component_name, **kwargs):
-      logging.info('DUT Bluetooth Initialize: %s', component_name)
+      logger.info('DUT Bluetooth Initialize: %s', component_name)
 
     def _Terminate(self, **kwargs):
-      logging.info('DUT Bluetooth Terminate')
+      logger.info('DUT Bluetooth Terminate')
 
     def _TxConfig(self, component_name, rf_type, test_type, center_freq,
                   power_level, packet_type, bit_pattern, **kwargs):
-      logging.info('DUT Bluetooth TxConfig')
+      logger.info('DUT Bluetooth TxConfig')
 
     def _TxStart(self, component_name, rf_type, test_type, center_freq,
                  power_level, packet_type, bit_pattern, **kwargs):
-      logging.info('DUT Bluetooth TxStart')
+      logger.info('DUT Bluetooth TxStart')
 
     def _TxStop(self, **kwargs):
-      logging.info('DUT Bluetooth TxStop')
+      logger.info('DUT Bluetooth TxStop')
 
     def _RxConfig(self, component_name, rf_type, test_type, center_freq,
                   power_level, packet_type, bit_pattern, **kwargs):
-      logging.info('DUT Bluetooth RxConfig')
+      logger.info('DUT Bluetooth RxConfig')
 
     def _RxClearResult(self, component_name, rf_type, test_type, center_freq,
                        power_level, packet_type, bit_pattern, **kwargs):
-      logging.info('DUT Bluetooth RxClearResult')
+      logger.info('DUT Bluetooth RxClearResult')
 
     def _RxGetResult(self, result_limit, **kwargs):
-      logging.info('DUT Bluetooth RxGetResult')
+      logger.info('DUT Bluetooth RxGetResult')
       return _MakePassResult(result_limit)
 
   class ZigbeeController(DUTBase.ZigbeeControllerBase):
     def _Initialize(self, component_name, **kwargs):
-      logging.info('DUT Zigbee Initialize: %s', component_name)
+      logger.info('DUT Zigbee Initialize: %s', component_name)
 
     def _Terminate(self, **kwargs):
-      logging.info('DUT Zigbee Terminate')
+      logger.info('DUT Zigbee Terminate')
 
     def _TxConfig(self, component_name, rf_type, test_type, center_freq,
                   power_level, **kwargs):
-      logging.info('DUT Zigbee TxConfig')
+      logger.info('DUT Zigbee TxConfig')
 
     def _TxStart(self, component_name, rf_type, test_type, center_freq,
                  power_level, **kwargs):
-      logging.info('DUT Zigbee TxStart')
+      logger.info('DUT Zigbee TxStart')
 
     def _TxStop(self, **kwargs):
-      logging.info('DUT Zigbee TxStop')
+      logger.info('DUT Zigbee TxStop')
 
     def _RxConfig(self, component_name, rf_type, test_type, center_freq,
                   power_level, rx_num_packets, **kwargs):
-      logging.info('DUT Zigbee RxConfig')
+      logger.info('DUT Zigbee RxConfig')
 
     def _RxClearResult(self, component_name, rf_type, test_type, center_freq,
                        power_level, rx_num_packets, **kwargs):
-      logging.info('DUT Zigbee RxClearResult')
+      logger.info('DUT Zigbee RxClearResult')
 
     def _RxGetResult(self, result_limit, **kwargs):
-      logging.info('DUT Zigbee RxGetResult')
+      logger.info('DUT Zigbee RxGetResult')
       return _MakePassResult(result_limit)

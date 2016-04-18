@@ -34,6 +34,7 @@ import logging
 from .data_parser import ListChecker
 from .data_parser import TupleChecker
 from .data_parser import Parse
+from .default_setting import logger
 from .utils import IsInBound
 from .utils import SearchConfig
 
@@ -82,7 +83,7 @@ class TestPlan(object):
     try:
       self.ParseCSVFile(config_file, search_dirs)
     except ValueError:
-      logging.exception('Parsing csv file %s error.', config_file)
+      logger.exception('Parsing csv file %s error.', config_file)
       self.test_cases = []
 
     order_by = self.test_config.get('order_by', None)
@@ -93,10 +94,10 @@ class TestPlan(object):
   def ParseCSVFile(self, config_file, search_dirs=None):
     def _LogErrorAndRaise(row_idx, msg):
       msg = 'Row %d: %s' % (row_idx, msg)
-      logging.error(msg)
+      logger.error(msg)
       raise ValueError(msg)
 
-    logging.info('Loading test config file: %s', config_file)
+    logger.info('Loading test config file: %s', config_file)
     with open(SearchConfig(config_file, search_dirs)) as csv_file:
       reader = csv.reader(csv_file)
       header = None
@@ -117,7 +118,7 @@ class TestPlan(object):
           key, value = row[1], row[2]
           data = Parse(value, HEADER_CHECKER.get(key))
           self.test_config[key] = data
-          logging.debug('test_config: %s', self.test_config)
+          logger.debug('test_config: %s', self.test_config)
         # Header starts with '@title', arguments and results is splitted by
         # '@result'
         elif row[0] == TITLE_MARKER:
@@ -148,9 +149,9 @@ class TestPlan(object):
             if not isinstance(arg_table[key], list):
               arg_table[key] = [arg_table[key]]
           arg_keys = arg_table.keys()
-          logging.debug('arg_keys: %s', arg_keys)
+          logger.debug('arg_keys: %s', arg_keys)
           for arg_values in itertools.product(*arg_table.values()):
-            logging.debug('arg_values: %s', arg_values)
+            logger.debug('arg_values: %s', arg_values)
             args = dict(zip(arg_keys, arg_values))
             try:
               self.test_cases.extend(CreateTestCase(args, result_limit))
@@ -505,12 +506,12 @@ class TestCase(object):
     for key in self.result_limit.keys():
       # Check required result is at the result
       if key not in result:
-        logging.error('The result of %s is missing.', key)
+        logger.error('The result of %s is missing.', key)
         return False
       # Check the result meets the result
       if not IsInBound(result[key], self.result_limit[key]):
-        logging.info('The test in result %s failed. %s not in %s',
-                     key, result[key], self.result_limit[key])
+        logger.info('The test in result %s failed. %s not in %s',
+                    key, result[key], self.result_limit[key])
         return False
     return True
 
@@ -552,11 +553,11 @@ def StripRow(row):
 
 # TODO(akahuang): Implement the CSV file check and CSV template generation.
 def main():
-  logging.basicConfig(level=logging.INFO)
+  logger.setLevel(level=logging.INFO)
   config_file = 'sample_testplan.csv'
   test_plan = TestPlan(config_file)
   for test_case in test_plan:
-    logging.info('test_case: %s', str(test_case))
+    logger.info('test_case: %s', str(test_case))
 
 
 if __name__ == '__main__':
