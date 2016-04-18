@@ -6,7 +6,7 @@
 
 from argparse import ArgumentParser
 
-from graphyte import graphyte
+import graphyte
 
 
 def main():

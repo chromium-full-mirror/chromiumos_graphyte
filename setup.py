@@ -30,5 +30,4 @@ setup(
         PROJECT_NAME + '.dut.sample_dut': ['*.json'],
         PROJECT_NAME + '.inst.anritsu_ml2437a': ['*.json'],
         PROJECT_NAME + '.inst.sample_inst': ['*.json']},
-    scripts=['graphyte_main.py'],
     )
