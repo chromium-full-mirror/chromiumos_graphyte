@@ -1,0 +1,6 @@
+{
+    "config_name": "Sample DUT Config",
+    "link_options": {
+        "link_class": "ADBLink"
+    }
+}

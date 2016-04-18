@@ -15,9 +15,9 @@ Typical Usage (Import to other modules):
 Please refer to graphyte_main.py.
 """
 
+import json
 import logging
 import os
-import yaml
 
 from .default_setting import DEFAULT_CONFIG_FILE
 from .default_setting import DEFAULT_LOG_FILE
@@ -42,7 +42,7 @@ class Graphyte(object):
     - Load test plans
     - Execute all the tests in the test plan.
 
-    The configuration file graphyte_config.sample.yaml follows the yaml format.
+    The configuration file graphyte_config.sample.json follows the json format.
     The file has the dut and inst module name and config file.
     These entries are initialized to sample_dut.py and sample_inst.py. The dut
     pluings are searched under ./dut/ and the instrument plugins are searched
@@ -65,7 +65,7 @@ class Graphyte(object):
     config_path = SearchConfig(config_file, GRAPHYTE_DIR)
     config_dir = os.path.dirname(config_path)
     with open(config_path, 'r') as f:
-      graphyte_config = yaml.load(f)
+      graphyte_config = json.load(f)
 
     # Load DUT and Inst class
     self.dut = self._LoadDevice(graphyte_config, 'dut', config_dir)
@@ -109,7 +109,7 @@ class Graphyte(object):
     config_file = SearchConfig(graphyte_config['%s_config' % device_type],
                                [device_dir, config_dir])
     with open(config_file, 'r') as f:
-      config = yaml.load(f)
+      config = json.load(f)
     logging.info('Loading %s: %s, config: %s', device_type, module_name, config)
     return module.__dict__[class_name](config)
 

@@ -1,0 +1,8 @@
+{
+    "link_options": {
+        "link_class": "GPIBLink",
+        "minor": 0,
+        "primary": 13
+    },
+    "sample_number": 10
+}

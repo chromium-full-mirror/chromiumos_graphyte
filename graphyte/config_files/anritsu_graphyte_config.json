@@ -1,0 +1,12 @@
+{
+    "config_name": "Graphyte Anritsu Config",
+
+    "dut": "lucid_dut",
+    "dut_config": "lucid_dut_config.json",
+
+    "inst": "anritsu_ml2437a",
+    "inst_config": "anritsu_ml2437a_config.json",
+
+    "port_config": "sample_port_config.json",
+    "test_plan": "anritsu_testplan.csv"
+}
