@@ -6,6 +6,7 @@
 """Implementation of graphyte.link.DeviceLink using SSH."""
 
 import pipes
+import platform
 import subprocess
 
 from .. import link
@@ -96,8 +97,12 @@ class SSHLink(link.DeviceLink):
       shell = False
 
     logger.debug('SSHLink: Run [%r]', command)
-    return subprocess.Popen(command, shell=shell, close_fds=True, stdin=stdin,
-                            stdout=stdout, stderr=stderr)
+    close_fds = True
+    if (platform.system() == 'Windows' and
+        (stdin, stdout, stderr) != (None, None, None)):
+      close_fds = False
+    return subprocess.Popen(command, shell=shell, close_fds=close_fds,
+                            stdin=stdin, stdout=stdout, stderr=stderr)
 
   def IsReady(self):
     """See DUTLink.IsReady"""
