@@ -98,11 +98,12 @@ class GPIBLink(link.DeviceLink):
       command = ' '.join([str(arg) for arg in command])
     logging.debug('GPIB Write: %s', command)
     return_code = self.device.write(command)
+    # The return value should be (byte size, Status code), but PyVisa-py only
+    # returns the status code while successful.
     if not isinstance(return_code, int):
-      # The return value is (byte size, Status code) when an error occurs.
-      return int(return_code[1])
+      return_code = int(return_code[1])
 
-    if stdout is not None:
+    if stdout is not None and return_code == 0:
       time.sleep(self.query_delay)
       output = self.device.read()
       stdout.write(output)
