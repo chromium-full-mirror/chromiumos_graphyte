@@ -18,16 +18,18 @@ UNITTEST_BLACKLIST=
 UNITTEST_FILES=$(shell find . -name '*_unittest.py' | sort)
 UNITTEST_WHITELIST=$(filter-out $(UNITTEST_BLACKLIST), $(UNITTEST_FILES))
 
-default:
+.PHONY: .phony
+
+default: .phony
 	python setup.py sdist
 
-install:
+install: .phony
 	python setup.py install
 
-clean:
-	sudo rm -rf build dist MANIFEST graphyte.egg-info
+clean: .phony
+	rm -rf build dist MANIFEST graphyte.egg-info overlay-*
 
-lint:
+lint: .phony
 	@set -e -o pipefail; \
 	out=$$(mktemp); \
 	echo Linting $(shell echo $(LINT_WHITELIST) | wc -w) files...; \
@@ -46,8 +48,29 @@ lint:
 	echo ...no lint errors! You are awesome!; \
 	rm -f $$out
 
-test:
+test: .phony
 	@set -e
 	$(PYTHON) $(UNITTEST_RUNNER) $(UNITTEST_WHITELIST)
 
-.PHONY: lint test
+overlay-%: .phony
+	rm -rf $@
+	mkdir $@
+	rsync -aK graphyte pylintrc Makefile $(UNITTEST_RUNNER) $@/
+	overlay_name="$(subst overlay-,,$@)"; \
+	for prefix in \
+	    "partner_private" \
+	    "private-overlays/overlay-$${overlay_name}-private/chromeos-base"; \
+	do \
+	  path="../../$${prefix}/graphyte-$${overlay_name}"; \
+	  if [ -e "$${path}" ]; then \
+	    rsync -aK $${path}/graphyte $@/; \
+	  fi; \
+	done
+
+lint-overlay-%: overlay-%
+	make -C $< lint; \
+	rm -rf $(subst lint-,,$@)
+
+test-overlay-%: overlay-%
+	make -C $< test; \
+	rm -rf $(subst test-,,$@)
