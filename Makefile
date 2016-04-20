@@ -9,6 +9,8 @@ PYTHON=python
 PYLINTRC=pylintrc
 PYLINT_OPTIONS=--rcfile=$(PYLINTRC) --msg-template='{path}:{line}: {msg_id}: {msg}'
 
+FORMATS=gztar
+
 LINT_BLACKLIST=
 LINT_FILES=$(shell find . -name '*.py' -type f | sort)
 LINT_WHITELIST=$(filter-out $(LINT_BLACKLIST),$(LINT_FILES))
@@ -21,7 +23,7 @@ UNITTEST_WHITELIST=$(filter-out $(UNITTEST_BLACKLIST), $(UNITTEST_FILES))
 .PHONY: .phony
 
 default: .phony
-	python setup.py sdist
+	python setup.py sdist --formats=$(FORMATS)
 
 install: .phony
 	python setup.py install
