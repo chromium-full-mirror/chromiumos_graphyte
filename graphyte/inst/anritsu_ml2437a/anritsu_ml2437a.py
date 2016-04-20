@@ -54,12 +54,11 @@ class Inst(InstBase):
   name = 'Anritsu ML2437A'
   need_link = True
 
-  def __init__(self, args):
-    super(Inst, self).__init__(args)
+  def __init__(self, sample_number=5, **kwargs):
+    super(Inst, self).__init__(**kwargs)
     self.current_pathloss = None
-    self.sample_number = self.args.get('sample_number', 5)
+    self.sample_number = sample_number
 
-  def SetRFController(self):
     self.controllers = {
         'WLAN': RFController(self),
         'BLUETOOTH': RFController(self),

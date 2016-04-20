@@ -28,7 +28,8 @@ def _MakePassResult(result_limit):
 class Inst(InstBase):
   name = 'Mock inst Plugin'
 
-  def SetRFController(self):
+  def __init__(self, **kwargs):
+    super(Inst, self).__init__(**kwargs)
     self.controllers = {
         'WLAN': self.WlanController(self),
         'BLUETOOTH': self.BluetoothController(self),

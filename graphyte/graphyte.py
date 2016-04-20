@@ -112,7 +112,7 @@ class Graphyte(object):
     with open(config_file, 'r') as f:
       config = json.load(f)
     logger.info('Loading %s: %s, config: %s', device_type, module_name, config)
-    return module.__dict__[class_name](config)
+    return module.__dict__[class_name](**config)
 
   def SetLogging(self, log_file, verbose, append_mode, console_output):
     level = logging.DEBUG if verbose else logging.INFO

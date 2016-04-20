@@ -22,14 +22,23 @@ class InstBase(object):
   name = 'Virtual instrument Plugin'
   need_link = False
 
-  def __init__(self, args):
-    self.args = args
-    if self.need_link:
-      self.link = link.Create(args['link_options'])
+  def __init__(self, **kwargs):
+    """Abstract init method. The init method of each child class shoule be:
+
+    def __init__(self, arg1, **kwargs):
+      # Call parent's __init__
+      super(Inst, self).__init__(**kwargs)
+      # Set the child arguments
+      self.arg1 = arg1
+      # Set the RF controllers
+      self.controllers = {
+          'WLAN': ChildWlanController(self),
+          'BLUETOOTH': ChildBluetoothController(self),
+      }
+    """
     self.rf_type = None
     self.controllers = {}
-    self.SetRFController()
-
+    self.link = link.Create(kwargs['link_options']) if self.need_link else None
     # Active component record the current (component_name, test_type)
     # for port mapping and pathloss.
     self.port_config_table = None
@@ -52,15 +61,6 @@ class InstBase(object):
     the plugin itself.
     """
     logger.info(self.name)
-
-  def SetRFController(self):
-    """Set the controller for supported RF type.
-
-    Every child class should implement this method."""
-    self.controllers = {
-        'WLAN': self.WlanControllerBase(self),
-        'BLUETOOTH': self.BluetoothControllerBase(self),
-        '802_15_4': self.ZigbeeControllerBase(self)}
 
   def Initialize(self):
     raise NotImplementedError

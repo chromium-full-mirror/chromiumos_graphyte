@@ -20,13 +20,23 @@ class DUTBase(object):
   name = 'Virtual DUT Plugin'
   need_link = False
 
-  def __init__(self, args):
-    self.args = args
+  def __init__(self, **kwargs):
+    """Abstract init method. The init method of each child class should be:
+
+    def __init__(self, arg1, **kwargs):
+      # Call parent's __init__
+      super(DUT, self).__init__(**kwargs)
+      # Set the child arguments
+      self.arg1 = arg1
+      # Set the RF controllers
+      self.controllers = {
+          'WLAN': ChildWlanController(self),
+          'BLUETOOTH': ChildBluetoothController(self),
+      }
+    """
     self.rf_type = None
-    if self.need_link:
-      self.link = link.Create(args['link_options'])
     self.controllers = {}
-    self.SetRFController()
+    self.link = link.Create(kwargs['link_options']) if self.need_link else None
 
   def __getattr__(self, name):
     """Delegate to the active controller, that is recorded at rf_type."""
@@ -39,24 +49,9 @@ class DUTBase(object):
   def SetRF(self, rf_type):
     self.rf_type = rf_type
 
-  def SetRFController(self):
-    """Set the controller for supported RF type.
-
-    Create the controllers for each supported RF type, and place them into
-    self.controllers.
-
-    For example:
-      def SetRFController(self):
-        self.controllers = {
-            'WLAN': self.WlanControllerBase(self),
-            'BLUETOOTH': self.BluetoothControllerBase(self),
-            '802_15_4': self.ZigbeeControllerBase(self)}
-    """
-    raise NotImplementedError
-
   class ControllerBase(object):
     """The abstract DUT controller class that every controller in DUT plugin
-    shoule inherit it. We use wrapped function for each API, that give us
+    should inherit it. We use wrapped function for each API, that give us
     flexibility to do some pre-processing or post-processing."""
 
     def __init__(self, dut=None):

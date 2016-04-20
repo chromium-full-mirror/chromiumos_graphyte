@@ -26,7 +26,8 @@ def _MakePassResult(result_limit):
 class DUT(DUTBase):
   name = 'Mock DUT Plugin'
 
-  def SetRFController(self):
+  def __init__(self, **kwargs):
+    super(DUT, self).__init__(**kwargs)
     self.controllers = {
         'WLAN': self.WlanController(self),
         'BLUETOOTH': self.BluetoothController(self),
