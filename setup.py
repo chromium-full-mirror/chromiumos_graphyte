@@ -24,10 +24,12 @@ setup(
         PROJECT_NAME + '.dut.sample_dut',
         PROJECT_NAME + '.inst',
         PROJECT_NAME + '.inst.anritsu_ml2437a',
-        PROJECT_NAME + '.inst.sample_inst'],
+        PROJECT_NAME + '.inst.sample_inst',
+        PROJECT_NAME + '.inst.wait_inst'],
     package_data={
         PROJECT_NAME: ['config_files/*'],
         PROJECT_NAME + '.dut.sample_dut': ['*.json'],
         PROJECT_NAME + '.inst.anritsu_ml2437a': ['*.json'],
-        PROJECT_NAME + '.inst.sample_inst': ['*.json']},
+        PROJECT_NAME + '.inst.sample_inst': ['*.json'],
+        PROJECT_NAME + '.inst.wait_inst': ['*.json']},
     )

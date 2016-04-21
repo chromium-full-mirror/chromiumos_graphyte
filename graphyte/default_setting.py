@@ -8,6 +8,7 @@
 
 import logging
 import os
+import sys
 
 GRAPHYTE_DIR = os.path.dirname(os.path.realpath(__file__))
 CONFIG_DIR = os.path.join(GRAPHYTE_DIR, 'config_files')
@@ -18,3 +19,7 @@ DEFAULT_LOG_FILE = os.path.join(LOG_DIR, 'graphyte.log')
 DEFAULT_RESULT_FILE = os.path.join(LOG_DIR, 'result.csv')
 
 logger = logging.getLogger('Graphyte')  # pylint: disable=invalid-name
+
+# Graphyte input and output stream
+GRAPHYTE_IN = sys.stdin
+GRAPHYTE_OUT = sys.stdout

@@ -24,6 +24,7 @@ from .default_setting import DEFAULT_LOG_FILE
 from .default_setting import DEFAULT_RESULT_FILE
 from .default_setting import GRAPHYTE_DIR
 from .default_setting import logger
+from .default_setting import GRAPHYTE_OUT
 from .result_writer import ResultWriter
 from .port_config import PortConfig
 from .testplan import TestPlan
@@ -127,7 +128,7 @@ class Graphyte(object):
     file_handler.setFormatter(formatter)
     logger.addHandler(file_handler)
     if console_output:
-      console_handler = logging.StreamHandler()
+      console_handler = logging.StreamHandler(GRAPHYTE_OUT)
       console_handler.setFormatter(formatter)
       logger.addHandler(console_handler)
 
