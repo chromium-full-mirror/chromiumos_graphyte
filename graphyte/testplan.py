@@ -345,6 +345,10 @@ class BluetoothTestCaseFactory(TestCaseFactory):
       'power_level':    ListChecker([int, float]),
       'packet_type':    ListChecker(['1DH1', '1DH3', '1DH5', '2DH1', '2DH3',
                                      '2DH5', '3DH1', '3DH3', '3DH5', 'LE'])}
+  LE_RX_ARG_CHECKER = {
+      'rx_num_packets': ListChecker([int])}
+  BT_RX_ARG_CHECKER = {
+      'rx_num_bits': ListChecker([int])}
   COMMON_RESULTS = [
       'avg_power', 'acp_5', 'acp_4', 'acp_3', 'acp_2',
       'acp_1', 'acp0', 'acp1', 'acp2', 'acp3', 'acp4', 'acp5']
@@ -357,7 +361,8 @@ class BluetoothTestCaseFactory(TestCaseFactory):
       'LE': ['freq_offset', 'delta_f1_avg', 'delta_f2_avg',
              'delta_f2_max', 'delta_f0_fn_max', 'delta_f1_f0',
              'delta_fn_fn5_max', 'delta_f2_f1_avg_ratio']}
-  RX_RESULTS = ['rx_ber']
+  LE_RX_RESULTS = ['rx_per']
+  BT_RX_RESULTS = ['rx_ber']
 
   # For a Bluetooth test case, each result needs different bit pattern.
   # This dict records the relation between results and bit patterns.
@@ -368,10 +373,24 @@ class BluetoothTestCaseFactory(TestCaseFactory):
   BIT_PATTERN_RESULTS = {
       'PRBS9': ['avg_power', 'bandwidth_20db', 'acp_5', 'acp_4', 'acp_3',
                 'acp_2', 'acp_1', 'acp0', 'acp1', 'acp2', 'acp3', 'acp4',
-                'acp5', 'freq_offset'],
+                'acp5', 'freq_offset', 'rx_ber', 'rx_per'],
       'F0': ['freq_deviation', 'delta_f1_avg', 'delta_f2_f1_avg_ratio'],
       'AA': ['delta_f2_avg', 'delta_f2_max', 'delta_f1_f0',
              'delta_f2_f1_avg_ratio', 'delta_f0_fn_max', 'delta_fn_fn5_max']}
+
+  # The maximum number of bytes for each BDR and EDR packet type.
+  # In Rx test, the instrument should transmit the largest packet.
+  # Ref: Bluetooth Core Specification 4.0 Table 6.9: ACL packets.
+  MAX_PACKET_LENGTH = {
+      '1DH1': 27,
+      '1DH3': 183,
+      '1DH5': 339,
+      '2DH1': 54,
+      '2DH3': 367,
+      '2DH5': 679,
+      '3DH1': 83,
+      '3DH3': 552,
+      '3DH5': 1021}
 
   def _DetermineFormat(self, packet_type):
     """Determine the bluetooth format of the packet type.
@@ -396,14 +415,22 @@ class BluetoothTestCaseFactory(TestCaseFactory):
     if self.RF_TYPE != args['rf_type']:
       raise ValueError('%s is not a valid RF type.' % args['rf_type'])
     # Check all required arguments are valid.
-    TestCaseFactory.VerifyArguments(self.REQUIRED_ARG_CHECKER, args)
+    arg_checker = self.REQUIRED_ARG_CHECKER.copy()
+    if args['test_type'] == 'RX':
+      if args['packet_type'] == 'LE':
+        arg_checker.update(self.LE_RX_ARG_CHECKER)
+      else:
+        arg_checker.update(self.BT_RX_ARG_CHECKER)
+    TestCaseFactory.VerifyArguments(arg_checker, args)
     # Check there is result and all results are valid.
     if args['test_type'] == 'TX':
       result_list = self.COMMON_RESULTS[:]
       packet_format = self._DetermineFormat(args['packet_type'])
       result_list += self.FORMAT_RESULT_CHECKER[packet_format]
+    elif args['packet_type'] == 'LE':
+      result_list = self.LE_RX_RESULTS
     else:
-      result_list = self.RX_RESULTS
+      result_list = self.BT_RX_RESULTS
     TestCaseFactory._VerifyResults(result_list, result_limit)
 
   def _Create(self, args, result_limit):
@@ -415,6 +442,10 @@ class BluetoothTestCaseFactory(TestCaseFactory):
     """
     name = self._GenerateCanonicalName(args)
     packet_format = self._DetermineFormat(args['packet_type'])
+    # Convert rx_num_bits to rx_num_packets. Add 10% packets for some loss.
+    if args['test_type'] == 'RX' and packet_format != 'LE':
+      args['rx_num_packets'] = int(1.1 * args['rx_num_bits'] / 8 /
+                                   self.MAX_PACKET_LENGTH[args['packet_type']])
     if packet_format == 'EDR':
       args['bit_pattern'] = 'PRBS9'
       return [TestCase(name, args, result_limit)]

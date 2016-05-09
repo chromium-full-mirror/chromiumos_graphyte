@@ -11,6 +11,12 @@ import unittest
 
 from . import testplan
 
+class SampleTestPlanTest(unittest.TestCase):
+  def testLoadSampleTestPlan(self):
+    sample_file = 'sample_testplan.csv'
+    test_plan = testplan.TestPlan(sample_file)
+    self.assertTrue(len(test_plan) > 0)
+
 
 class WLANTestPlanTest(unittest.TestCase):
   def setUp(self):
@@ -169,11 +175,6 @@ class WLANTestPlanTest(unittest.TestCase):
 
     with self.assertRaises(ValueError):
       self.test_plan.ParseCSVFile(self.temp_path)
-
-  def testLoadSampleTestPlan(self):
-    sample_file = 'sample_testplan.csv'
-    self.test_plan = testplan.TestPlan(sample_file)
-    self.assertTrue(len(self.test_plan) > 0)
 
 
 class BluetoothTestPlanTest(unittest.TestCase):
@@ -467,3 +468,73 @@ class BluetoothTestPlanTest(unittest.TestCase):
     self.assertEquals(2, len(self.test_plan))
     self.assertEquals(set(['F0', 'AA']),
                       set(test.args['bit_pattern'] for test in self.test_plan))
+
+  def testValidRxLE(self):
+    rx_args = ['rx_num_packets']
+    valid_args_value = [
+        '', 'BT', 'BLUETOOTH', 'RX', '2412',
+        '18', 'LE', '10000']
+    valid_results = [
+        '@result', 'rx_per']
+    valid_result_value = [
+        '', '(0,20)']
+
+    self._WriteCSVContent([
+        self.valid_args + rx_args + valid_results,
+        valid_args_value + valid_result_value])
+
+    self.test_plan.ParseCSVFile(self.temp_path)
+    self.assertEquals(1, len(self.test_plan))
+
+  def testValidRxBDR(self):
+    rx_args = ['rx_num_bits']
+    valid_args_value = [
+        '', 'BT', 'BLUETOOTH', 'RX', '2412',
+        '18', '1DH1', '10000']
+    valid_results = [
+        '@result', 'rx_ber']
+    valid_result_value = [
+        '', '(0,20)']
+
+    self._WriteCSVContent([
+        self.valid_args + rx_args + valid_results,
+        valid_args_value + valid_result_value])
+
+    self.test_plan.ParseCSVFile(self.temp_path)
+    self.assertEquals(1, len(self.test_plan))
+
+  def testInvalidRxLE(self):
+    rx_args = ['rx_num_bits']
+    valid_args_value = [
+        '', 'BT', 'BLUETOOTH', 'RX', '2412',
+        '18', 'LE', '10000']
+    valid_results = [
+        '@result', 'rx_ber']
+    valid_result_value = [
+        '', '(0,20)']
+
+    self._WriteCSVContent([
+        self.valid_args + rx_args + valid_results,
+        valid_args_value + valid_result_value])
+
+    with self.assertRaises(ValueError):
+      self.test_plan.ParseCSVFile(self.temp_path)
+    self.assertEquals(0, len(self.test_plan))
+
+  def testInvalidRxBDR(self):
+    rx_args = ['rx_num_packets']
+    valid_args_value = [
+        '', 'BT', 'BLUETOOTH', 'RX', '2412',
+        '18', '1DH1', '10000']
+    valid_results = [
+        '@result', 'rx_per']
+    valid_result_value = [
+        '', '(0,20)']
+
+    self._WriteCSVContent([
+        self.valid_args + rx_args + valid_results,
+        valid_args_value + valid_result_value])
+
+    with self.assertRaises(ValueError):
+      self.test_plan.ParseCSVFile(self.temp_path)
+    self.assertEquals(0, len(self.test_plan))

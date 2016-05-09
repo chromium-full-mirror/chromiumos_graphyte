@@ -278,11 +278,13 @@ class InstBase(object):
       raise NotImplementedError
 
     def _RxConfig(self, component_name, rf_type, test_type, center_freq,
-                  power_level, packet_type, bit_pattern, **kwargs):
+                  power_level, packet_type, bit_pattern, rx_num_packets,
+                  **kwargs):
       raise NotImplementedError
 
     def _RxGenerate(self, component_name, rf_type, test_type, center_freq,
-                    power_level, packet_type, bit_pattern, **kwargs):
+                    power_level, packet_type, bit_pattern, rx_num_packets,
+                    **kwargs):
       raise NotImplementedError
 
   class ZigbeeControllerBase(ControllerBase):
