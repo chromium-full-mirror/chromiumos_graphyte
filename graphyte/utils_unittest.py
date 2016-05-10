@@ -5,6 +5,7 @@
 # found in the LICENSE file.
 
 import math
+import time
 import unittest
 
 from . import utils
@@ -90,3 +91,18 @@ class CalculateAverageTest(unittest.TestCase):
     self.assertEquals(float('-inf'), ret)
     ret = utils.CalculateAverage([10000, 10000], '10Log10')
     self.assertTrue(math.isnan(ret))
+
+
+class WaitForTest(unittest.TestCase):
+
+  def testWaitFor(self):
+    def _ReturnTrueAfter(period):
+      return time.time() > period
+
+    now = time.time()
+    ret = utils.WaitFor(lambda: _ReturnTrueAfter(now + 0.5), timeout_secs=1)
+    self.assertEquals(True, ret)
+
+    now = time.time()
+    with self.assertRaises(utils.TimeoutError):
+      utils.WaitFor(lambda: _ReturnTrueAfter(now + 1), timeout_secs=0.5)

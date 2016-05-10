@@ -7,9 +7,11 @@
 """Utils class and functions. """
 
 from contextlib import contextmanager
+import inspect
 import math
 import os
 import tempfile
+import time
 
 from .default_setting import CONFIG_DIR
 from .default_setting import LOG_DIR
@@ -132,3 +134,50 @@ def CalculateAverage(values, average_type='Linear'):
     except OverflowError:
       logger.warning('The values exceed the range. Return NaN.')
       return float('nan')
+
+
+class TimeoutError(Exception):
+  """Timeout error."""
+  def __init__(self, message, output=None):
+    Exception.__init__(self)
+    self.message = message
+    self.output = output
+
+  def __str__(self):
+    return repr(self.message)
+
+
+def WaitFor(condition, timeout_secs, poll_interval_secs=0.1):
+  """Wait for the given condition for at most the specified time.
+
+  Args:
+    condition: A function object.
+    timeout_secs: Timeout value in seconds.
+    poll_interval_secs: Interval to poll condition in seconds.
+
+  Raises:
+    ValueError: If condition is not a function.
+    TimeoutError: If cond does not become True after timeout_secs seconds.
+  """
+  if not callable(condition):
+    raise ValueError('condition must be a callable object')
+
+  condition_name = condition.__name__
+  if condition_name == '<lambda>':
+    try:
+      condition_name = inspect.getsource(condition).strip()
+    except IOError:
+      pass
+
+  end_time = time.time() + timeout_secs if timeout_secs else float('inf')
+  while True:
+    if not math.isinf(end_time):
+      logger.info('[%ds left] %s', end_time - time.time(), condition_name)
+    ret = condition()
+    if ret:
+      return ret
+    if time.time() + poll_interval_secs > end_time:
+      error_msg = 'Timeout waiting for condition: %s' % condition_name
+      logger.error(error_msg)
+      raise TimeoutError(error_msg, ret)
+    time.sleep(poll_interval_secs)
