@@ -61,6 +61,7 @@ overlay-%: .phony
 	overlay_name="$(subst overlay-,,$@)"; \
 	for prefix in \
 	    "partner_private" \
+	    "private-overlays/project-goofy-private/chromeos-base" \
 	    "private-overlays/overlay-$${overlay_name}-private/chromeos-base"; \
 	do \
 	  path="../../$${prefix}/graphyte-$${overlay_name}"; \
