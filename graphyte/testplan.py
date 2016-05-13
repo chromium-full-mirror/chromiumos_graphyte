@@ -346,26 +346,32 @@ class BluetoothTestCaseFactory(TestCaseFactory):
       'packet_type':    ListChecker(['1DH1', '1DH3', '1DH5', '2DH1', '2DH3',
                                      '2DH5', '3DH1', '3DH3', '3DH5', 'LE'])}
   COMMON_RESULTS = [
-      'avg_power', 'freq_deviation', 'acp_5', 'acp_4', 'acp_3', 'acp_2',
+      'avg_power', 'acp_5', 'acp_4', 'acp_3', 'acp_2',
       'acp_1', 'acp0', 'acp1', 'acp2', 'acp3', 'acp4', 'acp5']
   FORMAT_RESULT_CHECKER = {
-      'BDR': ['bandwidth_20db', 'delta_f2_f1'],
-      'EDR': ['edr_evm_avg', 'edr_evm_peak', 'edr_extreme_omega_0',
-              'edr_extreme_omega_i0', 'edr_omega_i', 'edr_power_diff',
-              'edr_prob_evm_99_pass'],
-      'LE': ['freq_offset', 'delta_f0_fn_max', 'delta_f1_avg', 'delta_f1_f0',
-             'delta_f2_f1_avg', 'delta_f2_avg', 'delta_f2_max',
-             'delta_fn_fn5_max']}
+      'BDR': ['bandwidth_20db', 'freq_deviation', 'delta_f1_avg',
+              'delta_f2_avg', 'delta_f2_max', 'delta_f2_f1_avg_ratio'],
+      'EDR': ['freq_deviation', 'edr_evm_avg', 'edr_evm_peak',
+              'edr_extreme_omega_0', 'edr_extreme_omega_i0', 'edr_omega_i',
+              'edr_power_diff', 'edr_prob_evm_99_pass'],
+      'LE': ['freq_offset', 'delta_f1_avg', 'delta_f2_avg',
+             'delta_f2_max', 'delta_f0_fn_max', 'delta_f1_f0',
+             'delta_fn_fn5_max', 'delta_f2_f1_avg_ratio']}
   RX_RESULTS = ['rx_ber']
 
+  # For a Bluetooth test case, each result needs different bit pattern.
+  # This dict records the relation between results and bit patterns.
+  # NOTE1: This dict only for BDR and LE. EDR only uses PRBS9 pattern.
+  # That is, EDR freq_deviation still uses PRBS9.
+  # NOTE2: delta_f2_f1_avg_ratio is the ratio of delta_f2_avg and delta_f1_avg,
+  # so it needs 'F0' and 'AA' patterns.
   BIT_PATTERN_RESULTS = {
       'PRBS9': ['avg_power', 'bandwidth_20db', 'acp_5', 'acp_4', 'acp_3',
                 'acp_2', 'acp_1', 'acp0', 'acp1', 'acp2', 'acp3', 'acp4',
                 'acp5', 'freq_offset'],
-      'F0': ['freq_deviation', 'delta_f1_avg'],
-      'AA': ['delta_f2_avg', 'delta_f2_max', 'delta_f1_f0', 'delta_f2_f1_avg',
-             'delta_f2_f1', 'delta_f0_fn_max', 'delta_fn_fn5_max']}
-
+      'F0': ['freq_deviation', 'delta_f1_avg', 'delta_f2_f1_avg_ratio'],
+      'AA': ['delta_f2_avg', 'delta_f2_max', 'delta_f1_f0',
+             'delta_f2_f1_avg_ratio', 'delta_f0_fn_max', 'delta_fn_fn5_max']}
 
   def _DetermineFormat(self, packet_type):
     """Determine the bluetooth format of the packet type.
@@ -403,8 +409,9 @@ class BluetoothTestCaseFactory(TestCaseFactory):
   def _Create(self, args, result_limit):
     """Create the bluetooth test case.
 
-    In BDR and LE, the bit pattern of the packet are different from results.
+    For BDR and LE, the bit pattern of the packet are different from results.
     We add the 'bit_pattern' argument and split into different test cases.
+    There is only 'PRBS9' bit pattern for EDR.
     """
     name = self._GenerateCanonicalName(args)
     packet_format = self._DetermineFormat(args['packet_type'])
@@ -525,7 +532,11 @@ class TestCase(object):
     """
     ret = self.args.copy()
     ret['result_limit'] = self.result_limit.copy()
+    ret['name'] = self.name
     return ret
+
+  def Copy(self):
+    return TestCase(self.name, self.args.copy(), self.result_limit.copy())
 
 
 def ChainMaskToList(chain_mask):

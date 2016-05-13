@@ -50,7 +50,7 @@ class WLANTestPlanTest(unittest.TestCase):
         self.valid_args_value + self.valid_result_value])
 
     self.test_plan.ParseCSVFile(self.temp_path)
-    self.assertTrue(len(self.test_plan) == 4)
+    self.assertEquals(4, len(self.test_plan))
 
   def testParseValidWLANContent(self):
     self._WriteCSVContent([
@@ -58,7 +58,7 @@ class WLANTestPlanTest(unittest.TestCase):
         self.valid_args_value + self.valid_result_value])
 
     self.test_plan.ParseCSVFile(self.temp_path)
-    self.assertTrue(len(self.test_plan) == 4)
+    self.assertEquals(4, len(self.test_plan))
 
   def testMissingArgumentTitle(self):
     invalid_args = self.valid_args[:-1]
@@ -69,7 +69,7 @@ class WLANTestPlanTest(unittest.TestCase):
 
     with self.assertRaisesRegexp(ValueError, 'missing'):
       self.test_plan.ParseCSVFile(self.temp_path)
-    self.assertTrue(len(self.test_plan) == 0)
+    self.assertEquals(0, len(self.test_plan))
 
   def testWrongArgumentTitle(self):
     self._WriteCSVContent([
@@ -78,7 +78,7 @@ class WLANTestPlanTest(unittest.TestCase):
 
     with self.assertRaisesRegexp(ValueError, 'wrong_arg'):
       self.test_plan.ParseCSVFile(self.temp_path)
-    self.assertTrue(len(self.test_plan) == 0)
+    self.assertEquals(0, len(self.test_plan))
 
   def testWrongResultTitle(self):
     self._WriteCSVContent([
@@ -87,7 +87,7 @@ class WLANTestPlanTest(unittest.TestCase):
 
     with self.assertRaisesRegexp(ValueError, 'wrong_result'):
       self.test_plan.ParseCSVFile(self.temp_path)
-    self.assertTrue(len(self.test_plan) == 0)
+    self.assertEquals(0, len(self.test_plan))
 
   def testMissingResultTitle(self):
     self._WriteCSVContent([
@@ -96,7 +96,7 @@ class WLANTestPlanTest(unittest.TestCase):
 
     with self.assertRaisesRegexp(ValueError, '@result'):
       self.test_plan.ParseCSVFile(self.temp_path)
-    self.assertTrue(len(self.test_plan) == 0)
+    self.assertEquals(0, len(self.test_plan))
 
   def testWrongArgumentValue(self):
     # Wrong value for rf_type
@@ -108,7 +108,7 @@ class WLANTestPlanTest(unittest.TestCase):
 
     with self.assertRaisesRegexp(ValueError, 'WRONG_RF_TYPE'):
       self.test_plan.ParseCSVFile(self.temp_path)
-    self.assertTrue(len(self.test_plan) == 0)
+    self.assertEquals(0, len(self.test_plan))
 
   def testWrongArgumentValueInList(self):
     # Wrong valud for center_freq
@@ -120,7 +120,7 @@ class WLANTestPlanTest(unittest.TestCase):
 
     with self.assertRaisesRegexp(ValueError, 'WRONG_VALUE'):
       self.test_plan.ParseCSVFile(self.temp_path)
-    self.assertTrue(len(self.test_plan) == 2)
+    self.assertEquals(2, len(self.test_plan))
 
   def testWrongResultValue(self):
 
@@ -130,7 +130,7 @@ class WLANTestPlanTest(unittest.TestCase):
 
     with self.assertRaisesRegexp(ValueError, 'WRONG_RESULT'):
       self.test_plan.ParseCSVFile(self.temp_path)
-    self.assertTrue(len(self.test_plan) == 0)
+    self.assertEquals(0, len(self.test_plan))
 
   def testMissingValue(self):
     self._WriteCSVContent([
@@ -139,7 +139,7 @@ class WLANTestPlanTest(unittest.TestCase):
 
     with self.assertRaises(ValueError):
       self.test_plan.ParseCSVFile(self.temp_path)
-    self.assertTrue(len(self.test_plan) == 0)
+    self.assertEquals(0, len(self.test_plan))
 
   def testMissingTitle(self):
     self._WriteCSVContent([
@@ -147,7 +147,7 @@ class WLANTestPlanTest(unittest.TestCase):
 
     with self.assertRaisesRegexp(ValueError, 'title'):
       self.test_plan.ParseCSVFile(self.temp_path)
-    self.assertTrue(len(self.test_plan) == 0)
+    self.assertEquals(0, len(self.test_plan))
 
   def testParseValidTestplanConfig(self):
     self._WriteCSVContent([
@@ -199,7 +199,7 @@ class BluetoothTestPlanTest(unittest.TestCase):
         '', 'BT', 'BLUETOOTH', 'TX', '[2412, 2437]',
         '18', '1DH5']
     valid_results = [
-        '@result', 'bandwidth_20db', 'delta_f2_f1']
+        '@result', 'bandwidth_20db', 'delta_f2_f1_avg_ratio']
     valid_result_value = [
         '', '(16,20)', '(0,20)']
 
@@ -234,7 +234,7 @@ class BluetoothTestPlanTest(unittest.TestCase):
         '18', 'LE']
     valid_results = [
         '@result', 'freq_offset', 'delta_f0_fn_max', 'delta_f1_avg',
-        'delta_f1_f0', 'delta_f2_f1_avg', 'delta_f2_avg', 'delta_f2_max',
+        'delta_f1_f0', 'delta_f2_f1_avg_ratio', 'delta_f2_avg', 'delta_f2_max',
         'delta_fn_fn5_max']
     valid_result_value = [
         '', '(0,20)', '(0,20)', '(0,20)', '(0,20)', '(0,20)', '(0,20)',
@@ -262,12 +262,12 @@ class BluetoothTestPlanTest(unittest.TestCase):
 
     with self.assertRaises(ValueError):
       self.test_plan.ParseCSVFile(self.temp_path)
-    self.assertTrue(len(self.test_plan) == 0)
+    self.assertEquals(0, len(self.test_plan))
 
   def testEDRInvalidValue(self):
     valid_args_value = [
         '', 'BT', 'BLUETOOTH', 'TX', '[2412, 2437]',
-        '18', '1DH5']
+        '18', '2DH5']
     invalid_results = [
         '@result', 'bandwidth_20db', 'freq_offset']
     invalid_result_value = [
@@ -279,12 +279,12 @@ class BluetoothTestPlanTest(unittest.TestCase):
 
     with self.assertRaises(ValueError):
       self.test_plan.ParseCSVFile(self.temp_path)
-    self.assertTrue(len(self.test_plan) == 0)
+    self.assertEquals(0, len(self.test_plan))
 
   def testLEInvalidValue(self):
     valid_args_value = [
         '', 'BT', 'BLUETOOTH', 'TX', '[2412, 2437]',
-        '18', '1DH5']
+        '18', 'LE']
     invalid_results = [
         '@result', 'bandwidth_20db', 'edr_evm_avg']
     invalid_result_value = [
@@ -296,26 +296,9 @@ class BluetoothTestPlanTest(unittest.TestCase):
 
     with self.assertRaises(ValueError):
       self.test_plan.ParseCSVFile(self.temp_path)
-    self.assertTrue(len(self.test_plan) == 0)
+    self.assertEquals(0, len(self.test_plan))
 
-  def testEDRBitPattern(self):
-    valid_args_value = [
-        '', 'BT', 'BLUETOOTH', 'TX', '2412',
-        '18', '2DH5']
-    valid_results = [
-        '@result', 'avg_power', 'edr_evm_avg', 'edr_evm_peak']
-    valid_result_value = [
-        '', '(16,20)', '(0,20)', '(0,20)']
-
-    self._WriteCSVContent([
-        self.valid_args + valid_results,
-        valid_args_value + valid_result_value])
-
-    self.test_plan.ParseCSVFile(self.temp_path)
-    self.assertTrue(len(self.test_plan) == 1)
-    self.assertTrue(self.test_plan[0].args['bit_pattern'] == 'PRBS9')
-
-  def testBitPatternPRBS9(self):
+  def testBDRBitPatternPRBS9(self):
     valid_args_value = [
         '', 'BT', 'BLUETOOTH', 'TX', '2412',
         '18', '1DH5']
@@ -333,8 +316,28 @@ class BluetoothTestPlanTest(unittest.TestCase):
         valid_args_value + valid_result_value])
 
     self.test_plan.ParseCSVFile(self.temp_path)
-    self.assertTrue(len(self.test_plan) == 1)
-    self.assertTrue(self.test_plan[0].args['bit_pattern'] == 'PRBS9')
+    self.assertEquals(1, len(self.test_plan))
+    self.assertEquals('PRBS9', self.test_plan[0].args['bit_pattern'])
+
+  def testEDRBitPatternPRBS9(self):
+    valid_args_value = [
+        '', 'BT', 'BLUETOOTH', 'TX', '2412',
+        '18', '2DH5']
+    valid_results = [
+        '@result', 'avg_power', 'freq_deviation', 'edr_evm_avg', 'edr_evm_peak',
+        'edr_extreme_omega_0', 'edr_extreme_omega_i0', 'edr_omega_i',
+        'edr_power_diff', 'edr_prob_evm_99_pass']
+    valid_result_value = [
+        '', '(16,20)', '(0,20)', '(0,20)', '(0,20)', '(0,20)', '(0,20)',
+        '(0,20)', '(0,20)', '(0,20)']
+
+    self._WriteCSVContent([
+        self.valid_args + valid_results,
+        valid_args_value + valid_result_value])
+
+    self.test_plan.ParseCSVFile(self.temp_path)
+    self.assertEquals(1, len(self.test_plan))
+    self.assertEquals('PRBS9', self.test_plan[0].args['bit_pattern'])
 
   def testLEBitPatternPRBS9(self):
     valid_args_value = [
@@ -354,32 +357,105 @@ class BluetoothTestPlanTest(unittest.TestCase):
         valid_args_value + valid_result_value])
 
     self.test_plan.ParseCSVFile(self.temp_path)
-    self.assertTrue(len(self.test_plan) == 1)
-    self.assertTrue(self.test_plan[0].args['bit_pattern'] == 'PRBS9')
+    self.assertEquals(1, len(self.test_plan))
+    self.assertEquals('PRBS9', self.test_plan[0].args['bit_pattern'])
 
-  def testBitPatternF0(self):
+  def testBDRBitPatternF0(self):
     valid_args_value = [
         '', 'BT', 'BLUETOOTH', 'TX', '2412',
-        '18', 'LE']
+        '18', '1DH5']
     valid_results = [
-        '@result', 'freq_deviation', 'delta_f1_avg']
+        '@result', 'delta_f1_avg', 'freq_deviation']
     valid_result_value = [
-        '', '(16,20)', '(0,20)']
+        '', '(0,20)', '(0,20)']
 
     self._WriteCSVContent([
         self.valid_args + valid_results,
         valid_args_value + valid_result_value])
 
     self.test_plan.ParseCSVFile(self.temp_path)
-    self.assertTrue(len(self.test_plan) == 1)
-    self.assertTrue(self.test_plan[0].args['bit_pattern'] == 'F0')
+    self.assertEquals(1, len(self.test_plan))
+    self.assertEquals('F0', self.test_plan[0].args['bit_pattern'])
 
-  def testBitPatternAA(self):
+  def testLEBitPatternF0(self):
     valid_args_value = [
         '', 'BT', 'BLUETOOTH', 'TX', '2412',
-        '18', '1DH1']
+        '18', 'LE']
     valid_results = [
-        '@result', 'delta_f2_f1']
+        '@result', 'delta_f1_avg']
+    valid_result_value = [
+        '', '(0,20)']
+
+    self._WriteCSVContent([
+        self.valid_args + valid_results,
+        valid_args_value + valid_result_value])
+
+    self.test_plan.ParseCSVFile(self.temp_path)
+    self.assertEquals(1, len(self.test_plan))
+    self.assertEquals('F0', self.test_plan[0].args['bit_pattern'])
+
+  def testBDRBitPatternAA(self):
+    valid_args_value = [
+        '', 'BT', 'BLUETOOTH', 'TX', '2412',
+        '18', '1DH5']
+    valid_results = [
+        '@result', 'delta_f2_avg', 'delta_f2_max']
+    valid_result_value = [
+        '', '(16,20)', '(16,20)']
+
+    self._WriteCSVContent([
+        self.valid_args + valid_results,
+        valid_args_value + valid_result_value])
+
+    self.test_plan.ParseCSVFile(self.temp_path)
+    self.assertEquals(1, len(self.test_plan))
+    self.assertEquals('AA', self.test_plan[0].args['bit_pattern'])
+
+  def testLEBitPatternAA(self):
+    valid_args_value = [
+        '', 'BT', 'BLUETOOTH', 'TX', '2412',
+        '18', 'LE']
+    valid_results = [
+        '@result', 'delta_f2_avg', 'delta_f2_max', 'delta_f1_f0',
+        'delta_f0_fn_max', 'delta_fn_fn5_max']
+    valid_result_value = [
+        '', '(16,20)', '(0,20)', '(16,20)',
+        '(0,20)', '(16,20)']
+
+    self._WriteCSVContent([
+        self.valid_args + valid_results,
+        valid_args_value + valid_result_value])
+
+    self.test_plan.ParseCSVFile(self.temp_path)
+    self.assertEquals(1, len(self.test_plan))
+    self.assertEquals('AA', self.test_plan[0].args['bit_pattern'])
+
+  def testSplitByBitPattern(self):
+    valid_args_value = [
+        '', 'BT', 'BLUETOOTH', 'TX', '2412',
+        '18', 'LE']
+    valid_results = [
+        '@result', 'avg_power',  # bit_pattern is PRBS9
+        'delta_f1_avg',  # bit_pattern is F0
+        'delta_f2_avg', 'delta_f2_max']  # bit_pattern is AA
+    valid_result_value = [
+        '', '(16,20)', '(16,20)', '(0,20)', '(0,20)']
+
+    self._WriteCSVContent([
+        self.valid_args + valid_results,
+        valid_args_value + valid_result_value])
+
+    self.test_plan.ParseCSVFile(self.temp_path)
+    self.assertEquals(3, len(self.test_plan))
+    self.assertEquals(set(['PRBS9', 'F0', 'AA']),
+                      set(test.args['bit_pattern'] for test in self.test_plan))
+
+  def testDeltaF2F1Avg(self):
+    valid_args_value = [
+        '', 'BT', 'BLUETOOTH', 'TX', '2412',
+        '18', 'LE']
+    valid_results = [
+        '@result', 'delta_f2_f1_avg_ratio']
     valid_result_value = [
         '', '(16,20)']
 
@@ -388,44 +464,6 @@ class BluetoothTestPlanTest(unittest.TestCase):
         valid_args_value + valid_result_value])
 
     self.test_plan.ParseCSVFile(self.temp_path)
-    self.assertTrue(len(self.test_plan) == 1)
-    self.assertTrue(self.test_plan[0].args['bit_pattern'] == 'AA')
-
-  def testLEBitPatternAA(self):
-    valid_args_value = [
-        '', 'BT', 'BLUETOOTH', 'TX', '2412',
-        '18', 'LE']
-    valid_results = [
-        '@result', 'delta_f2_avg', 'delta_f2_max', 'delta_f1_f0',
-        'delta_f2_f1_avg', 'delta_f0_fn_max', 'delta_fn_fn5_max']
-    valid_result_value = [
-        '', '(16,20)', '(0,20)', '(16,20)',
-        '(16,20)', '(0,20)', '(16,20)']
-
-    self._WriteCSVContent([
-        self.valid_args + valid_results,
-        valid_args_value + valid_result_value])
-
-    self.test_plan.ParseCSVFile(self.temp_path)
-    self.assertTrue(len(self.test_plan) == 1)
-    self.assertTrue(self.test_plan[0].args['bit_pattern'] == 'AA')
-
-  def testSplitByBitPattern(self):
-    valid_args_value = [
-        '', 'BT', 'BLUETOOTH', 'TX', '2412',
-        '18', 'LE']
-    valid_results = [
-        '@result', 'avg_power',  # bit_pattern is PRBS9
-        'freq_deviation', 'delta_f1_avg',  # bit_pattern is F0
-        'delta_f2_avg', 'delta_f2_max']  # bit_pattern is AA
-    valid_result_value = [
-        '', '(16,20)', '(0,20)', '(16,20)', '(0,20)', '(0,20)']
-
-    self._WriteCSVContent([
-        self.valid_args + valid_results,
-        valid_args_value + valid_result_value])
-
-    self.test_plan.ParseCSVFile(self.temp_path)
-    self.assertTrue(len(self.test_plan) == 3)
-    self.assertTrue(set(test.args['bit_pattern'] for test in self.test_plan) ==
-                    set(['PRBS9', 'F0', 'AA']))
+    self.assertEquals(2, len(self.test_plan))
+    self.assertEquals(set(['F0', 'AA']),
+                      set(test.args['bit_pattern'] for test in self.test_plan))

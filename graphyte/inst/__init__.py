@@ -218,6 +218,13 @@ class InstBase(object):
       raise NotImplementedError
 
   class BluetoothControllerBase(ControllerBase):
+    def __init__(self, inst):
+      InstBase.ControllerBase.__init__(self, inst)
+      self.inst = inst
+      # Store the delta_f1_avg and delta_f2_avg for delta_f2_f1_avg_ratio
+      self._delta_f1_avg_results = {}
+      self._delta_f2_avg_results = {}
+
     def _TxConfig(self, component_name, rf_type, test_type, center_freq,
                   power_level, packet_type, bit_pattern, **kwargs):
       raise NotImplementedError
@@ -226,6 +233,44 @@ class InstBase(object):
                    power_level, packet_type, bit_pattern, result_limit,
                    **kwargs):
       raise NotImplementedError
+
+    def TxGetResult(self, test):
+      """Calculate Bluetooth Tx result.
+
+      delta_f2_f1_avg_ratio is the ratio of delta_f2_avg and delta_f1_avg, but
+      two results come from different bit pattern, F0 and AA. So we measure both
+      results separately and store them. While both results are measured, then
+      we calculate the delta_f2_f1_avg_ratio.
+      """
+      # We don't ask the inst plugin to measure delta_f2_f1_avg_ratio. Instead
+      # we need to ensure we would measure delta_f1_avg and delta_f2_avg.
+      modified_test = test.Copy()
+      if 'delta_f2_f1_avg_ratio' in modified_test.result_limit:
+        modified_test.result_limit.pop('delta_f2_f1_avg_ratio')
+        if modified_test.args['bit_pattern'] == 'F0':
+          modified_test.result_limit.setdefault('delta_f1_avg', (None, None))
+        elif modified_test.args['bit_pattern'] == 'AA':
+          modified_test.result_limit.setdefault('delta_f2_avg', (None, None))
+
+      results = self._TxGetResult(**modified_test.ToDict())
+
+      if 'delta_f2_f1_avg_ratio' in test.result_limit:
+        if test.args['bit_pattern'] == 'F0':
+          self._delta_f1_avg_results[test.name] = results['delta_f1_avg']
+        elif test.args['bit_pattern'] == 'AA':
+          self._delta_f2_avg_results[test.name] = results['delta_f2_avg']
+
+        if (test.name in self._delta_f1_avg_results and
+            test.name in self._delta_f2_avg_results):
+          # Both results are measured, calculate the delta_f2_f1_avg_ratio.
+          results['delta_f2_f1_avg_ratio'] = (
+              self._delta_f2_avg_results[test.name] /
+              self._delta_f1_avg_results[test.name])
+        else:
+          # Not both results are measured, we don't check the it at this time.
+          test.result_limit.pop('delta_f2_f1_avg_ratio')
+
+      return (test.IsTestPass(results), results)
 
     def _TxGetResult(self, component_name, rf_type, test_type, center_freq,
                      power_level, packet_type, bit_pattern, result_limit,
