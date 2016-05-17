@@ -343,7 +343,7 @@ class BluetoothTestCaseFactory(TestCaseFactory):
       'test_type':      ListChecker(['TX', 'RX']),
       'center_freq':    ListChecker([lambda freq: 2400 < freq < 2500]),
       'power_level':    ListChecker([int, float]),
-      'packet_type':    ListChecker(['DH1', 'DH3', 'DH5', '2DH1', '2DH3',
+      'packet_type':    ListChecker(['1DH1', '1DH3', '1DH5', '2DH1', '2DH3',
                                      '2DH5', '3DH1', '3DH3', '3DH5', 'LE'])}
   COMMON_RESULTS = [
       'avg_power', 'freq_deviation', 'acp_5', 'acp_4', 'acp_3', 'acp_2',
@@ -378,7 +378,7 @@ class BluetoothTestCaseFactory(TestCaseFactory):
     if packet_type == 'LE':
       return 'LE'
     # The Bluetooth packet types are in the format: nXYm
-    # n means modulation type. no number is 1Mbps (basic data rate).
+    # n indicates modulation type. 1 is 1Mbps (basic data rate).
     # 2 is 2Mbps, 3 is 3Mbps modulation (enhanced data rate).
     # Hence the packet type starts from '2' or '3' is EDR, otherwise is BDR.
     if packet_type[0] in ['2', '3']:

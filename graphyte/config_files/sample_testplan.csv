@@ -8,4 +8,4 @@
 ,WLAN_2G,WLAN,RX,"[2412, 2437, 2462]",-90,B,20,11,"[1, 2, 3]",None,0,100,,"(0,10)"
 
 @title,component_name,rf_type,test_type,center_freq,power_level,packet_type,@result,avg_power
-,BLUETOOTH,BLUETOOTH,TX,"[2412, 2437, 2462]",18,"[DH5, 3DH5, LE]",,"(16,20)"
+,BLUETOOTH,BLUETOOTH,TX,"[2412, 2437, 2462]",18,"[1DH5, 3DH5, LE]",,"(16,20)"
