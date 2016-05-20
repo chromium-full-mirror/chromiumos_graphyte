@@ -6,8 +6,10 @@
 
 """Utils class and functions. """
 
+import collections
 from contextlib import contextmanager
 import inspect
+import itertools
 import math
 import os
 import tempfile
@@ -16,6 +18,22 @@ import time
 from .default_setting import CONFIG_DIR
 from .default_setting import LOG_DIR
 from .default_setting import logger
+
+
+def Enum(*args, **kwargs):
+  """Create the immutable enumeration set.
+
+  Usage:
+    1. C-style enum. The value starts from 0 and increase orderly.
+      A = Enum('foo', 'bar')
+      then A.foo == 0, A.bar == 1
+    2. Key-value pair enum.
+      B = Enum(foo='FOO', bar='BAR')
+      then B.foo == 'FOO', B.bar == 'BAR'
+  """
+  fields = dict(zip(args, itertools.count()), **kwargs)
+  enum_type = collections.namedtuple('Enum', fields.keys())
+  return enum_type(**fields)
 
 
 def SearchConfig(filepath, search_dirs=None):

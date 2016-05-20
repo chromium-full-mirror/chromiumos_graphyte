@@ -106,3 +106,30 @@ class WaitForTest(unittest.TestCase):
     now = time.time()
     with self.assertRaises(utils.TimeoutError):
       utils.WaitFor(lambda: _ReturnTrueAfter(now + 1), timeout_secs=0.5)
+
+
+class EnumTest(unittest.TestCase):
+  def testArgsEnum(self):
+    ret = utils.Enum('A', 'B', 'C')
+    self.assertEquals(ret.A, 0)
+    self.assertEquals(ret.B, 1)
+    self.assertEquals(ret.C, 2)
+
+  def testKwargsEnum(self):
+    ret = utils.Enum(A='a', B=1, C=False)
+    self.assertEquals(ret.A, 'a')
+    self.assertEquals(ret.B, 1)
+    self.assertEquals(ret.C, False)
+
+  def testArgsAndKwargsEnum(self):
+    ret = utils.Enum('foo', 'bar', A='a', B=1, C=None)
+    self.assertEquals(ret.foo, 0)
+    self.assertEquals(ret.bar, 1)
+    self.assertEquals(ret.A, 'a')
+    self.assertEquals(ret.B, 1)
+    self.assertEquals(ret.C, None)
+
+  def testEnumImmutable(self):
+    ret = utils.Enum('foo')
+    with self.assertRaises(AttributeError):
+      ret.foo = 'NO WAY!!'
