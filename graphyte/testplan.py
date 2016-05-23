@@ -294,7 +294,7 @@ class WLANTestCaseFactory(TestCaseFactory):
       'bandwidth':      ListChecker([20, 40, 80, 160]),
       'data_rate':      ListChecker([1, 2, 5.5, 11,
                                      6, 9, 12, 18, 24, 36, 48, 54] +
-                                    ['MCS' + str(i) for i in range(10)]),
+                                    ['MCS' + str(i) for i in range(32)]),
       'chain_mask':     ListChecker(range(1, 16)),  # 4x4 MIMO supported
       'nss':            ListChecker([None, 1, 2, 3, 4]),
       'long_preamble':  ListChecker([0, 1])}
