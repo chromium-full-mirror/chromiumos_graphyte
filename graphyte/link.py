@@ -7,6 +7,8 @@ import inspect
 import subprocess
 import tempfile
 
+from . import utils
+
 CalledProcessError = subprocess.CalledProcessError
 
 MODULE_PATH_MAPPING = {
@@ -140,6 +142,18 @@ class DeviceLink(object):
       return self.CheckOutput(*args, **kargs)
     except CalledProcessError:
       return None
+
+  def WriteFile(self, path, content):
+    """Writes some content into file on DUT.
+
+    Args:
+      path: A string for file path on DUT.
+      content: A string to be written into file.
+    """
+    with utils.UnopenedTemporaryFile() as temp_path:
+      with open(temp_path, 'w') as f:
+        f.write(content)
+      self.Push(temp_path, path)
 
 
 def _GetLinkClass(class_name):
