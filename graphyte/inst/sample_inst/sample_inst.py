@@ -10,19 +10,7 @@
 from .. import InstBase
 from ...testplan import ChainMaskToList
 from ...default_setting import logger
-
-
-def _MakePassResult(result_limit):
-  """Make the result that pass all limit."""
-  def _MakeInBoundValue(bound):
-    lower, upper = bound
-    if lower is None:
-      return upper - 1
-    if upper is None:
-      return lower + 1
-    return (lower + upper) / 2
-  return dict([(key, _MakeInBoundValue(bound))
-               for key, bound in result_limit.iteritems()])
+from ...utils import MakeMockPassResult
 
 
 class Inst(InstBase):
@@ -73,7 +61,7 @@ class Inst(InstBase):
                      power_level, standard, bandwidth, data_rate, chain_mask,
                      nss, long_preamble, result_limit, **kwargs):
       logger.info('Wlan TxGetResult. Result limit: %s', result_limit)
-      result = _MakePassResult(result_limit)
+      result = MakeMockPassResult(result_limit)
       if len(self.chain_list) > 1:
         for key, value in result.iteritems():
           result[key] = {idx: value for idx in self.chain_list}
@@ -107,7 +95,7 @@ class Inst(InstBase):
                      power_level, packet_type, bit_pattern, result_limit,
                      **kwargs):
       logger.info('Bluetooth TxGetResult. Result limit: %s', result_limit)
-      return _MakePassResult(result_limit)
+      return MakeMockPassResult(result_limit)
 
     def _RxConfig(self, component_name, rf_type, test_type, center_freq,
                   power_level, packet_type, bit_pattern, **kwargs):
@@ -132,7 +120,7 @@ class Inst(InstBase):
     def _TxGetResult(self, component_name, rf_type, test_type, center_freq,
                      power_level, result_limit, **kwargs):
       logger.info('Zigbee TxGetResult. Result limit: %s', result_limit)
-      return _MakePassResult(result_limit)
+      return MakeMockPassResult(result_limit)
 
     def _RxConfig(self, component_name, rf_type, test_type, center_freq,
                   power_level, rx_num_packets, **kwargs):

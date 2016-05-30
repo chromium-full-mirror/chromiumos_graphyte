@@ -124,6 +124,15 @@ def IsInBound(results, bound):
   return all([_OneValueInBound(value, bound) for value in value_list])
 
 
+def MakeMockPassResult(result_limit):
+  """Make the result that pass all limit."""
+  def _MakeInBoundValue(bound):
+    lower, upper = bound
+    return lower or upper or 0
+  return dict([(key, _MakeInBoundValue(bound))
+               for key, bound in result_limit.iteritems()])
+
+
 def CalculateAverage(values, average_type='Linear'):
   """Calculate the average value.
 

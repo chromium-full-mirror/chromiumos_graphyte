@@ -52,6 +52,35 @@ class IsInBoundTest(unittest.TestCase):
     self.assertFalse(utils.IsInBound({'test1': 'WRONG RESULT'}, bound))
 
 
+class MakeMockPassResultTest(unittest.TestCase):
+  def testNormalLimit(self):
+    key = 'TEST1'
+    bound = (0, 10)
+    ret = utils.MakeMockPassResult({key: bound})
+    self.assertTrue(key in ret)
+    self.assertTrue(utils.IsInBound(ret, bound))
+
+  def testNoLowerBoundLimit(self):
+    key = 'TEST1'
+    bound = (None, 10)
+    ret = utils.MakeMockPassResult({key: bound})
+    self.assertTrue(key in ret)
+    self.assertTrue(utils.IsInBound(ret, bound))
+
+  def testNoUpperBoundLimit(self):
+    key = 'TEST1'
+    bound = (0, None)
+    ret = utils.MakeMockPassResult({key: bound})
+    self.assertTrue(key in ret)
+    self.assertTrue(utils.IsInBound(ret, bound))
+
+  def testNoBoundLimit(self):
+    key = 'TEST1'
+    bound = (None, None)
+    ret = utils.MakeMockPassResult({key: bound})
+    self.assertTrue(key in ret)
+    self.assertTrue(utils.IsInBound(ret, bound))
+
 class CalculateAverageTest(unittest.TestCase):
   def setUp(self):
     self.values = [1.0, 3.0, 8.0]
