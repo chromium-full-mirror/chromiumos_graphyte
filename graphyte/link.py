@@ -14,6 +14,7 @@ CalledProcessError = subprocess.CalledProcessError
 MODULE_PATH_MAPPING = {
     'ADBLink': 'links.adb',
     'SSHLink': 'links.ssh',
+    'SCPILink': 'links.scpi',
     'GPIBLink': 'links.gpib'}
 
 
