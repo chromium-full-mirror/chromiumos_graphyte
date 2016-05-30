@@ -11,7 +11,7 @@ PROJECT_DIR = os.path.join(PROJECT_NAME, os.path.dirname(__file__))
 
 setup(
     name=PROJECT_NAME,
-    version='0.1',
+    version='0.2',
     description='Graphyte (Google RAdio PHY TEst)',
     url='https://sites.google.com/a/google.com/graphyte/home',
     author='Chih-Yu Huang',
