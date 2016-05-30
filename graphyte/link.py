@@ -18,8 +18,13 @@ MODULE_PATH_MAPPING = {
     'GPIBLink': 'links.gpib'}
 
 
+class LinkNotReady(Exception):
+  """Exception for link is not ready."""
+  pass
+
+
 class LinkOptionsError(Exception):
-  """Exception for invalid DUT options."""
+  """Exception for invalid link options."""
   pass
 
 
@@ -65,6 +70,10 @@ class DeviceLink(object):
       An object representing the process, similar to subprocess.Popen.
     """
     raise NotImplementedError
+
+  def CheckReady(self):
+    if not self.IsReady():
+      raise LinkNotReady
 
   def IsReady(self):
     """Checks if DUT is ready for connection.
