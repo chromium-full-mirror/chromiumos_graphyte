@@ -139,7 +139,9 @@ def CalculateAverage(values, average_type='Linear'):
   Args:
     values: A list of float value.
     average_type: one of 'Linear', '10Log10', '20Log10'.
-  Returns: the average value.
+
+  Returns:
+    the average value.
   """
   length = len(values)
   values = map(float, values)
@@ -150,17 +152,48 @@ def CalculateAverage(values, average_type='Linear'):
   if average_type == 'Linear':
     return sum(values) / length
   else:
-    deno = {'10Log10': 10,
-            '20Log10': 20}[average_type]
+    denominator = {
+        '10Log10': 10,
+        '20Log10': 20}[average_type]
     try:
-      actual_values = [math.pow(10, value / deno) for value in values]
+      actual_values = [math.pow(10, value / denominator) for value in values]
       average_value = sum(actual_values) / length
-      return deno * math.log10(average_value)
+      return denominator * math.log10(average_value)
     except ValueError:
       return float('-inf')
     except OverflowError:
       logger.warning('The values exceed the range. Return NaN.')
       return float('nan')
+
+
+def CalculateAverageResult(results, average_type='Linear'):
+  """Calculate the average results.
+
+  For WLAN multi-antenna case, the result would be a dict where the key is the
+  antenna index. So we handle this kind of situation in this method.
+
+  Args:
+    results: a list of float values, or a dict, where the key is antenna index
+             and the value is a list of float values. For example:
+      [150.12, 149.88, 151.22] or
+      {0: [150.12, 149.88, 151.22],
+       1: [148.14, 151.79, 150.24]}
+    average_type: one of 'Linear', '10Log10', '20Log10'.
+
+  Returns:
+    the average results, a float value or a dict where the key is antenna
+    index and the value is a float value. For example:
+      150.41 or
+      {0: 150.41,
+       1: 150.06}
+  """
+  if isinstance(results, list):
+    return CalculateAverage(results, average_type)
+  elif isinstance(results, dict):
+    return {ant_idx: CalculateAverage(values, average_type)
+            for ant_idx, values in results.items()}
+  else:
+    raise TypeError('The type should be list or a dict. %s' % results)
 
 
 class TimeoutError(Exception):

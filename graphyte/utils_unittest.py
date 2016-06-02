@@ -121,6 +121,11 @@ class CalculateAverageTest(unittest.TestCase):
     ret = utils.CalculateAverage([10000, 10000], '10Log10')
     self.assertTrue(math.isnan(ret))
 
+  def testDictResults(self):
+    results = {0: self.values, 1: self.values}
+    answer = {0: self.answer, 1: self.answer}
+    self.assertEquals(answer, utils.CalculateAverageResult(results, 'Linear'))
+
 
 class WaitForTest(unittest.TestCase):
 
