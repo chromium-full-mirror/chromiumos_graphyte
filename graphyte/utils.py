@@ -208,3 +208,15 @@ def WaitFor(condition, timeout_secs, poll_interval_secs=0.1):
       logger.error(error_msg)
       raise TimeoutError(error_msg, ret)
     time.sleep(poll_interval_secs)
+
+def Retry(max_retry_times, interval, target, *args, **kwargs):
+  result = None
+  for retry_time in xrange(max_retry_times):
+    try:
+      result = target(*args, **kwargs)
+    except Exception:
+      logging.exception('Retrying...')
+    if result:
+      logging.info('Get result after %d retries', retry_time)
+      return result
+    time.sleep(interval)
