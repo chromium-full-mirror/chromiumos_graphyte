@@ -155,6 +155,18 @@ class DeviceLink(object):
         f.write(content)
       self.Push(temp_path, path)
 
+  def ReadFile(self, path):
+    with utils.UnopenedTemporaryFile() as temp_path:
+      self.Pull(path, temp_path)
+      return open(temp_path, 'r').read()
+
+  def ReadSpecialFile(self, path, count=None, skip=None):
+    cmd = ['dd', 'bs=1', 'if=%s' % path]
+    if count:
+      cmd += ['count=%d' % count]
+    if skip:
+      cmd += ['skip=%d' % skip]
+    return self.CheckOutput(cmd)
 
 def _GetLinkClass(class_name):
   """Loads and returns a class object specified from the arguments.
