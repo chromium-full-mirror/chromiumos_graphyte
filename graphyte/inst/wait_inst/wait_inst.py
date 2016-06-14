@@ -15,6 +15,12 @@ from ...default_setting import GRAPHYTE_OUT
 
 
 class WaitController(InstBase.ControllerBase):
+  def _Initialize(self):
+    pass
+
+  def _Terminate(self):
+    pass
+
   def _TxConfig(self, **kwargs):
     pass
 

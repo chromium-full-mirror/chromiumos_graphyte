@@ -22,6 +22,12 @@ class RFController(InstBase.ControllerBase):
     super(RFController, self).__init__(inst)
     self.result = None
 
+  def _Initialize(self):
+    pass
+
+  def _Terminate(self):
+    pass
+
   def _TxConfig(self, center_freq, **kwargs):
     self.inst.SetFrequency(center_freq)
 

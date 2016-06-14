@@ -46,8 +46,19 @@ class DUTBase(object):
       logger.exception('Failed in DUTBase __getattr__')
       raise NotImplementedError
 
+  def Initialize(self):
+    """Initialize the DUT device."""
+    raise NotImplementedError
+
+  def Terminate(self):
+    """Terminate the DUT device."""
+    raise NotImplementedError
+
   def SetRF(self, rf_type):
+    if self.rf_type is not None:
+      self.controllers[self.rf_type].Terminate()
     self.rf_type = rf_type
+    self.controllers[self.rf_type].Initialize()
 
   class ControllerBase(object):
     """The abstract DUT controller class that every controller in DUT plugin
@@ -57,18 +68,18 @@ class DUTBase(object):
     def __init__(self, dut=None):
       self.dut = dut
 
-    def Initialize(self, test):
-      """Initialize the given interface."""
-      return self._Initialize(**test.ToDict())
+    def Initialize(self):
+      """Initialize the controller."""
+      return self._Initialize()
 
-    def _Initialize(self, component_name, **kwargs):
+    def _Initialize(self):
       raise NotImplementedError
 
     def Terminate(self):
       """Disconnect/unconfigure the interface that was being used."""
       return self._Terminate()
 
-    def _Terminate(self, **kwargs):
+    def _Terminate(self):
       raise NotImplementedError
 
     def TxConfig(self, test):

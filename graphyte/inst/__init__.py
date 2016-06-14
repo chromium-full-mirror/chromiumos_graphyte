@@ -53,19 +53,23 @@ class InstBase(object):
       raise NotImplementedError
 
   def SetRF(self, rf_type):
+    if self.rf_type is not None:
+      self.controllers[self.rf_type].Terminate()
     self.rf_type = rf_type
-
-  def Info(self):
-    """
-    Right now not much useful. It may be used to print information about
-    the plugin itself.
-    """
-    logger.info(self.name)
+    self.controllers[self.rf_type].Initialize()
 
   def Initialize(self):
+    """Initialize the instrument.
+
+    The method would be called only once before all tests items are executed.
+    """
     raise NotImplementedError
 
   def Terminate(self):
+    """Terminate the instrument.
+
+    The method would be called only once after all tests items are executed.
+    """
     raise NotImplementedError
 
   def SelfCalibrate(self, calibration_type='full'):
@@ -118,6 +122,20 @@ class InstBase(object):
   class ControllerBase(object):
     def __init__(self, inst=None):
       self.inst = inst
+
+    def Initialize(self):
+      """Initialize the RF interface."""
+      return self._Initialize()
+
+    def _Initialize(self):
+      raise NotImplementedError
+
+    def Terminate(self):
+      """Disconnect/unconfigure the interface that was being used."""
+      return self._Terminate()
+
+    def _Terminate(self, **kwargs):
+      raise NotImplementedError
 
     def TxConfig(self, test):
       return self._TxConfig(**test.ToDict())

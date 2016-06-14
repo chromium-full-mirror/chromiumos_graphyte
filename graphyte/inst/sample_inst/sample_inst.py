@@ -46,6 +46,12 @@ class Inst(InstBase):
       super(Inst.WlanController, self).__init__(inst)
       self.chain_list = None
 
+    def _Initialize(self):
+      logger.info('Inst WLAN Initialize')
+
+    def _Terminate(self):
+      logger.info('Inst WLAN Terminate')
+
     def _TxConfig(self, component_name, rf_type, test_type, center_freq,
                   power_level, standard, bandwidth, data_rate, chain_mask, nss,
                   long_preamble, **kwargs):
@@ -82,6 +88,12 @@ class Inst(InstBase):
       logger.info('Wlan RxStop')
 
   class BluetoothController(InstBase.BluetoothControllerBase):
+    def _Initialize(self):
+      logger.info('Inst Bluetooth Initialize')
+
+    def _Terminate(self):
+      logger.info('Inst Bluetooth Terminate')
+
     def _TxConfig(self, component_name, rf_type, test_type, center_freq,
                   power_level, packet_type, bit_pattern, **kwargs):
       logger.info('Bluetooth TxConfig')
@@ -109,6 +121,12 @@ class Inst(InstBase):
       logger.info('Bluetooth RxStop')
 
   class ZigbeeController(InstBase.ZigbeeControllerBase):
+    def _Initialize(self):
+      logger.info('Inst Zigbee Initialize')
+
+    def _Terminate(self):
+      logger.info('Inst Zigbee Terminate')
+
     def _TxConfig(self, component_name, rf_type, test_type, center_freq,
                   power_level, **kwargs):
       logger.info('Zigbee TxConfig')

@@ -151,6 +151,7 @@ class Graphyte(object):
       self.inst.LockInstrument()
       self.inst.SelfCalibrate()
       self.inst.InitPortConfig(self.port_config)
+      self.dut.Initialize()
     except Exception:
       logger.exception('Initialize devices failed')
 
@@ -164,18 +165,14 @@ class Graphyte(object):
 
   def SetRF(self, rf_type):
     logger.info('Set RF type: %s', rf_type)
-    self.rf_type = rf_type
-    self.dut.SetRF(rf_type)
-    self.inst.SetRF(rf_type)
+    if rf_type != self.rf_type:
+      self.rf_type = rf_type
+      self.dut.SetRF(rf_type)
+      self.inst.SetRF(rf_type)
 
   def RunTest(self, test_case):
     logger.info('Running test: \n%s', test_case)
-    # Initialize the device if the RF is changed.
-    if test_case.rf_type != self.rf_type:
-      if self.rf_type is not None:
-        self.dut.Terminate()
-      self.SetRF(test_case.rf_type)
-      self.dut.Initialize(test_case)
+    self.SetRF(test_case.rf_type)
 
     self.inst.SetPortConfig(test_case)
     function_map = {

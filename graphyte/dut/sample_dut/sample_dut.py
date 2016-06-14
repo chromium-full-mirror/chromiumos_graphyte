@@ -21,11 +21,17 @@ class DUT(DUTBase):
         'BLUETOOTH': self.BluetoothController(self),
         '802_15_4': self.ZigbeeController(self)}
 
-  class WlanController(DUTBase.WlanControllerBase):
-    def _Initialize(self, component_name, **kwargs):
-      logger.info('DUT Wlan Initialize: %s', component_name)
+  def Initialize(self):
+    logger.info('DUT Initialize')
 
-    def _Terminate(self, **kwargs):
+  def Terminate(self):
+    logger.info('DUT Terminate')
+
+  class WlanController(DUTBase.WlanControllerBase):
+    def _Initialize(self):
+      logger.info('DUT Wlan Initialize')
+
+    def _Terminate(self):
       logger.info('DUT Wlan Terminate')
 
     def _TxConfig(self, component_name, rf_type, test_type, center_freq,
@@ -56,10 +62,10 @@ class DUT(DUTBase):
       return MakeMockPassResult(result_limit)
 
   class BluetoothController(DUTBase.BluetoothControllerBase):
-    def _Initialize(self, component_name, **kwargs):
-      logger.info('DUT Bluetooth Initialize: %s', component_name)
+    def _Initialize(self):
+      logger.info('DUT Bluetooth Initialize')
 
-    def _Terminate(self, **kwargs):
+    def _Terminate(self):
       logger.info('DUT Bluetooth Terminate')
 
     def _TxConfig(self, component_name, rf_type, test_type, center_freq,
@@ -86,10 +92,10 @@ class DUT(DUTBase):
       return MakeMockPassResult(result_limit)
 
   class ZigbeeController(DUTBase.ZigbeeControllerBase):
-    def _Initialize(self, component_name, **kwargs):
-      logger.info('DUT Zigbee Initialize: %s', component_name)
+    def _Initialize(self):
+      logger.info('DUT Zigbee Initialize')
 
-    def _Terminate(self, **kwargs):
+    def _Terminate(self):
       logger.info('DUT Zigbee Terminate')
 
     def _TxConfig(self, component_name, rf_type, test_type, center_freq,
