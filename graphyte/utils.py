@@ -242,6 +242,7 @@ def WaitFor(condition, timeout_secs, poll_interval_secs=0.1):
       raise TimeoutError(error_msg, ret)
     time.sleep(poll_interval_secs)
 
+
 def Retry(max_retry_times, interval, target, *args, **kwargs):
   result = None
   for retry_time in xrange(max_retry_times):
@@ -253,3 +254,18 @@ def Retry(max_retry_times, interval, target, *args, **kwargs):
       logging.info('Get result after %d retries', retry_time)
       return result
     time.sleep(interval)
+
+
+def LogFunc(func):
+  """The decorator for logging the function call."""
+  def Wrapper(*args, **kwargs):
+    args_name = inspect.getargspec(func).args
+    if args_name and args_name[0] in ['self', 'cls']:
+      real_args = args[1:]
+    else:
+      real_args = args[:]
+    arg_str = ', '.join(map(str, real_args) +
+                        ['%s=%r' % (k, v) for k, v in kwargs.items()])
+    logger.debug('Calling %s(%s)', func.__name__, arg_str)
+    return func(*args, **kwargs)
+  return Wrapper

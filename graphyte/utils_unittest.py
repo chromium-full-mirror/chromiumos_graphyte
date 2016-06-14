@@ -5,6 +5,7 @@
 # found in the LICENSE file.
 
 import math
+import mock
 import time
 import unittest
 
@@ -167,3 +168,26 @@ class EnumTest(unittest.TestCase):
     ret = utils.Enum('foo')
     with self.assertRaises(AttributeError):
       ret.foo = 'NO WAY!!'
+
+
+@utils.LogFunc
+def FakeFunction(*args, **kwargs):
+  del args, kwargs
+
+
+class LogFuncTest(unittest.TestCase):
+  @utils.LogFunc
+  def FakeMethod(self, *args, **kwargs):
+    del args, kwargs
+
+  @mock.patch(__name__ + '.utils.logger')
+  def testArgsAndKwargsMethod(self, mock_logger):
+    self.FakeMethod('foo', 'bar', a=1, b=2)
+    mock_logger.debug.assert_called_with(
+        'Calling %s(%s)', 'FakeMethod', 'foo, bar, a=1, b=2')
+
+  @mock.patch(__name__ + '.utils.logger')
+  def testArgsAndKwargsFunction(self, mock_logger):
+    FakeFunction('foo', 'bar', a=1, b=2)
+    mock_logger.debug.assert_called_with(
+        'Calling %s(%s)', 'FakeFunction', 'foo, bar, a=1, b=2')
