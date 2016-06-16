@@ -400,9 +400,9 @@ class BluetoothTestPlanTest(unittest.TestCase):
         '', 'BT', 'BLUETOOTH', 'TX', '2412',
         '18', '1DH5']
     valid_results = [
-        '@result', 'delta_f2_avg', 'delta_f2_max']
+        '@result', 'freq_drift', 'delta_f2_avg', 'delta_f2_max']
     valid_result_value = [
-        '', '(16,20)', '(16,20)']
+        '', '(16,20)', '(16,20)', '(16,20)']
 
     self._WriteCSVContent([
         self.valid_args + valid_results,

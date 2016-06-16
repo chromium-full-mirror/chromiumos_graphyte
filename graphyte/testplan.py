@@ -353,7 +353,7 @@ class BluetoothTestCaseFactory(TestCaseFactory):
       'avg_power', 'acp_5', 'acp_4', 'acp_3', 'acp_2',
       'acp_1', 'acp0', 'acp1', 'acp2', 'acp3', 'acp4', 'acp5']
   FORMAT_RESULT_CHECKER = {
-      'BDR': ['bandwidth_20db', 'freq_deviation', 'delta_f1_avg',
+      'BDR': ['bandwidth_20db', 'freq_deviation', 'freq_drift', 'delta_f1_avg',
               'delta_f2_avg', 'delta_f2_max', 'delta_f2_f1_avg_ratio'],
       'EDR': ['freq_deviation', 'edr_evm_avg', 'edr_evm_peak',
               'edr_extreme_omega_0', 'edr_extreme_omega_i0', 'edr_omega_i',
@@ -375,7 +375,7 @@ class BluetoothTestCaseFactory(TestCaseFactory):
                 'acp_2', 'acp_1', 'acp0', 'acp1', 'acp2', 'acp3', 'acp4',
                 'acp5', 'freq_offset', 'rx_ber', 'rx_per'],
       'F0': ['freq_deviation', 'delta_f1_avg', 'delta_f2_f1_avg_ratio'],
-      'AA': ['delta_f2_avg', 'delta_f2_max', 'delta_f1_f0',
+      'AA': ['freq_drift', 'delta_f2_avg', 'delta_f2_max', 'delta_f1_f0',
              'delta_f2_f1_avg_ratio', 'delta_f0_fn_max', 'delta_fn_fn5_max']}
 
   # The maximum number of bytes for each BDR and EDR packet type.
