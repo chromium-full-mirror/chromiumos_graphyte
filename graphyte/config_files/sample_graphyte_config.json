@@ -8,5 +8,7 @@
     "dut_config": "sample_dut_config.json",
 
     "test_plan": "sample_testplan.csv",
-    "port_config": "sample_port_config.json"
+    "port_config": "sample_port_config.json",
+
+    "retries": 3
 }

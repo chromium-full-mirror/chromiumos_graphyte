@@ -29,6 +29,7 @@ from .result_writer import ResultWriter
 from .port_config import PortConfig
 from .testplan import TestPlan
 from .utils import PrepareOutputFile
+from .utils import Retry
 from .utils import SearchConfig
 
 
@@ -81,6 +82,9 @@ class Graphyte(object):
 
     # Load port config, including port mapping and path loss
     self.port_config = PortConfig(graphyte_config['port_config'], config_dir)
+
+    # Load the test argument
+    self.retries = graphyte_config.get('retries', 1)
 
     # Open a result writer
     self.result_writer = ResultWriter(result_file)
@@ -178,11 +182,19 @@ class Graphyte(object):
     function_map = {
         'TX': self.RunTxTest,
         'RX': self.RunRxTest}
-    try:
-      is_pass, result = function_map[test_case.test_type](test_case)
-    except Exception:
-      logger.exception('RunTest error. test_case: %s', test_case)
-      is_pass, result = False, {}
+
+    def _RunTest():
+      try:
+        return function_map[test_case.test_type](test_case)
+      except Exception:
+        logger.exception('RunTest error. test_case: %s', test_case)
+        return False, {}
+    def _Condition(ret):
+      # ret is (is_pass, result)
+      return ret[0]
+
+    # pylint: disable=W0633
+    is_pass, result = Retry(self.retries, 0, _RunTest, _Condition)
     self.all_tests_pass &= is_pass
     self.result_writer.WriteResult(test_case, result)
 

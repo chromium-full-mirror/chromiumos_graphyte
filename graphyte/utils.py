@@ -243,17 +243,37 @@ def WaitFor(condition, timeout_secs, poll_interval_secs=0.1):
     time.sleep(poll_interval_secs)
 
 
-def Retry(max_retry_times, interval, target, *args, **kwargs):
+def Retry(max_retry_times, interval, target, condition=None, *args, **kwargs):
+  """Retry the function until the condition is satisfied.
+
+  Args:
+    max_retry_times: the maximum retry times.
+    interval: the time interval between each try, unit in second.
+    target: the target function.
+    condition: a method to decide if target's return value is valid.
+               None for standard Python if statement.
+    args: the arguments passed into the target function.
+    kwargs: the keyword arguments passed into the target function.
+
+  Returns:
+    the result of the target function.
+  """
+  if condition is None:
+    condition = lambda x: x
   result = None
   for retry_time in xrange(max_retry_times):
     try:
       result = target(*args, **kwargs)
     except Exception:
-      logging.exception('Retrying...')
-    if result:
-      logging.info('Get result after %d retries', retry_time)
+      pass
+    if condition(result):
+      logger.info('Get result after %d retries', retry_time)
       return result
-    time.sleep(interval)
+    else:
+      logger.warning('Retrying...[%d/%d]', retry_time + 1, max_retry_times)
+      time.sleep(interval)
+  # All results failed. Return the last result.
+  return result
 
 
 def LogFunc(func):
