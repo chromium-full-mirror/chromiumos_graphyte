@@ -4,9 +4,12 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-"""The Anritsu ML2437A power meter. """
+"""The plugin of Anritsu ML2437A power meter.
+
+Reference: ML2430A series power meter operation manual."""
 
 import re
+import time
 
 from .. import InstBase
 from ...default_setting import logger
@@ -18,12 +21,13 @@ class InstrumentNotReady(Exception):
 
 
 class RFController(InstBase.ControllerBase):
-  def __init__(self, inst=None):
+  def __init__(self, inst=None, duty_cycle=None):
     super(RFController, self).__init__(inst)
     self.result = None
+    self.duty_cycle = duty_cycle
 
   def _Initialize(self):
-    pass
+    self.inst.SetDutyCycle(self.duty_cycle)
 
   def _Terminate(self):
     pass
@@ -32,6 +36,7 @@ class RFController(InstBase.ControllerBase):
     self.inst.SetFrequency(center_freq)
 
   def _TxMeasure(self, center_freq, **kwargs):
+    time.sleep(2)  # Wait for power meter stable
     power = self.inst.FetchPower()
     if 'chain_mask' in kwargs:  # WLAN case
       antenna_indice = ChainMaskToList(kwargs['chain_mask'])
@@ -67,8 +72,8 @@ class Inst(InstBase):
 
     self.controllers = {
         'WLAN': RFController(self),
-        'BLUETOOTH': RFController(self),
-        '802_15_4': RFController(self)}
+        'BLUETOOTH': RFController(self, 50),
+        '802_15_4': RFController(self, 50)}
 
   def Initialize(self):
     logger.info('Inst Initialize')
@@ -100,6 +105,25 @@ class Inst(InstBase):
       return int(fetch_freq / 1e6) == freq_mhz
     except Exception:
       return False
+
+  def SetDutyCycle(self, duty_cycle):
+    """Applies a duty cycle to the sensor.
+
+    When the signal is continuous carrier wave, we should turn off the duty
+    cycle and set the sensor measurement mode to default. On the other hand, if
+    the signal is modulated signal, we should turn on the duty cycle setting and
+    set the sensor measurement mode to modulated average.
+
+    Args:
+      duty_cycle: None to turn of duty cycle, or a number between 0 and 100.
+    """
+    if duty_cycle is None:
+      self.link.CheckCall('DUTYS A,OFF')
+      self.link.CheckCall('SENMM A,DEFAULT')
+    else:
+      self.link.CheckCall('DUTYS A,ON')
+      self.link.CheckCall('DUTY A,%d' % duty_cycle)
+      self.link.CheckCall('SENMM A,MOD')
 
   def FetchPower(self):
     results = []
