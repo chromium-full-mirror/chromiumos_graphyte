@@ -1,11 +1,13 @@
 {
     "config_name": "Graphyte Sample Config",
 
-    "inst": "sample_inst",
-    "inst_config": "sample_inst_config.json",
+    "inst": "sample.dummy_inst",
+    "inst_config": {},
 
-    "dut": "sample_dut",
-    "dut_config": "sample_dut_config.json",
+    "dut": "sample.dummy_dut",
+    "dut_config": {
+        "override_config": "new value"
+    },
 
     "test_plan": "sample_testplan.csv",
     "port_config": "sample_port_config.json",

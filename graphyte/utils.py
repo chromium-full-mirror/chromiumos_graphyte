@@ -10,6 +10,7 @@ import collections
 from contextlib import contextmanager
 import inspect
 import itertools
+import json
 import math
 import os
 import signal
@@ -35,6 +36,29 @@ def Enum(*args, **kwargs):
   fields = dict(zip(args, itertools.count()), **kwargs)
   enum_type = collections.namedtuple('Enum', fields.keys())
   return enum_type(**fields)
+
+
+def LoadConfig(filepath):
+  with open(filepath, 'r') as f:
+    return json.load(f)
+
+
+def OverrideConfig(base, overrides):
+  """Recursively overrides non-mapping values inside a mapping object.
+
+  Args:
+    base: A mapping object with existing data.
+    overrides: A mapping to override values in base.
+
+  Returns:
+    The new mapping object with values overridden.
+  """
+  for key, val in overrides.iteritems():
+    if isinstance(val, collections.Mapping):
+      base[key] = OverrideConfig(base.get(key, {}), val)
+    else:
+      base[key] = overrides[key]
+  return base
 
 
 def SearchConfig(filepath, search_dirs=None):
@@ -319,7 +343,7 @@ def LogFunc(func):
     else:
       real_args = args[:]
     arg_str = ', '.join(map(str, real_args) +
-                        ['%s=%r' % (k, v) for k, v in kwargs.items()])
+                        ['%s=%r' % (key, val) for key, val in kwargs.items()])
     logger.debug('Calling %s(%s)', func.__name__, arg_str)
     return func(*args, **kwargs)
   return Wrapper
