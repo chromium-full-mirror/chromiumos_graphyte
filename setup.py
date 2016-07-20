@@ -3,11 +3,15 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-from distutils.core import setup
+from setuptools import find_packages
+from setuptools import setup
 import os
 
 PROJECT_NAME = 'graphyte'
 PROJECT_DIR = os.path.join(PROJECT_NAME, os.path.dirname(__file__))
+PACKAGES = find_packages()
+PACKAGE_DATA = {package: ['*.json'] for package in PACKAGES}
+PACKAGE_DATA[PROJECT_NAME].append('config_files/*')
 
 setup(
     name=PROJECT_NAME,
@@ -17,19 +21,5 @@ setup(
     author='Chih-Yu Huang',
     author_email='akahuang@google.com',
     license='Chromium',
-    packages=[
-        PROJECT_NAME,
-        PROJECT_NAME + '.links',
-        PROJECT_NAME + '.dut',
-        PROJECT_NAME + '.dut.sample_dut',
-        PROJECT_NAME + '.inst',
-        PROJECT_NAME + '.inst.anritsu_ml2437a',
-        PROJECT_NAME + '.inst.sample_inst',
-        PROJECT_NAME + '.inst.wait_inst'],
-    package_data={
-        PROJECT_NAME: ['config_files/*'],
-        PROJECT_NAME + '.dut.sample_dut': ['*.json'],
-        PROJECT_NAME + '.inst.anritsu_ml2437a': ['*.json'],
-        PROJECT_NAME + '.inst.sample_inst': ['*.json'],
-        PROJECT_NAME + '.inst.wait_inst': ['*.json']},
-    )
+    packages=PACKAGES,
+    package_data=PACKAGE_DATA)
