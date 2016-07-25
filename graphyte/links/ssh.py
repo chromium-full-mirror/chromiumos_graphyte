@@ -7,6 +7,7 @@
 
 import pipes
 import platform
+import shlex
 import subprocess
 
 from .. import link
@@ -89,12 +90,14 @@ class SSHLink(link.DeviceLink):
     remote_sig, options = self._Signature(False)
 
     if isinstance(command, basestring):
-      command = 'ssh %s %s %s' % (' '.join(options), remote_sig,
-                                  pipes.quote(command))
-      shell = True
-    else:
-      command = ['ssh'] + options + [remote_sig] + map(pipes.quote, command)
-      shell = False
+      # since the shell command is passed through SSH client,
+      # the entire command is argument for SSH command
+      # e.g. command = 'VAR=xxx cmd arg0 arg1...'
+      # will become: 'ssh' <SSH OPTIONS> 'VAR=xxx' 'cmd' 'arg0' 'arg1' ...
+      command = shlex.split(command)
+
+    shell = False
+    command = ['ssh'] + options + [remote_sig] + map(pipes.quote, command)
 
     logger.debug('SSHLink: Run [%r]', command)
     close_fds = True
