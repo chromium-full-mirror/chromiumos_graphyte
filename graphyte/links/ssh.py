@@ -5,6 +5,7 @@
 
 """Implementation of graphyte.link.DeviceLink using SSH."""
 
+import os
 import pipes
 import platform
 import shlex
@@ -67,9 +68,18 @@ class SSHLink(link.DeviceLink):
       options += ['-i', self.identity]
     return sig, options
 
+  def _ToUnixPath(self, path):
+    if platform.system() != 'Windows':
+      return path  # assume that we are in Unix machine already
+
+    path = os.path.abspath(path)
+    drive, path = os.path.splitdrive(path)
+    return '/' + drive[0] + path.replace(os.path.sep, '/')
+
   def Push(self, local, remote):
     """See DUTLink.Push"""
     remote_sig, options = self._Signature(True)
+    local = self._ToUnixPath(local)
     return subprocess.check_call(['scp'] + options +
                                  [local, '%s:%s' % (remote_sig, remote)])
 
@@ -81,6 +91,7 @@ class SSHLink(link.DeviceLink):
         with open(path) as f:
           return f.read()
 
+    local = self._ToUnixPath(local)
     remote_sig, options = self._Signature(True)
     subprocess.check_call(['scp'] + options +
                           ['%s:%s' % (remote_sig, remote), local])
