@@ -152,7 +152,7 @@ class InstBase(object):
     def TxGetResult(self, test):
       results = self._TxGetResult(**test.ToDict())
       # TODO(akahuang): Check the structure of the results.
-      return (test.IsTestPass(results), results)
+      return (test.CheckTestPasses(results), results)
 
     def _TxGetResult(self, result_limit, **kwargs):
       """Wait for measurement to be completed and return the test result.
@@ -288,7 +288,7 @@ class InstBase(object):
           # Not both results are measured, we don't check the it at this time.
           test.result_limit.pop('delta_f2_f1_avg_ratio')
 
-      return (test.IsTestPass(results), results)
+      return (test.CheckTestPasses(results), results)
 
     def _TxGetResult(self, component_name, rf_type, test_type, center_freq,
                      power_level, packet_type, bit_pattern, result_limit,

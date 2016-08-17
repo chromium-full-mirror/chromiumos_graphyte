@@ -539,27 +539,40 @@ class TestCase(object):
     """Returns the value in args. It's used for sorting the test cases."""
     return tuple([self.args.get(arg_key) for arg_key in arg_keys])
 
-  def IsTestPass(self, result):
-    """Check the result meets the result or not."""
+  def CheckTestPasses(self, result):
+    """Checks the result meets the result limit of the test case or not.
+
+    The method verifies that each item in the `result_limit` is included in the
+    result dict, and verifies that the result value meets the limit.
+
+    Args:
+      result: A dict in which keys should contain all the keys of
+          `self.result_limit`, and the values are the result values.
+
+    Returns:
+      True if every result value meets the result limit.
+    """
+    is_pass = True
     for key in self.result_limit.keys():
-      # Check required result is at the result
+      # Check there are all the required items in the result.
       if key not in result:
         logger.error('The result of %s is missing.', key)
-        return False
-      # Check the result meets the result
+        is_pass = False
+      # Check the result value meets the result limit.
       if not IsInBound(result[key], self.result_limit[key]):
         logger.info('The test in result %s failed. %s not in %s',
                     key, result[key], self.result_limit[key])
-        return False
-    return True
+        is_pass = False
+    return is_pass
 
   def ToDict(self):
-    """Return a dictionary containing all arguments of the class. It is for
-    expanding the arguments of the function. For example:
+    """Returns a dictionary containing all arguments of the class.
 
-    def foo(component_name, **kwargs):
-      pass
-    foo(**test_case.ToDict())
+    It is for expanding the arguments of the function. For example:
+
+      def foo(component_name, **kwargs):
+        pass
+      foo(**test_case.ToDict())
     """
     ret = self.args.copy()
     ret['result_limit'] = self.result_limit.copy()
@@ -571,8 +584,21 @@ class TestCase(object):
 
 
 def ChainMaskToList(chain_mask):
-  """Convert the chain mask to the list of active antenna, starts from 0.
+  """Converts the chain mask to the list of active antenna, starts from 0.
+
+  The chain mask is the indicator of the activated antenna in binary
+  representation. LSB means the first antenna and we called it antenna #0. For
+  example:
+    1 (b’0001) means the first antenna is activated.
+    2 (b’0010) means the second antenna is activated.
+    3 (b’0011) means the first and the second antenna are activated.
   If the chain_mask is None, it means there is only 1 antenna.
+
+  Args:
+    chain_mask: None or integer.
+
+  Returns:
+    A list of integer which contains the activated antenna indices.
   """
   if chain_mask is None:
     return [0]

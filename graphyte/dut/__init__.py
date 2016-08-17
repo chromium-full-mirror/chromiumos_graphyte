@@ -128,7 +128,7 @@ class DUTBase(object):
 
     def RxGetResult(self, test):
       results = self._RxGetResult(**test.ToDict())
-      return (test.IsTestPass(results), results)
+      return (test.CheckTestPasses(results), results)
 
     def _RxGetResult(self, result_limit, **kwargs):
       raise NotImplementedError
