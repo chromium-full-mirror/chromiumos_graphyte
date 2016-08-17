@@ -4,5 +4,8 @@
         "minor": 0,
         "primary": 13
     },
-    "sample_number": 10
+    "sample_number": 5,
+    "wlan_duty_cycle": null,
+    "bluetooth_duty_cycle": null,
+    "zigbee_duty_cycle": null
 }
