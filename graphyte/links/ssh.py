@@ -106,9 +106,11 @@ class SSHLink(link.DeviceLink):
       # e.g. command = 'VAR=xxx cmd arg0 arg1...'
       # will become: 'ssh' <SSH OPTIONS> 'VAR=xxx' 'cmd' 'arg0' 'arg1' ...
       command = shlex.split(command)
+      command = ['ssh'] + options + [remote_sig] + command
+    else:
+      command = ['ssh'] + options + [remote_sig] + map(pipes.quote, command)
 
     shell = False
-    command = ['ssh'] + options + [remote_sig] + map(pipes.quote, command)
 
     logger.debug('SSHLink: Run [%r]', command)
     close_fds = True
