@@ -12,6 +12,7 @@ import inspect
 import itertools
 import math
 import os
+import signal
 import tempfile
 import time
 
@@ -205,6 +206,39 @@ class TimeoutError(Exception):
 
   def __str__(self):
     return repr(self.message)
+
+
+@contextmanager
+def Timeout(secs):
+  """Timeout context manager.
+
+  It will raise TimeoutError after timeout is reached, interrupting execution
+  of the thread.  It does not support nested "with Timeout" blocks, and can only
+  be used in the main thread of Python.
+
+  Args:
+    secs: Number of seconds to wait before timeout.
+
+  Raises:
+    TimeoutError if timeout is reached before execution has completed.
+    ValueError if not run in the main thread.
+  """
+  def Handler(signum, frame):
+    del signum, frame
+    raise TimeoutError('Timeout')
+
+  if secs:
+    if signal.alarm(secs):
+      raise TimeoutError('Alarm was already set')
+
+  signal.signal(signal.SIGALRM, Handler)
+
+  try:
+    yield
+  finally:
+    if secs:
+      signal.alarm(0)
+      signal.signal(signal.SIGALRM, lambda signum, frame: None)
 
 
 def WaitFor(condition, timeout_secs, poll_interval_secs=0.1):
