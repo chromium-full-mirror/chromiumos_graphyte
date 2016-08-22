@@ -1,0 +1,8 @@
+{
+    "link_options": {
+        "link_class": "SCPILink",
+        "host": "10.3.0.60",
+        "port": 5025
+    },
+    "inst_port": 1
+}
