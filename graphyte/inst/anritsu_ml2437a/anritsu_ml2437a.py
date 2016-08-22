@@ -65,15 +65,16 @@ class Inst(InstBase):
   name = 'Anritsu ML2437A'
   need_link = True
 
-  def __init__(self, sample_number=5, **kwargs):
+  def __init__(self, sample_number=5, wlan_duty_cycle=None,
+               bluetooth_duty_cycle=None, zigbee_duty_cycle=None, **kwargs):
     super(Inst, self).__init__(**kwargs)
     self.current_pathloss = None
     self.sample_number = sample_number
 
     self.controllers = {
-        'WLAN': RFController(self),
-        'BLUETOOTH': RFController(self, 50),
-        '802_15_4': RFController(self, 50)}
+        'WLAN': RFController(self, wlan_duty_cycle),
+        'BLUETOOTH': RFController(self, bluetooth_duty_cycle),
+        '802_15_4': RFController(self, zigbee_duty_cycle)}
 
   def Initialize(self):
     logger.info('Inst Initialize')
