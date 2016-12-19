@@ -52,18 +52,18 @@ class Inst(InstBase):
     def _Terminate(self):
       logger.info('Inst WLAN Terminate')
 
-    def _TxConfig(self, component_name, rf_type, test_type, center_freq,
+    def _TxConfig(self, component_name, center_freq,
                   power_level, standard, bandwidth, data_rate, chain_mask, nss,
                   long_preamble, **kwargs):
       logger.info('Wlan TxConfig')
       self.chain_list = ChainMaskToList(kwargs.get('chain_mask'))
 
-    def _TxMeasure(self, component_name, rf_type, test_type, center_freq,
+    def _TxMeasure(self, component_name, center_freq,
                    power_level, standard, bandwidth, data_rate, chain_mask,
                    nss, long_preamble, result_limit, **kwargs):
       logger.info('Wlan TxMeasure')
 
-    def _TxGetResult(self, component_name, rf_type, test_type, center_freq,
+    def _TxGetResult(self, component_name, center_freq,
                      power_level, standard, bandwidth, data_rate, chain_mask,
                      nss, long_preamble, result_limit, **kwargs):
       logger.info('Wlan TxGetResult. Result limit: %s', result_limit)
@@ -73,12 +73,12 @@ class Inst(InstBase):
           result[key] = {idx: value for idx in self.chain_list}
       return result
 
-    def _RxConfig(self, component_name, rf_type, test_type, center_freq,
+    def _RxConfig(self, component_name, center_freq,
                   power_level, standard, bandwidth, data_rate, chain_mask, nss,
                   long_preamble, rx_num_packets, **kwargs):
       logger.info('Wlan RxConfig')
 
-    def _RxGenerate(self, component_name, rf_type, test_type, center_freq,
+    def _RxGenerate(self, component_name, center_freq,
                     power_level, standard, bandwidth, data_rate, chain_mask,
                     nss, long_preamble, rx_num_packets, **kwargs):
       logger.info('Wlan RxGenerate. Rx num packets: %s, power level: %s',
@@ -94,26 +94,26 @@ class Inst(InstBase):
     def _Terminate(self):
       logger.info('Inst Bluetooth Terminate')
 
-    def _TxConfig(self, component_name, rf_type, test_type, center_freq,
+    def _TxConfig(self, component_name, center_freq,
                   power_level, packet_type, bit_pattern, **kwargs):
       logger.info('Bluetooth TxConfig')
 
-    def _TxMeasure(self, component_name, rf_type, test_type, center_freq,
+    def _TxMeasure(self, component_name, center_freq,
                    power_level, packet_type, bit_pattern, result_limit,
                    **kwargs):
       logger.info('Bluetooth TxMeasure')
 
-    def _TxGetResult(self, component_name, rf_type, test_type, center_freq,
+    def _TxGetResult(self, component_name, center_freq,
                      power_level, packet_type, bit_pattern, result_limit,
                      **kwargs):
       logger.info('Bluetooth TxGetResult. Result limit: %s', result_limit)
       return MakeMockPassResult(result_limit)
 
-    def _RxConfig(self, component_name, rf_type, test_type, center_freq,
+    def _RxConfig(self, component_name, center_freq,
                   power_level, packet_type, bit_pattern, **kwargs):
       logger.info('Bluetooth RxConfig')
 
-    def _RxGenerate(self, component_name, rf_type, test_type, center_freq,
+    def _RxGenerate(self, component_name, center_freq,
                     power_level, packet_type, bit_pattern, **kwargs):
       logger.info('Bluetooth RxGenerate. power level: %s', power_level)
 
@@ -127,24 +127,24 @@ class Inst(InstBase):
     def _Terminate(self):
       logger.info('Inst Zigbee Terminate')
 
-    def _TxConfig(self, component_name, rf_type, test_type, center_freq,
+    def _TxConfig(self, component_name, center_freq,
                   power_level, **kwargs):
       logger.info('Zigbee TxConfig')
 
-    def _TxMeasure(self, component_name, rf_type, test_type, center_freq,
+    def _TxMeasure(self, component_name, center_freq,
                    power_level, result_limit, **kwargs):
       logger.info('Zigbee TxMeasure')
 
-    def _TxGetResult(self, component_name, rf_type, test_type, center_freq,
+    def _TxGetResult(self, component_name, center_freq,
                      power_level, result_limit, **kwargs):
       logger.info('Zigbee TxGetResult. Result limit: %s', result_limit)
       return MakeMockPassResult(result_limit)
 
-    def _RxConfig(self, component_name, rf_type, test_type, center_freq,
+    def _RxConfig(self, component_name, center_freq,
                   power_level, rx_num_packets, **kwargs):
       logger.info('Zigbee RxConfig')
 
-    def _RxGenerate(self, component_name, rf_type, test_type, center_freq,
+    def _RxGenerate(self, component_name, center_freq,
                     power_level, rx_num_packets, **kwargs):
       logger.info('Zigbee RxGenerate. Rx num packets: %s, power level: %s',
                   rx_num_packets, power_level)

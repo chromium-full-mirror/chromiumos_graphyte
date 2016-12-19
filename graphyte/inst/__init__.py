@@ -5,19 +5,23 @@
 # found in the LICENSE file.
 
 """The Virtual Instrument module.
+
 This is the virtual instrument class which every instrument plugin should
 implement.
 """
 
 from .. import link
 from ..default_setting import logger
+from .. import device
 
 
 class InstBase(object):
-  """The abstract instrument class that every instrument plugin should inherit
-  it. It contains several RF controllers, and each controller corresponds one RF
-  chip. We can control different RF chip by assigning the rf_type, and delegate
-  to the assigned controller."""
+  """The abstract instrument class.
+
+  Every instrument plugin should inherit it. It contains several RF controllers,
+  and each controller corresponds one RF chip. We can control different RF chip
+  by assigning the rf_type, and delegate to the assigned controller.
+  """
 
   name = 'Virtual instrument Plugin'
   need_link = False
@@ -45,7 +49,7 @@ class InstBase(object):
     self.active_component = (None, None)
 
   def __getattr__(self, name):
-    """Delegate to the active controller, that is recorded at rf_type."""
+    """Delegates to the active controller, that is recorded at rf_type."""
     try:
       return getattr(self.controllers[self.rf_type], name)
     except:
@@ -59,20 +63,26 @@ class InstBase(object):
     self.controllers[self.rf_type].Initialize()
 
   def Initialize(self):
-    """Initialize the instrument.
+    """Initializes the instrument.
 
     The method would be called only once before all tests items are executed.
     """
     raise NotImplementedError
 
   def Terminate(self):
-    """Terminate the instrument.
+    """Terminates the instrument.
 
     The method would be called only once after all tests items are executed.
     """
     raise NotImplementedError
 
   def SelfCalibrate(self, calibration_type='full'):
+    """Runs the instrument self calirbation.
+
+    Runs the internal calculation to correct for power measurement inaccuracies
+    in the case of temperature drift. This method would be called once before
+    all test cases starts.
+    """
     raise NotImplementedError
 
   def InitPortConfig(self, port_config_table):
@@ -97,7 +107,8 @@ class InstBase(object):
     self._SetPortConfig(port_mapping, pathloss)
 
   def _SetPortConfig(self, port_mapping, pathloss):
-    """Set the port mapping and the pathloss table for the active component.
+    """Sets the port mapping and the pathloss table for the active component.
+
     Because a component might be multiple antenna, the port mapping and the path
     loss are the list.
     Arg:
@@ -114,53 +125,82 @@ class InstBase(object):
     raise NotImplementedError
 
   def LockInstrument(self):
+    """Locks the instrument to reject other connection.
+
+    This method is used for the ping pong test. After calling this method, the
+    instrument should reject additional connections.
+    """
     raise NotImplementedError
 
   def UnlockInstrument(self):
+    """Unlocks the instrument to allow other connection.
+
+    This method should be called after LockInstrument is called.
+    After calling this method, the instrument should allow other connections.
+    """
     raise NotImplementedError
 
-  class ControllerBase(object):
+  class ControllerBase(device.ControllerBase):
+    """The abstract instrument RF controller class.
+
+    Every controller in instrument plugin should inherit it. We use wrapped
+    function for each API, that give us flexibility to do pre-processing or
+    post-processing.
+    """
     def __init__(self, inst=None):
       self.inst = inst
 
     def Initialize(self):
-      """Initialize the RF interface."""
       return self._Initialize()
 
     def _Initialize(self):
+      """Initializes the RF interface."""
       raise NotImplementedError
 
     def Terminate(self):
-      """Disconnect/unconfigure the interface that was being used."""
       return self._Terminate()
 
-    def _Terminate(self, **kwargs):
+    def _Terminate(self):
+      """Disconnects/unconfigures the interface that was being used."""
       raise NotImplementedError
 
     def TxConfig(self, test):
-      return self._TxConfig(**test.ToDict())
+      test_case = self._CheckTestArgument(test.ToDict(), 'TX')
+      return self._TxConfig(**test_case)
 
     def _TxConfig(self, **kwargs):
+      """Configures the instrument for the test case.
+
+      Configures measurement and commits settings to the instrument without
+      arming trigger. The method would be called before the DUT start
+      transmitting signal.
+      """
       raise NotImplementedError
 
     def TxMeasure(self, test):
-      return self._TxMeasure(**test.ToDict())
+      test_case = self._CheckTestArgument(test.ToDict(), 'TX')
+      return self._TxMeasure(**test_case)
 
     def _TxMeasure(self, **kwargs):
+      """Measures the Tx signal transmitted by DUT.
+
+      Triggers, captures, and analyzes the signal. The method would be called
+      after the DUT start transmitting signal.
+      """
       raise NotImplementedError
 
     def TxGetResult(self, test):
-      results = self._TxGetResult(**test.ToDict())
+      test_case = self._CheckTestArgument(test.ToDict(), 'TX')
+      results = self._TxGetResult(**test_case)
       # TODO(akahuang): Check the structure of the results.
       return (test.CheckTestPasses(results), results)
 
     def _TxGetResult(self, result_limit, **kwargs):
-      """Wait for measurement to be completed and return the test result.
+      """Waits for measurement to be completed and returns the test result.
 
       Args:
-        result_limit: A dict of the test result.
-        The values are a tuple of the lower bound and upper bound.
-        Example:
+        result_limit: A dict of the test result. The values are a tuple of the
+        lower bound and upper bound. For example:
           {
             'test_result1': (None, -25),
             'test_result2': (16, 20)
@@ -192,24 +232,36 @@ class InstBase(object):
       raise NotImplementedError
 
     def RxConfig(self, test):
-      return self._RxConfig(**test.ToDict())
+      test_case = self._CheckTestArgument(test.ToDict(), 'RX')
+      return self._RxConfig(**test_case)
 
     def _RxConfig(self, **kwargs):
+      """Configures the instrument for the test case.
+
+      Configures the VSG and loads the waveform based on the signal information.
+      The method would be called before the DUT start receiving signal.
+      """
       raise NotImplementedError
 
     def RxGenerate(self, test):
-      return self._RxGenerate(**test.ToDict())
+      test_case = self._CheckTestArgument(test.ToDict(), 'RX')
+      return self._RxGenerate(**test_case)
 
     def _RxGenerate(self, rx_num_packets, power_level, **kwargs):
+      """Generates the signal and starts transmission."""
       raise NotImplementedError
 
     def RxStop(self, test):
-      return self._RxStop(**test.ToDict())
+      test_case = self._CheckTestArgument(test.ToDict(), 'RX')
+      return self._RxStop(**test_case)
 
     def _RxStop(self, **kwargs):
+      """Stops transmitting the signal."""
       raise NotImplementedError
 
   class WlanControllerBase(ControllerBase):
+    RF_TYPE = 'WLAN'
+
     def _TxConfig(self, component_name, rf_type, test_type, center_freq,
                   power_level, standard, bandwidth, data_rate, chain_mask, nss,
                   long_preamble, **kwargs):
@@ -236,6 +288,8 @@ class InstBase(object):
       raise NotImplementedError
 
   class BluetoothControllerBase(ControllerBase):
+    RF_TYPE = 'BLUETOOTH'
+
     def __init__(self, inst):
       InstBase.ControllerBase.__init__(self, inst)
       self.inst = inst
@@ -253,7 +307,7 @@ class InstBase(object):
       raise NotImplementedError
 
     def TxGetResult(self, test):
-      """Calculate Bluetooth Tx result.
+      """Calculates Bluetooth Tx result.
 
       delta_f2_f1_avg_ratio is the ratio of delta_f2_avg and delta_f1_avg, but
       two results come from different bit pattern, F0 and AA. So we measure both
@@ -306,6 +360,8 @@ class InstBase(object):
       raise NotImplementedError
 
   class ZigbeeControllerBase(ControllerBase):
+    RF_TYPE = '802_15_4'
+
     def _TxConfig(self, component_name, rf_type, test_type, center_freq,
                   power_level, **kwargs):
       raise NotImplementedError

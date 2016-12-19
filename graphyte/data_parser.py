@@ -5,6 +5,7 @@
 # found in the LICENSE file.
 
 """The module is for parsing data in the test plan.
+
 We implement a parse function to convert string to required data type, and data
 checkers for checking the data is valid.
 """
@@ -19,7 +20,7 @@ BUILDER_DICT = {'[': list, '(': tuple}
 
 
 def Parse(string, checker=None):
-  """Convert the string to the python type.
+  """Converts the string to the python type.
 
   We only support tuple, list, None, int, float, and str.
   There are some restrictions for input:
@@ -30,8 +31,10 @@ def Parse(string, checker=None):
   Args:
     string: The string to be parsed.
     checker: The rule of the result. None if no rule for the result.
+
   Returns:
     The parsed result.
+
   Raise:
     ValueError: if the result does not meet the rule.
   """
@@ -77,7 +80,8 @@ class CheckerBase(object):
 
 
 class LiteralChecker(CheckerBase):
-  """Check whether the literal data matches one of the rules.
+  """Checks whether the literal data matches one of the rules.
+
   Data should not be list or tuple.
   Each rule might be a type (ex: int, str) or a value.
 
@@ -108,7 +112,8 @@ class LiteralChecker(CheckerBase):
 
 
 class TupleChecker(CheckerBase):
-  """Check whether every field of the data matches the corresponding rules.
+  """Checks whether every field of the data matches the corresponding rules.
+
   Data type should be tuple, the length of the tuple should be the same as the
   length of the rules_list.
 
@@ -136,7 +141,8 @@ class TupleChecker(CheckerBase):
 
 
 class ListChecker(CheckerBase):
-  """Check whether all items in the data matches the rules.
+  """Checks whether all items in the data matches the rules.
+
   Data type should be list or literal, the length of the data is not limited.
 
   For example:

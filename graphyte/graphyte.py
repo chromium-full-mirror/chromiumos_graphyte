@@ -33,11 +33,13 @@ from .testplan import TestPlan
 
 class Graphyte(object):
   """The graphyte module.
+
   Instantiating the class does everything now. Refer to the constructor below.
   """
   def __init__(self, config_file=None, log_file=None, result_file=None,
                verbose=False, console_output=False, append_mode=False):
     """The constructor for this module does most of it right now.
+
     - Load the graphyte.settings file to find the modules to load.
     - Load the plugins
     - Load test plans
@@ -149,6 +151,7 @@ class Graphyte(object):
 
   def Run(self):
     """The main method of the class.
+
     It returns whether all tests are passed or not.
     """
     self.all_tests_pass = True

@@ -4,7 +4,8 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-"""Handle the port config, including the port mapping and the pathloss.
+"""Handles the port config, including the port mapping and the pathloss.
+
 We load the port config from json file, which format is:
 {
   <component_name>: [ // List is represented for the multiple antenna
@@ -20,17 +21,20 @@ We load the port config from json file, which format is:
     }
   ]
 }
+
 Then we load the pathloss from the corresponding csv file.
-The format of csv is
+The format of csv is:
   'title',   <frequency 1>, <frequency 2>, ...
   <title 1>, [pathloss 1],  [pathloss 2],  ...
   <title 2>, [pathloss 1],  [pathloss 2],  ...
+
 If the value is empty, we just ignore it. For example:
   'title',2402,2404,2406
   'path1',20.0,,19.9
   'path2',21.0,20.3,
+
 It means that path1 is {2402: 20.0, 2406: 19.9},
-path2 is {2402: 21.0, 2404: 20.3}
+path2 is {2402: 21.0, 2404: 20.3}.
 """
 
 import csv
@@ -82,8 +86,11 @@ class PortConfig(object):
     return self._pathloss_table[filename][title]
 
   def _ConvertPathloss(self, pathloss):
-    """Filter the empty entry, then convert the frequency to int, and convert
-    pathloss to float."""
+    """Converts a dict to a PathlossTable.
+
+    Filters the empty entry, converts the frequency to int, and converts
+    pathloss to float.
+    """
     ret = {}
     for key, value in pathloss.iteritems():
       if not value:
@@ -92,10 +99,12 @@ class PortConfig(object):
     return PathlossTable(ret)
 
   def QueryPortConfig(self, component_name, test_type):
-    """Return the port config of the certain component.
+    """Returns the port config of the certain component.
+
     Args:
       component_name: the coponent name.
       test_type: 'TX' or 'RX'
+
     Return:
       List of the port config, for multiple antenna.
     """
@@ -131,6 +140,7 @@ class PathlossTable(object):
 
   The format is a dict which key is frequency unit in MHz, and the value is
   power loss in dB.
+
   Usage:
     table = PathlossTable({2000: 1.0, 2400: 3.1})
     pathloss = table[2014]
@@ -142,7 +152,7 @@ class PathlossTable(object):
     return len(self.table) > 0
 
   def __getitem__(self, freq):
-    """Return the pathloss of the frequency.
+    """Returns the pathloss of the frequency.
 
     If the frequency is recorded at the table, then return the value directly.
     If not, calculate the value using the linear interpolation with the nearest

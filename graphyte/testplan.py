@@ -50,7 +50,7 @@ HEADER_CHECKER = {
 
 
 class TestPlan(object):
-  """Generate the test plan from CSV file.
+  """Generates the test plan from CSV file.
 
   The class parses the CSV file and generates a list of test cases.
 
@@ -69,7 +69,7 @@ class TestPlan(object):
       self.LoadConfigFile(config_file, search_dirs)
 
   def __len__(self):
-    """Return the count of the test cases.
+    """Returns the count of the test cases.
 
     we implement __len__ and __getitem__ to make TestPlan behave like a
     read-only list.
@@ -160,7 +160,7 @@ class TestPlan(object):
 
 
 def CreateTestCase(args, result_limit):
-  """Create the test case according to the RF type.
+  """Creates the test case according to the RF type.
 
   Since the verification and the generation of the test case for each RF type
   are slightly different, we use the simple factory pattern to create the test
@@ -169,6 +169,7 @@ def CreateTestCase(args, result_limit):
   Args:
     args: the arguments of the test case.
     result_limit: the result limit of the test case.
+
   Return:
     a list of the test case.
   """
@@ -195,7 +196,7 @@ class TestCaseFactory(object):
     return self._Create(args, result_limit)
 
   def _VerifyArgAndResult(self, args, result_limit):
-    """Verify the test case is valid or not.
+    """Verifies the test case is valid or not.
 
     1. Check the RF type is correct.
     2. Check all required arguments exist and are valid.
@@ -226,7 +227,7 @@ class TestCaseFactory(object):
 
   @staticmethod
   def VerifyArguments(checker_dict, args):
-    """Verify all arguments are valid.
+    """Verifies all arguments are valid.
 
     If the keys of args are not the same as checker_dict, or there is any value
     is not valid, then raise the ValueError exception.
@@ -239,6 +240,7 @@ class TestCaseFactory(object):
           'test_type': ListChecker(['TX', 'RX'])
         }
       args: the arguments of the test case.
+
     Raises:
       ValueError if args does not pass the verification.
     """
@@ -257,7 +259,7 @@ class TestCaseFactory(object):
 
   @staticmethod
   def _VerifyResults(result_list, result_limit):
-    """Verify all results are valid.
+    """Verifies all results are valid.
 
     If there is key of result_limit not in result_list, or the value is not
     valid, then raise the ValueError exception.
@@ -265,6 +267,7 @@ class TestCaseFactory(object):
     Args:
       result_list: a list of all valid result keys.
       result_limit: the result limit of the test case.
+
     Raises:
       ValueError if data is not passed the verification.
     """
@@ -393,10 +396,11 @@ class BluetoothTestCaseFactory(TestCaseFactory):
       '3DH5': 1021}
 
   def _DetermineFormat(self, packet_type):
-    """Determine the bluetooth format of the packet type.
+    """Determines the bluetooth format of the packet type.
 
     Args:
       packet_type: the Bluetooth packet type.
+
     Returns:
       one of 'LE', 'BDR', or 'EDR'.
     """
@@ -434,7 +438,7 @@ class BluetoothTestCaseFactory(TestCaseFactory):
     TestCaseFactory._VerifyResults(result_list, result_limit)
 
   def _Create(self, args, result_limit):
-    """Create the bluetooth test case.
+    """Creates the bluetooth test case.
 
     For BDR and LE, the bit pattern of the packet are different from results.
     We add the 'bit_pattern' argument and split into different test cases.
@@ -505,7 +509,7 @@ class TestCase(object):
   """The test case. It contains the arguments of a RF test."""
 
   def __init__(self, name, args, result_limit):
-    """Initialize the test case.
+    """Initializes the test case.
 
     Arg:
       name: A string that should contain important arguments information.
@@ -613,7 +617,7 @@ def ChainMaskToList(chain_mask):
 
 
 def StripRow(row):
-  """Strip every item in the row, and remove the right side of empty item."""
+  """Strips every item in the row, and remove the right side of empty item."""
   row = [item.strip() for item in row]
   while len(row) > 0 and len(row[-1]) == 0:
     row.pop()

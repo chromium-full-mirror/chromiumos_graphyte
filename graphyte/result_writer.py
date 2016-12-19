@@ -26,7 +26,7 @@ class ResultWriter(object):
     self.fout.close()
 
   def WriteResult(self, test_case, result):
-    """Write the test result to csv file.
+    """Writes the test result to csv file.
 
     For the multi-antenna case, we record the result of each antenna separately.
     Then the result value is a number, not a dictionary.
@@ -34,6 +34,7 @@ class ResultWriter(object):
     For example:
       test_case: "WLAN TX ANTENNA-01"
       result: {"avg_power" : {0: 10.4, 1:11.2}}
+
     Then we will output two lines which test_name, result_name and value are:
       "WLAN TX ANTENNA-01-0", "avg_power", 10.4
       "WLAN TX ANTENNA-01-1", "avg_power", 11.2

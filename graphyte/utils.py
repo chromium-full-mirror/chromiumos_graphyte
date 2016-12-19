@@ -23,7 +23,7 @@ from .default_setting import logger
 
 
 def Enum(*args, **kwargs):
-  """Create the immutable enumeration set.
+  """Creates the immutable enumeration set.
 
   Usage:
     1. C-style enum. The value starts from 0 and increase orderly.
@@ -62,7 +62,8 @@ def OverrideConfig(base, overrides):
 
 
 def SearchConfig(filepath, search_dirs=None):
-  """Find the config file and return the content.
+  """Finds the config file and returns the content.
+
   The order of searching is:
   1. relative path
   2. config folder
@@ -82,7 +83,8 @@ def SearchConfig(filepath, search_dirs=None):
 
 
 def PrepareOutputFile(file_path):
-  """ Confirm the output file path is ok.
+  """Confirms the output file path is ok.
+
   1. If the file_path is not absolute, then assign it to default log folder.
   2. Check if the directory exists. If not, create the folder first.
   """
@@ -105,8 +107,7 @@ def UnopenedTemporaryFile(**kwargs):
   is closed if it still exists at that moment.
 
   Args:
-    Any allowable arguments to tempfile.mkstemp (e.g., prefix,
-      suffix, dir).
+    Any allowable arguments to tempfile.mkstemp (e.g., prefix, suffix, dir).
   """
   f, path = tempfile.mkstemp(**kwargs)
   os.close(f)
@@ -118,7 +119,7 @@ def UnopenedTemporaryFile(**kwargs):
 
 
 def IsInBound(results, bound):
-  """Check the results meet the bound or not.
+  """Checks the results meet the bound or not.
 
   Args:
     results: A number for SISO case, or a dict for MIMO case. The values of the
@@ -150,7 +151,7 @@ def IsInBound(results, bound):
 
 
 def MakeMockPassResult(result_limit):
-  """Make the result that pass all limit."""
+  """Makes the result that pass all limit."""
   def _MakeInBoundValue(bound):
     lower, upper = bound
     return lower or upper or 0
@@ -159,7 +160,7 @@ def MakeMockPassResult(result_limit):
 
 
 def CalculateAverage(values, average_type='Linear'):
-  """Calculate the average value.
+  """Calculates the average value.
 
   Args:
     values: A list of float value.
@@ -192,7 +193,7 @@ def CalculateAverage(values, average_type='Linear'):
 
 
 def CalculateAverageResult(results, average_type='Linear'):
-  """Calculate the average results.
+  """Calculates the average results.
 
   For WLAN multi-antenna case, the result would be a dict where the key is the
   antenna index. So we handle this kind of situation in this method.
@@ -266,7 +267,7 @@ def Timeout(secs):
 
 
 def WaitFor(condition, timeout_secs, poll_interval_secs=0.1):
-  """Wait for the given condition for at most the specified time.
+  """Waits for the given condition for at most the specified time.
 
   Args:
     condition: A function object.
@@ -302,7 +303,7 @@ def WaitFor(condition, timeout_secs, poll_interval_secs=0.1):
 
 
 def Retry(max_retry_times, interval, target, condition=None, *args, **kwargs):
-  """Retry the function until the condition is satisfied.
+  """Retries the function until the condition is satisfied.
 
   Args:
     max_retry_times: the maximum retry times.
