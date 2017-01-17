@@ -98,7 +98,8 @@ class DUTBase(object):
 
       Configures the transmission settings to the DUT without arming trigger.
       """
-      raise NotImplementedError
+      # TODO(akahuang): Decide whether this function should be removed.
+      pass
 
     def TxStart(self, test):
       test_case = self._CheckTestArgument(test.ToDict(), 'TX')
@@ -127,7 +128,8 @@ class DUTBase(object):
 
     def _RxConfig(self, **kwargs):
       """Configures the DUT for the receiving test case."""
-      raise NotImplementedError
+      # TODO(akahuang): Decide whether this function should be removed.
+      pass
 
     def RxClearResult(self, test):
       test_case = self._CheckTestArgument(test.ToDict(), 'RX')
@@ -161,7 +163,7 @@ class DUTBase(object):
     def _TxConfig(self, component_name, center_freq,
                   power_level, standard, bandwidth, data_rate, chain_mask, nss,
                   long_preamble, **kwargs):
-      raise NotImplementedError
+      pass
 
     def _TxStart(self, component_name, center_freq,
                  power_level, standard, bandwidth, data_rate, chain_mask, nss,
@@ -171,7 +173,7 @@ class DUTBase(object):
     def _RxConfig(self, component_name, center_freq,
                   power_level, standard, bandwidth, data_rate, chain_mask, nss,
                   long_preamble, rx_num_packets, **kwargs):
-      raise NotImplementedError
+      pass
 
     def _RxClearResult(self, component_name, center_freq,
                        power_level, standard, bandwidth, data_rate, chain_mask,
@@ -188,7 +190,7 @@ class DUTBase(object):
 
     def _TxConfig(self, component_name, center_freq,
                   power_level, packet_type, bit_pattern, **kwargs):
-      raise NotImplementedError
+      pass
 
     def _TxStart(self, component_name, center_freq,
                  power_level, packet_type, bit_pattern, **kwargs):
@@ -197,7 +199,7 @@ class DUTBase(object):
     def _RxConfig(self, component_name, center_freq,
                   power_level, packet_type, bit_pattern,
                   rx_num_packets=None, rx_num_bits=None, **kwargs):
-      raise NotImplementedError
+      pass
 
     def _RxClearResult(self, component_name, center_freq,
                        power_level, packet_type, bit_pattern,
@@ -214,7 +216,7 @@ class DUTBase(object):
 
     def _TxConfig(self, component_name, center_freq,
                   power_level, **kwargs):
-      raise NotImplementedError
+      pass
 
     def _TxStart(self, component_name, center_freq,
                  power_level, **kwargs):
@@ -222,7 +224,7 @@ class DUTBase(object):
 
     def _RxConfig(self, component_name, center_freq,
                   power_level, rx_num_packets, **kwargs):
-      raise NotImplementedError
+      pass
 
     def _RxClearResult(self, component_name, center_freq,
                        power_level, rx_num_packets, **kwargs):

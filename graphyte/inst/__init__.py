@@ -175,7 +175,8 @@ class InstBase(object):
       arming trigger. The method would be called before the DUT start
       transmitting signal.
       """
-      raise NotImplementedError
+      # TODO(akahuang): Decide whether this function should be removed.
+      pass
 
     def TxMeasure(self, test):
       test_case = self._CheckTestArgument(test.ToDict(), 'TX')
@@ -241,7 +242,8 @@ class InstBase(object):
       Configures the VSG and loads the waveform based on the signal information.
       The method would be called before the DUT start receiving signal.
       """
-      raise NotImplementedError
+      # TODO(akahuang): Decide whether this function should be removed.
+      pass
 
     def RxGenerate(self, test):
       test_case = self._CheckTestArgument(test.ToDict(), 'RX')
@@ -265,7 +267,7 @@ class InstBase(object):
     def _TxConfig(self, component_name, rf_type, test_type, center_freq,
                   power_level, standard, bandwidth, data_rate, chain_mask, nss,
                   long_preamble, **kwargs):
-      raise NotImplementedError
+      pass
 
     def _TxMeasure(self, component_name, rf_type, test_type, center_freq,
                    power_level, standard, bandwidth, data_rate, chain_mask,
@@ -280,7 +282,7 @@ class InstBase(object):
     def _RxConfig(self, component_name, rf_type, test_type, center_freq,
                   power_level, standard, bandwidth, data_rate, chain_mask, nss,
                   long_preamble, rx_num_packets, **kwargs):
-      raise NotImplementedError
+      pass
 
     def _RxGenerate(self, component_name, rf_type, test_type, center_freq,
                     power_level, standard, bandwidth, data_rate, chain_mask,
@@ -299,7 +301,7 @@ class InstBase(object):
 
     def _TxConfig(self, component_name, rf_type, test_type, center_freq,
                   power_level, packet_type, bit_pattern, **kwargs):
-      raise NotImplementedError
+      pass
 
     def _TxMeasure(self, component_name, rf_type, test_type, center_freq,
                    power_level, packet_type, bit_pattern, result_limit,
@@ -352,7 +354,7 @@ class InstBase(object):
     def _RxConfig(self, component_name, rf_type, test_type, center_freq,
                   power_level, packet_type, bit_pattern,
                   rx_num_packets=None, rx_num_bits=None, **kwargs):
-      raise NotImplementedError
+      pass
 
     def _RxGenerate(self, component_name, rf_type, test_type, center_freq,
                     power_level, packet_type, bit_pattern,
@@ -364,7 +366,7 @@ class InstBase(object):
 
     def _TxConfig(self, component_name, rf_type, test_type, center_freq,
                   power_level, **kwargs):
-      raise NotImplementedError
+      pass
 
     def _TxMeasure(self, component_name, rf_type, test_type, center_freq,
                    power_level, result_limit, **kwargs):
@@ -376,7 +378,7 @@ class InstBase(object):
 
     def _RxConfig(self, component_name, rf_type, test_type, center_freq,
                   power_level, rx_num_packets, **kwargs):
-      raise NotImplementedError
+      pass
 
     def _RxGenerate(self, component_name, rf_type, test_type, center_freq,
                     power_level, rx_num_packets, **kwargs):
