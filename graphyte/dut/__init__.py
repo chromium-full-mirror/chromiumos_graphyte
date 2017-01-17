@@ -154,6 +154,11 @@ class DUTBase(object):
                        nss, long_preamble, rx_num_packets, **kwargs):
       raise NotImplementedError
 
+    def _RxGetResult(self, component_name, rf_type, test_type, center_freq,
+                     power_level, standard, bandwidth, data_rate, chain_mask,
+                     nss, long_preamble, rx_num_packets, **kwargs):
+      raise NotImplementedError
+
   class BluetoothControllerBase(ControllerBase):
     def _TxConfig(self, component_name, rf_type, test_type, center_freq,
                   power_level, packet_type, bit_pattern, **kwargs):
@@ -164,13 +169,18 @@ class DUTBase(object):
       raise NotImplementedError
 
     def _RxConfig(self, component_name, rf_type, test_type, center_freq,
-                  power_level, packet_type, bit_pattern, rx_num_packets,
-                  **kwargs):
+                  power_level, packet_type, bit_pattern,
+                  rx_num_packets=None, rx_num_bits=None, **kwargs):
       raise NotImplementedError
 
     def _RxClearResult(self, component_name, rf_type, test_type, center_freq,
-                       power_level, packet_type, bit_pattern, rx_num_packets,
-                       **kwargs):
+                       power_level, packet_type, bit_pattern,
+                       rx_num_packets=None, rx_num_bits=None, **kwargs):
+      raise NotImplementedError
+
+    def _RxGetResult(self, component_name, rf_type, test_type, center_freq,
+                     power_level, packet_type, bit_pattern,
+                     rx_num_packets=None, rx_num_bits=None, **kwargs):
       raise NotImplementedError
 
   class ZigbeeControllerBase(ControllerBase):
@@ -188,4 +198,8 @@ class DUTBase(object):
 
     def _RxClearResult(self, component_name, rf_type, test_type, center_freq,
                        power_level, rx_num_packets, **kwargs):
+      raise NotImplementedError
+
+    def _RxGetResult(self, component_name, center_freq,
+                     power_level, rx_num_packets, **kwargs):
       raise NotImplementedError
