@@ -28,10 +28,8 @@ class ControllerBase(object):
       required_test_type: the required test type. 'TX' or 'RX'.
 
     Returns:
-      the test case without test type and RF type arguments.
+      the test case.
     """
     assert test_case['test_type'] == required_test_type
     assert test_case['rf_type'] == self.RF_TYPE
-    del test_case['test_type']
-    del test_case['rf_type']
     return test_case
