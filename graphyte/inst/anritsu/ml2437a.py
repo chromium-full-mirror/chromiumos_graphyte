@@ -14,7 +14,7 @@ import time
 from .. import InstBase
 from ...default_setting import logger
 from ...testplan import ChainMaskToList
-from ...utils import CalculateAverage
+from ...utils.graphyte_utils import CalculateAverage
 
 class InstrumentNotReady(Exception):
   pass

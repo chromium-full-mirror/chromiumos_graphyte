@@ -7,7 +7,7 @@ import inspect
 import subprocess
 import tempfile
 
-from . import utils
+from .utils import file_utils
 
 CalledProcessError = subprocess.CalledProcessError
 
@@ -160,13 +160,13 @@ class DeviceLink(object):
       path: A string for file path on DUT.
       content: A string to be written into file.
     """
-    with utils.UnopenedTemporaryFile() as temp_path:
+    with file_utils.UnopenedTemporaryFile() as temp_path:
       with open(temp_path, 'w') as f:
         f.write(content)
       self.Push(temp_path, path)
 
   def ReadFile(self, path):
-    with utils.UnopenedTemporaryFile() as temp_path:
+    with file_utils.UnopenedTemporaryFile() as temp_path:
       self.Pull(path, temp_path)
       return open(temp_path, 'r').read()
 

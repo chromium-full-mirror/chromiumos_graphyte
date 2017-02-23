@@ -9,8 +9,8 @@ import socket
 import time
 
 from .. import link
-from .. import utils
 from ..default_setting import logger
+from ..utils import sync_utils
 
 
 class SCPILinkError(Exception):
@@ -47,7 +47,7 @@ class SCPILink(link.DeviceLink):
     self.socket = None
     self.id = None
 
-    if not utils.Retry(retries, interval=1, target=self._Connect):
+    if not sync_utils.Retry(retries, interval=1, target=self._Connect):
       raise SCPILinkError('Failed to connect %s:%d after %d tries' %
                           (host, port, retries))
 
@@ -106,7 +106,7 @@ class SCPILink(link.DeviceLink):
     try:
       self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-      with utils.Timeout(self.timeout):
+      with sync_utils.Timeout(self.timeout):
         logger.debug('Connecting to %s:%d...', self.host, self.port)
         self.socket.connect((self.host, self.port))
 
@@ -157,7 +157,7 @@ class SCPILink(link.DeviceLink):
 
   def _ReadLine(self):
     """Reads a single line, timing out in self.timeout seconds."""
-    with utils.Timeout(self.timeout):
+    with sync_utils.Timeout(self.timeout):
       if not self.timeout:
         logger.debug('Waiting for reading...')
       ret = self.rfile.readline().rstrip('\n')

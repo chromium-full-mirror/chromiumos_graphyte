@@ -19,16 +19,17 @@ import json
 import logging
 import os
 
-from . import utils
 from .default_setting import DEFAULT_CONFIG_FILE
 from .default_setting import DEFAULT_LOG_FILE
 from .default_setting import DEFAULT_RESULT_FILE
 from .default_setting import GRAPHYTE_DIR
-from .default_setting import logger
 from .default_setting import GRAPHYTE_OUT
-from .result_writer import ResultWriter
+from .default_setting import logger
 from .port_config import PortConfig
+from .result_writer import ResultWriter
 from .testplan import TestPlan
+from .utils import graphyte_utils
+from .utils import sync_utils
 
 
 class Graphyte(object):
@@ -65,7 +66,7 @@ class Graphyte(object):
     self.SetLogging(log_file, verbose, append_mode, console_output)
     logger.info('Starting Graphyte....')
 
-    config_path = utils.SearchConfig(config_file, GRAPHYTE_DIR)
+    config_path = graphyte_utils.SearchConfig(config_file, GRAPHYTE_DIR)
     config_dir = os.path.dirname(config_path)
     with open(config_path, 'r') as f:
       graphyte_config = json.load(f)
@@ -115,18 +116,18 @@ class Graphyte(object):
     default_config_file = module_name.replace('.', os.path.sep) + '.json'
     default_config_path = os.path.join(GRAPHYTE_DIR, device_type,
                                        default_config_file)
-    device_config = utils.LoadConfig(default_config_path)
+    device_config = graphyte_utils.LoadConfig(default_config_path)
 
     config_key = '%s_config_file' % device_type
     if config_key in graphyte_config:
-      config_file = utils.SearchConfig(graphyte_config[config_key],
-                                       [config_dir])
-      device_config = utils.OverrideConfig(device_config,
-                                           utils.LoadConfig(config_file))
+      config_file = graphyte_utils.SearchConfig(
+          graphyte_config[config_key], [config_dir])
+      device_config = graphyte_utils.OverrideConfig(
+          device_config, graphyte_utils.LoadConfig(config_file))
     config_key = '%s_config' % device_type
     if config_key in graphyte_config:
-      device_config = utils.OverrideConfig(device_config,
-                                           graphyte_config[config_key])
+      device_config = graphyte_utils.OverrideConfig(
+          device_config, graphyte_config[config_key])
 
     logger.info('Loading %s: %s, device config: %s',
                 device_type, module_name, device_config)
@@ -135,19 +136,20 @@ class Graphyte(object):
   def SetLogging(self, log_file, verbose, append_mode, console_output):
     level = logging.DEBUG if verbose else logging.INFO
     mode = 'a' if append_mode else 'w'
-    log_file = utils.PrepareOutputFile(log_file)
+    log_file = graphyte_utils.PrepareOutputFile(log_file)
     fmt = '[%(levelname)s] %(asctime)s %(filename)s:%(lineno)d %(message)s'
     date_fmt = '%H:%M:%S'
     formatter = logging.Formatter(fmt, date_fmt)
 
-    logger.setLevel(level)
+    root_logger = logging.getLogger('')
+    root_logger.setLevel(level)
     file_handler = logging.FileHandler(log_file, mode)
     file_handler.setFormatter(formatter)
-    logger.addHandler(file_handler)
+    root_logger.addHandler(file_handler)
     if console_output:
       console_handler = logging.StreamHandler(GRAPHYTE_OUT)
       console_handler.setFormatter(formatter)
-      logger.addHandler(console_handler)
+      root_logger.addHandler(console_handler)
 
   def Run(self):
     """The main method of the class.
@@ -208,7 +210,7 @@ class Graphyte(object):
       return ret[0]
 
     # pylint: disable=W0633
-    is_pass, result = utils.Retry(self.retries, 0, _RunTest, _Condition)
+    is_pass, result = sync_utils.Retry(self.retries, 0, _RunTest, _Condition)
     self.all_tests_pass &= is_pass
     self.result_writer.WriteResult(test_case, result)
 

@@ -8,7 +8,7 @@
 
 from .. import DUTBase
 from ...default_setting import logger
-from ...utils import MakeMockPassResult
+from ...utils.graphyte_utils import MakeMockPassResult
 
 
 class DUT(DUTBase):

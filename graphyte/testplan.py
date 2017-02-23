@@ -35,8 +35,8 @@ from .data_parser import ListChecker
 from .data_parser import TupleChecker
 from .data_parser import Parse
 from .default_setting import logger
-from .utils import IsInBound
-from .utils import SearchConfig
+from .utils.graphyte_utils import IsInBound
+from .utils.graphyte_utils import SearchConfig
 
 
 CONFIG_MARKER = '@config'

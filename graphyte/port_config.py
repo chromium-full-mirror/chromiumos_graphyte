@@ -43,7 +43,7 @@ import os
 import sys
 
 from .default_setting import logger
-from .utils import SearchConfig
+from .utils.graphyte_utils import SearchConfig
 
 class PortConfig(object):
   def __init__(self, config_file=None, search_dirs=None):

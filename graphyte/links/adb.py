@@ -11,7 +11,7 @@ import uuid
 
 from .. import link
 from ..default_setting import logger
-from ..utils import UnopenedTemporaryFile
+from ..utils.file_utils import UnopenedTemporaryFile
 
 
 class ADBProcess(object):

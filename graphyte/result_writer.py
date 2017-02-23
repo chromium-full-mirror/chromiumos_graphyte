@@ -8,9 +8,9 @@
 
 import csv
 
-from .utils import IsInBound
-from .utils import PrepareOutputFile
 from . import testplan
+from .utils.graphyte_utils import IsInBound
+from .utils.graphyte_utils import PrepareOutputFile
 
 
 class ResultWriter(object):

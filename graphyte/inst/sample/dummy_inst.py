@@ -10,7 +10,7 @@
 from .. import InstBase
 from ...testplan import ChainMaskToList
 from ...default_setting import logger
-from ...utils import MakeMockPassResult
+from ...utils.graphyte_utils import MakeMockPassResult
 
 
 class Inst(InstBase):

@@ -7,35 +7,14 @@
 """Utils class and functions. """
 
 import collections
-from contextlib import contextmanager
 import inspect
-import itertools
 import json
 import math
 import os
-import signal
-import tempfile
-import time
 
-from .default_setting import CONFIG_DIR
-from .default_setting import LOG_DIR
-from .default_setting import logger
-
-
-def Enum(*args, **kwargs):
-  """Creates the immutable enumeration set.
-
-  Usage:
-    1. C-style enum. The value starts from 0 and increase orderly.
-      A = Enum('foo', 'bar')
-      then A.foo == 0, A.bar == 1
-    2. Key-value pair enum.
-      B = Enum(foo='FOO', bar='BAR')
-      then B.foo == 'FOO', B.bar == 'BAR'
-  """
-  fields = dict(zip(args, itertools.count()), **kwargs)
-  enum_type = collections.namedtuple('Enum', fields.keys())
-  return enum_type(**fields)
+from ..default_setting import CONFIG_DIR
+from ..default_setting import LOG_DIR
+from ..default_setting import logger
 
 
 def LoadConfig(filepath):
@@ -97,25 +76,6 @@ def PrepareOutputFile(file_path):
     logger.debug('%s folder is not existed, create it.', dir_path)
     os.mkdir(os.path.dirname(file_path))
   return file_path
-
-
-@contextmanager
-def UnopenedTemporaryFile(**kwargs):
-  """Yields an unopened temporary file.
-
-  The file is not opened, and it is deleted when the context manager
-  is closed if it still exists at that moment.
-
-  Args:
-    Any allowable arguments to tempfile.mkstemp (e.g., prefix, suffix, dir).
-  """
-  f, path = tempfile.mkstemp(**kwargs)
-  os.close(f)
-  try:
-    yield path
-  finally:
-    if os.path.exists(path):
-      os.unlink(path)
 
 
 def IsInBound(results, bound):
@@ -220,119 +180,6 @@ def CalculateAverageResult(results, average_type='Linear'):
             for ant_idx, values in results.items()}
   else:
     raise TypeError('The type should be list or a dict. %s' % results)
-
-
-class TimeoutError(Exception):
-  """Timeout error."""
-  def __init__(self, message, output=None):
-    Exception.__init__(self)
-    self.message = message
-    self.output = output
-
-  def __str__(self):
-    return repr(self.message)
-
-
-@contextmanager
-def Timeout(secs):
-  """Timeout context manager.
-
-  It will raise TimeoutError after timeout is reached, interrupting execution
-  of the thread.  It does not support nested "with Timeout" blocks, and can only
-  be used in the main thread of Python.
-
-  Args:
-    secs: Number of seconds to wait before timeout.
-
-  Raises:
-    TimeoutError if timeout is reached before execution has completed.
-    ValueError if not run in the main thread.
-  """
-  def Handler(signum, frame):
-    del signum, frame
-    raise TimeoutError('Timeout')
-
-  if secs:
-    if signal.alarm(secs):
-      raise TimeoutError('Alarm was already set')
-
-  signal.signal(signal.SIGALRM, Handler)
-
-  try:
-    yield
-  finally:
-    if secs:
-      signal.alarm(0)
-      signal.signal(signal.SIGALRM, lambda signum, frame: None)
-
-
-def WaitFor(condition, timeout_secs, poll_interval_secs=0.1):
-  """Waits for the given condition for at most the specified time.
-
-  Args:
-    condition: A function object.
-    timeout_secs: Timeout value in seconds.
-    poll_interval_secs: Interval to poll condition in seconds.
-
-  Raises:
-    ValueError: If condition is not a function.
-    TimeoutError: If cond does not become True after timeout_secs seconds.
-  """
-  if not callable(condition):
-    raise ValueError('condition must be a callable object')
-
-  condition_name = condition.__name__
-  if condition_name == '<lambda>':
-    try:
-      condition_name = inspect.getsource(condition).strip()
-    except IOError:
-      pass
-
-  end_time = time.time() + timeout_secs if timeout_secs else float('inf')
-  while True:
-    if not math.isinf(end_time):
-      logger.info('[%ds left] %s', end_time - time.time(), condition_name)
-    ret = condition()
-    if ret:
-      return ret
-    if time.time() + poll_interval_secs > end_time:
-      error_msg = 'Timeout waiting for condition: %s' % condition_name
-      logger.error(error_msg)
-      raise TimeoutError(error_msg, ret)
-    time.sleep(poll_interval_secs)
-
-
-def Retry(max_retry_times, interval, target, condition=None, *args, **kwargs):
-  """Retries the function until the condition is satisfied.
-
-  Args:
-    max_retry_times: the maximum retry times.
-    interval: the time interval between each try, unit in second.
-    target: the target function.
-    condition: a method to decide if target's return value is valid.
-               None for standard Python if statement.
-    args: the arguments passed into the target function.
-    kwargs: the keyword arguments passed into the target function.
-
-  Returns:
-    the result of the target function.
-  """
-  if condition is None:
-    condition = lambda x: x
-  result = None
-  for retry_time in xrange(max_retry_times):
-    try:
-      result = target(*args, **kwargs)
-    except Exception:
-      pass
-    if condition(result):
-      logger.info('Get result after %d retries', retry_time)
-      return result
-    else:
-      logger.warning('Retrying...[%d/%d]', retry_time + 1, max_retry_times)
-      time.sleep(interval)
-  # All results failed. Return the last result.
-  return result
 
 
 def LogFunc(func):

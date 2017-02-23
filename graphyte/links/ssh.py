@@ -5,15 +5,21 @@
 
 """Implementation of graphyte.link.DeviceLink using SSH."""
 
+import Queue
 import os
 import pipes
 import platform
 import shlex
 import subprocess
+import threading
+import time
 
 from .. import link
 from ..default_setting import logger
-from ..utils import UnopenedTemporaryFile
+from ..utils.file_utils import UnopenedTemporaryFile
+from ..utils import process_utils
+from ..utils import sync_utils
+from ..utils import type_utils
 
 
 class ClientNotExistError(Exception):
@@ -29,6 +35,9 @@ class SSHLink(link.DeviceLink):
     user: A string for the user accont to login. Defaults to 'root'.
     port: An integer for the SSH port on remote host.
     identify: An identity file to specify credential.
+    connect_timeout: An integer for ssh(1) connection timeout in seconds.
+    control_persist: An integer for ssh(1) to keep master connection remain
+              opened for given seconds, or None to not using master control.
 
   link_options example:
     {
@@ -38,11 +47,14 @@ class SSHLink(link.DeviceLink):
     }
   """
 
-  def __init__(self, host, user='root', port=22, identity=None):
+  def __init__(self, host, user='root', port=22, identity=None,
+               connect_timeout=1, control_persist=300):
     self.host = host
     self.user = user
     self.port = port
     self.identity = identity
+    self.connect_timeout = connect_timeout
+    self.control_persist = control_persist
 
   def _Signature(self, is_scp=False):
     """Generates the ssh command signature.
@@ -61,7 +73,12 @@ class SSHLink(link.DeviceLink):
       sig = self.host
 
     options = ['-o', 'UserKnownHostsFile=/dev/null',
-               '-o', 'StrictHostKeyChecking=no']
+               '-o', 'StrictHostKeyChecking=no',
+               '-o', 'ConnectTimeout=%d' % self.connect_timeout]
+    if self.control_persist is not None:
+      options += ['-o', 'ControlMaster=auto',
+                  '-o', 'ControlPath=/tmp/.ssh-%r@%h:%p',
+                  '-o', 'ControlPersist=%s' % self.control_persist]
     if self.port:
       options += ['-P' if is_scp else '-p', str(self.port)]
     if self.identity:
@@ -96,6 +113,11 @@ class SSHLink(link.DeviceLink):
     subprocess.check_call(['scp'] + options +
                           ['%s:%s' % (remote_sig, remote), local])
 
+  def _StartWatcher(self, subproc):
+    watcher = self.__class__.ControlMasterWatcher(self)
+    watcher.Start()  # make sure the watcher is running
+    watcher.AddProcess(subproc.pid, os.getpid())
+
   def Shell(self, command, stdin=None, stdout=None, stderr=None):
     """See DUTLink.Shell"""
     remote_sig, options = self._Signature(False)
@@ -117,8 +139,10 @@ class SSHLink(link.DeviceLink):
     if (platform.system() == 'Windows' and
         (stdin, stdout, stderr) != (None, None, None)):
       close_fds = False
-    return subprocess.Popen(command, shell=shell, close_fds=close_fds,
+    proc = subprocess.Popen(command, shell=shell, close_fds=close_fds,
                             stdin=stdin, stdout=stdout, stderr=stderr)
+    self._StartWatcher(proc)
+    return proc
 
   def IsReady(self):
     """See DUTLink.IsReady"""
@@ -126,3 +150,109 @@ class SSHLink(link.DeviceLink):
       return subprocess.call(['ping', '-w', '1', '-c', '1', self.host]) == 0
     except ClientNotExistError:
       return False
+
+  class ControlMasterWatcher(object):
+    __metaclass__ = type_utils.Singleton
+
+    def __init__(self, link_instance):
+      assert isinstance(link_instance, SSHLink)
+
+      self._link = link_instance
+      self._thread = threading.Thread(target=self.Run)
+      self._proc_queue = Queue.Queue()
+
+      self._user = self._link.user
+      self._host = self._link.host
+      self._port = self._link.port
+      self._link_class_name = self._link.__class__.__name__
+
+    def IsRunning(self):
+      if not self._thread:
+        return False
+      if not self._thread.is_alive():
+        self._thread = None
+        return False
+      return True
+
+    def Start(self):
+      if self.IsRunning():
+        return
+
+      if self._link.control_persist is None:
+        logger.debug('%s %s@%s:%s is not using control master, don\'t start',
+                     self._link_class_name, self._user, self._host, self._port)
+        return
+
+      self._thread = process_utils.StartDaemonThread(target=self.Run)
+
+    def AddProcess(self, pid, ppid=None):
+      """Add an SSH process to monitor.
+
+      If any of added SSH process is still running, ControlMasterWatcher will
+      keep monitoring network connectivity.  If network is down, control master
+      will be killed.
+
+      Args:
+        pid: PID of process using SSH
+        ppid: parent PID of given process
+      """
+      if not self.IsRunning():
+        logger.warning('Watcher is not running, %d is not added', pid)
+        return
+      self._proc_queue.put((pid, ppid))
+
+    def Run(self):
+      logger.info('start monitoring control master')
+
+      # an alias to prevent duplicated pylint warnings
+      # pylint: disable=protected-access
+      _GetLinkSignature = self._link._Signature
+
+      def _IsControlMasterRunning():
+        sig, options = _GetLinkSignature(False)
+        return subprocess.call(
+            ['ssh', '-O', 'check'] + options + [sig, 'true']) == 0
+
+      def _StopControlMaster():
+        sig, options = _GetLinkSignature(False)
+        subprocess.call(['ssh', '-O', 'exit'] + options + [sig, 'true'])
+
+      def _CallTrue():
+        sig, options = _GetLinkSignature(False)
+        proc = subprocess.Popen(['ssh'] + options + [sig, 'true'])
+        time.sleep(1)
+        returncode = proc.poll()
+        if returncode != 0:
+          proc.kill()
+          return False
+        else:
+          return True
+
+      def _PollingCallback(is_process_alive):
+        if not is_process_alive:
+          return True  # returns True to stop polling
+
+        try:
+          if not _IsControlMasterRunning():
+            logger.info('control master is not running, skipped')
+            return
+
+          if not _CallTrue():
+            logger.info('loss connection, stopping control master')
+            _StopControlMaster()
+        except Exception:
+          logger.info('monitoring %s to %s@%s:%s',
+                      self._link_class_name,
+                      self._user, self._host, self._port, exc_info=True)
+
+      while True:
+        # get a new process from queue to monitor
+        # since Queue.get will block if queue is empty, we don't need to sleep
+        pid, ppid = self._proc_queue.get()
+        logger.info('start monitoring control master until %d terminates', pid)
+
+        sync_utils.PollForCondition(
+            lambda: process_utils.IsProcessAlive(pid, ppid),
+            condition_method=_PollingCallback,
+            timeout_secs=None,
+            poll_interval_secs=1)
