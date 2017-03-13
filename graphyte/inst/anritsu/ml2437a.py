@@ -20,7 +20,7 @@ class InstrumentNotReady(Exception):
   pass
 
 
-class RFController(InstBase.ControllerBase):
+class RFController(InstBase.PowerMeterControllerBase):
   def __init__(self, inst=None, duty_cycle=None):
     super(RFController, self).__init__(inst)
     self.result = None

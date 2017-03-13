@@ -53,10 +53,8 @@ class Inst(InstBase):
     self.continuous_trigger = continuous_trigger
     self.trigger_source = trigger_source
 
-    self.controllers = {
-        'WLAN': RFController(self),
-        'BLUETOOTH': RFController(self),
-        '802_15_4': RFController(self)}
+    self.controllers = {rf_type: RFController(self)
+                        for rf_type in ['WLAN', 'BLUETOOTH', '802_15_4']}
 
   def Initialize(self):
     logger.info('Inst Initialize')
@@ -169,7 +167,7 @@ class Inst(InstBase):
 
   def SetFrequency(self, freq_mhz):
     logger.info('Set frequency to %d MHz', freq_mhz)
-    self.SendCommand('SENSe%d:FREQuency %sMHZ' % (self.inst_port, freq_mhz))
+    self.SendCommand('SENSe%d:FREQuency %sMHz' % (self.inst_port, freq_mhz))
     self.SendCommand('SENSe%d:CORRection:GAIN2:STATe 0' % self.inst_port)
 
   def FetchPower(self):
@@ -183,8 +181,8 @@ class Inst(InstBase):
       return float('-inf')
 
 
-class RFController(InstBase.ControllerBase):
-  def __init__(self, inst=None):
+class RFController(InstBase.PowerMeterControllerBase):
+  def __init__(self, inst):
     super(RFController, self).__init__(inst)
     self.result = None
 

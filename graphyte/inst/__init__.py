@@ -261,6 +261,19 @@ class InstBase(object):
       """Stops transmitting the signal."""
       raise NotImplementedError
 
+  class PowerMeterControllerBase(ControllerBase):
+    """The controller for power meters."""
+    RF_TYPE = 'ALL'
+
+    def _TxConfig(self, center_freq, **kwargs):
+      raise NotImplementedError
+
+    def _TxMeasure(self, center_freq, **kwargs):
+      raise NotImplementedError
+
+    def _TxGetResult(self, result_limit, **kwargs):
+      raise NotImplementedError
+
   class WlanControllerBase(ControllerBase):
     RF_TYPE = 'WLAN'
 

@@ -12,6 +12,7 @@ class ControllerBase(object):
       - dut.BluetoothControllerBase
       - dut.ZigbeeControllerBase
     - inst.ControllerBase
+      - inst.PowerMeterControllerBase
       - inst.WlanControllerBase
       - inst.BluetoothControllerBase
       - inst.ZigbeeControllerBase
@@ -31,5 +32,5 @@ class ControllerBase(object):
       the test case.
     """
     assert test_case['test_type'] == required_test_type
-    assert test_case['rf_type'] == self.RF_TYPE
+    assert self.RF_TYPE == 'ALL' or test_case['rf_type'] == self.RF_TYPE
     return test_case
