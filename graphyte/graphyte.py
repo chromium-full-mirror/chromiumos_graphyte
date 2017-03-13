@@ -38,7 +38,7 @@ class Graphyte(object):
   Instantiating the class does everything now. Refer to the constructor below.
   """
   def __init__(self, config_file=None, log_file=None, result_file=None,
-               verbose=False, console_output=False, append_mode=False):
+               verbose=False, console_output=False):
     """The constructor for this module does most of it right now.
 
     - Load the graphyte.settings file to find the modules to load.
@@ -63,7 +63,7 @@ class Graphyte(object):
     log_file = log_file or DEFAULT_LOG_FILE
     result_file = result_file or DEFAULT_RESULT_FILE
 
-    self.SetLogging(log_file, verbose, append_mode, console_output)
+    self.SetLogging(log_file, verbose, console_output)
     logger.info('Starting Graphyte....')
 
     config_path = graphyte_utils.SearchConfig(config_file, GRAPHYTE_DIR)
@@ -133,17 +133,18 @@ class Graphyte(object):
                 device_type, module_name, device_config)
     return module.__dict__[class_name](**device_config)
 
-  def SetLogging(self, log_file, verbose, append_mode, console_output):
+  def SetLogging(self, log_file, verbose, console_output):
     level = logging.DEBUG if verbose else logging.INFO
-    mode = 'a' if append_mode else 'w'
     log_file = graphyte_utils.PrepareOutputFile(log_file)
+    if os.path.exists(log_file):
+      os.remove(log_file)
     fmt = '[%(levelname)s] %(asctime)s %(filename)s:%(lineno)d %(message)s'
     date_fmt = '%H:%M:%S'
     formatter = logging.Formatter(fmt, date_fmt)
 
     root_logger = logging.getLogger('')
     root_logger.setLevel(level)
-    file_handler = logging.FileHandler(log_file, mode)
+    file_handler = logging.FileHandler(log_file, 'a')
     file_handler.setFormatter(formatter)
     root_logger.addHandler(file_handler)
     if console_output:
@@ -173,7 +174,7 @@ class Graphyte(object):
       self.inst.InitPortConfig(self.port_config)
       self.dut.Initialize()
     except Exception:
-      logger.exception('Initialize devices failed')
+      logger.exception('Initialize devices failed.')
 
   def TerminateDevices(self):
     try:
@@ -181,7 +182,7 @@ class Graphyte(object):
       self.inst.Terminate()
       self.dut.Terminate()
     except Exception:
-      logger.exception('Terminate devices failed')
+      logger.exception('Terminate devices failed.')
 
   def SetRF(self, rf_type):
     logger.info('Set RF type: %s', rf_type)
