@@ -10,71 +10,25 @@ This is the virtual instrument class which every instrument plugin should
 implement.
 """
 
-from .. import link
 from ..default_setting import logger
 from .. import device
 
 
-class InstBase(object):
+class InstBase(device.DeviceBase):  # pylint: disable=abstract-method
   """The abstract instrument class.
 
   Every instrument plugin should inherit it. It contains several RF controllers,
   and each controller corresponds one RF chip. We can control different RF chip
   by assigning the rf_type, and delegate to the assigned controller.
   """
-
   name = 'Virtual instrument Plugin'
-  need_link = False
 
   def __init__(self, **kwargs):
-    """Abstract init method. The init method of each child class shoule be:
-
-    def __init__(self, arg1, **kwargs):
-      # Call parent's __init__
-      super(Inst, self).__init__(**kwargs)
-      # Set the child arguments
-      self.arg1 = arg1
-      # Set the RF controllers
-      self.controllers = {
-          'WLAN': ChildWlanController(self),
-          'BLUETOOTH': ChildBluetoothController(self),
-      }
-    """
-    self.rf_type = None
-    self.controllers = {}
-    self.link = link.Create(kwargs['link_options']) if self.need_link else None
+    super(InstBase, self).__init__(**kwargs)
     # Active component record the current (component_name, test_type)
     # for port mapping and pathloss.
     self.port_config_table = None
     self.active_component = (None, None)
-
-  def __getattr__(self, name):
-    """Delegates to the active controller, that is recorded at rf_type."""
-    try:
-      return getattr(self.controllers[self.rf_type], name)
-    except:
-      logger.exception('Failed in InstBase __getattr__')
-      raise NotImplementedError
-
-  def SetRF(self, rf_type):
-    if self.rf_type is not None:
-      self.controllers[self.rf_type].Terminate()
-    self.rf_type = rf_type
-    self.controllers[self.rf_type].Initialize()
-
-  def Initialize(self):
-    """Initializes the instrument.
-
-    The method would be called only once before all tests items are executed.
-    """
-    raise NotImplementedError
-
-  def Terminate(self):
-    """Terminates the instrument.
-
-    The method would be called only once after all tests items are executed.
-    """
-    raise NotImplementedError
 
   def SelfCalibrate(self, calibration_type='full'):
     """Runs the instrument self calirbation.

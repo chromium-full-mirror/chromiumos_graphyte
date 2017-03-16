@@ -9,60 +9,17 @@
 This is the virtual DUT class which every DUT plugin should implement.
 """
 
-from .. import link
-from ..default_setting import logger
 from .. import device
 
-class DUTBase(object):
+
+class DUTBase(device.DeviceBase):  # pylint: disable=abstract-method
   """The abstract DUT class that every DUT plugin should inherit it.
 
   It contains several RF controllers, and each controller corresponds one RF
   chip. We can control different RF chip by assigning the rf_type, and delegate
   to the assigned controller.
   """
-
   name = 'Virtual DUT Plugin'
-  need_link = False
-
-  def __init__(self, **kwargs):
-    """Abstract init method. The init method of each child class should be:
-
-    def __init__(self, arg1, **kwargs):
-      # Call parent's __init__
-      super(DUT, self).__init__(**kwargs)
-      # Set the child arguments
-      self.arg1 = arg1
-      # Set the RF controllers
-      self.controllers = {
-          'WLAN': ChildWlanController(self),
-          'BLUETOOTH': ChildBluetoothController(self),
-      }
-    """
-    self.rf_type = None
-    self.controllers = {}
-    self.link = link.Create(kwargs['link_options']) if self.need_link else None
-
-  def __getattr__(self, name):
-    """Delegates to the active controller, that is recorded at rf_type."""
-    try:
-      return getattr(self.controllers[self.rf_type], name)
-    except:
-      logger.exception('Failed in DUTBase __getattr__')
-      raise NotImplementedError
-
-  def Initialize(self):
-    """Initializes the DUT device."""
-    raise NotImplementedError
-
-  def Terminate(self):
-    """Terminates the DUT device."""
-    raise NotImplementedError
-
-  def SetRF(self, rf_type):
-    if self.rf_type is not None:
-      self.controllers[self.rf_type].Terminate()
-    self.rf_type = rf_type
-    self.controllers[self.rf_type].Initialize()
 
   class ControllerBase(device.ControllerBase):
     """The abstract DUT RF controller class.
