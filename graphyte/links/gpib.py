@@ -59,9 +59,10 @@ class GPIBLink(link.DeviceLink):
     except Exception as ex:
       raise ValueError('GPIBLink Init failed. %s' % ex)
 
-  def __del__(self):
+  def Close(self):
     if self.device is not None:
       self.device.close()
+      self.device = None
 
   def Push(self, local, remote):
     raise NotImplementedError

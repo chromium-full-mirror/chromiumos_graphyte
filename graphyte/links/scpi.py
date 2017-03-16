@@ -51,9 +51,6 @@ class SCPILink(link.DeviceLink):
       raise SCPILinkError('Failed to connect %s:%d after %d tries' %
                           (host, port, retries))
 
-  def __del__(self):
-    self._Close()
-
   def Push(self, local, remote):
     raise NotImplementedError
 
@@ -121,12 +118,12 @@ class SCPILink(link.DeviceLink):
       self.id = self._Query('*IDN?')
     except Exception:
       logger.exception('Unable to connect to %s:%d.', self.host, self.port)
-      self._Close()
+      self.Close()
       return False
     return True
 
-  def _Close(self):
-    logger.info('Destroying')
+  def Close(self):
+    logger.info('Close the SCPI socket.')
     if self.rfile:
       self.rfile.close()
       self.rfile = None

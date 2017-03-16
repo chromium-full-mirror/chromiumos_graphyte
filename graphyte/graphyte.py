@@ -93,7 +93,8 @@ class Graphyte(object):
     # Record all tests are pass or not
     self.all_tests_pass = None
 
-  def __del__(self):
+  def Close(self):
+    self.result_writer.Close()
     self.TerminateDevices()
 
   def _LoadDevice(self, graphyte_config, device_type, config_dir):
@@ -157,13 +158,18 @@ class Graphyte(object):
 
     It returns whether all tests are passed or not.
     """
+    # Initialize the test environment.
     self.all_tests_pass = True
     self.InitialzeDevices()
+
+    # Iteratively execute every test case.
     for test_case in self.testplan:
       self.RunTest(test_case)
-    self.TerminateDevices()
     logger.info('All tests are pass? %s', self.all_tests_pass)
     self.result_writer.WriteTotalResult(self.all_tests_pass)
+
+    # Terminate the test environment.
+    self.Close()
     return self.all_tests_pass
 
   def InitialzeDevices(self):

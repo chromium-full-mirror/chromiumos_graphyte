@@ -22,8 +22,10 @@ class ResultWriter(object):
     self.csv_writer = csv.DictWriter(self.fout, self.CSV_HEADER)
     self.csv_writer.writeheader()
 
-  def __del__(self):
-    self.fout.close()
+  def Close(self):
+    if self.fout is not None:
+      self.fout.close()
+      self.fout = None
 
   def WriteResult(self, test_case, result):
     """Writes the test result to csv file.

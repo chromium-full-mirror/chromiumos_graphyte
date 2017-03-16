@@ -50,7 +50,9 @@ class DeviceBase(object):
 
   def Terminate(self):
     """Terminates the device."""
-    raise NotImplementedError
+    if self.link is not None:
+      self.link.Close()
+      self.link = None
 
   def SetRF(self, rf_type):
     """Set the RF type."""

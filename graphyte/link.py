@@ -31,6 +31,13 @@ class LinkOptionsError(Exception):
 class DeviceLink(object):
   """An abstract class for Device (DUT and instrument) Links."""
 
+  def Close(self):
+    """Closes the connection of the link.
+
+    This method should be explicitly called before the device is destroyed.
+    """
+    pass
+
   def Push(self, local, remote):
     """Uploads a local file to DUT.
 
