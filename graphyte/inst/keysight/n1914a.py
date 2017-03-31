@@ -14,6 +14,11 @@ from .. import InstBase
 from ...default_setting import logger
 from ...testplan import ChainMaskToList
 
+# The mapping from the port name to the index. The port name is recorded at
+# the port_mapping config file, and the index is used for calling SCPI command.
+PORT_INDEX_MAPPING = {
+    'A': 1,
+    'B': 2}
 
 DEFAULT_LINK_OPTIONS = {
     'link_class': 'SCPILink',
@@ -26,12 +31,11 @@ class Inst(InstBase):
   name = 'Keysight N1914a'
   need_link = True
 
-  def __init__(self, inst_port=1, range_setting='AUTO', avg_count=0,
+  def __init__(self, range_setting='AUTO', avg_count=0,
                continuous_trigger=False, trigger_source='IMMediate', **kwargs):
     """Initialize method.
 
     Args:
-      inst_port: the port of the power meter. 1 or 2.
       range_setting: 0, 1, or 'AUTO'.
       avg_count: integer or 'AUTO'.
       continuous_trigger: enable continuous trigger or not. boolean.
@@ -41,13 +45,12 @@ class Inst(InstBase):
     for key, value in DEFAULT_LINK_OPTIONS.items():
       kwargs['link_options'].setdefault(key, value)
     super(Inst, self).__init__(**kwargs)
+    self.port_mapping = None
     self.current_pathloss = None
 
-    assert inst_port in [1, 2]
     assert range_setting in [0, 1, 'AUTO']
     assert isinstance(avg_count, int) or avg_count == 'AUTO'
 
-    self.inst_port = inst_port
     self.range_setting = range_setting
     self.avg_count = avg_count
     self.continuous_trigger = continuous_trigger
@@ -64,12 +67,13 @@ class Inst(InstBase):
     self.SendCommand('*RST')
 
     # Set range and average filter
-    self.SendCommand('UNIT%d:POWer DBM' % self.inst_port)
     self.SendCommand('FORM ASCii')
-    self._SetRange(self.range_setting)
-    self._SetAverageFilter(self.avg_count)
-    self._SetContinuousTrigger(self.continuous_trigger)
-    self._SetTriggerMode(self.trigger_source)
+    for port_idx in PORT_INDEX_MAPPING.values():
+      self.SendCommand('UNIT%d:POWer DBM' % port_idx)
+      self._SetRange(self.range_setting, port_idx)
+      self._SetAverageFilter(self.avg_count, port_idx)
+      self._SetContinuousTrigger(self.continuous_trigger, port_idx)
+      self._SetTriggerMode(self.trigger_source, port_idx)
 
   def Terminate(self):
     pass
@@ -78,6 +82,7 @@ class Inst(InstBase):
     pass
 
   def _SetPortConfig(self, port_mapping, pathloss):
+    self.port_mapping = port_mapping
     self.current_pathloss = pathloss
 
   def LockInstrument(self):
@@ -116,7 +121,7 @@ class Inst(InstBase):
     if int(check_str) != 1:
       raise ValueError('Expected 1 after *OPC? but got %s' % check_str)
 
-  def _SetRange(self, range_setting):
+  def _SetRange(self, range_setting, port_idx):
     """Selects a sensor's range (lower or upper).
 
     Args:
@@ -126,16 +131,17 @@ class Inst(InstBase):
         lower range and 1 for the upper range. Because range definition
         varies from sensor to sensor, check the manual before using this
         function.
+      port_idx: the index of the selected port. 1 or 2.
     """
     assert range_setting in ['AUTO', 0, 1]
     if range_setting == 'AUTO':
-      self.SendCommand('SENSe%d:POWer:AC:RANGe:AUTO 1' % self.inst_port)
+      self.SendCommand('SENSe%d:POWer:AC:RANGe:AUTO 1' % port_idx)
     else:
-      self.SendCommand('SENSe%d:POWer:AC:RANGe:AUTO 0' % self.inst_port)
+      self.SendCommand('SENSe%d:POWer:AC:RANGe:AUTO 0' % port_idx)
       self.SendCommand('SENSe%d:POWer:AC:RANGe %d' %
-                       (self.inst_port, range_setting))
+                       (port_idx, range_setting))
 
-  def _SetAverageFilter(self, avg_count):
+  def _SetAverageFilter(self, avg_count, port_idx):
     """Sets the average filter.
 
     There are three different average filters available, averaging disable,
@@ -144,36 +150,35 @@ class Inst(InstBase):
     Args:
       avg_length: Use 'AUTO' for auto averaging, 0 for averaging disable, and
         other positive numbers for specific window length.
+      port_idx: the index of the selected port. 1 or 2.
     """
     if avg_count == 'AUTO':
-      self.SendCommand('SENSe%d:AVERage:COUNt:AUTO ON' % self.inst_port)
+      self.SendCommand('SENSe%d:AVERage:COUNt:AUTO ON' % port_idx)
     elif avg_count == 0:
       # Disable the average filter.
-      self.SendCommand('SENSe%d:AVERage:STATe 0' % self.inst_port)
+      self.SendCommand('SENSe%d:AVERage:STATe 0' % port_idx)
     elif isinstance(avg_count, int):
-      self.SendCommand('SENSe%d:AVERage:COUNt:AUTO OFF' % self.inst_port)
-      self.SendCommand('SENSe%d:AVERage:COUNt %d' %
-                       (self.inst_port, avg_count))
+      self.SendCommand('SENSe%d:AVERage:COUNt:AUTO OFF' % port_idx)
+      self.SendCommand('SENSe%d:AVERage:COUNt %d' % (port_idx, avg_count))
     else:
       raise ValueError('Invalid avg_count setting [%s]' % avg_count)
 
-  def _SetContinuousTrigger(self, enable):
+  def _SetContinuousTrigger(self, enable, port_idx):
     status = 'ON' if enable else 'OFF'
-    self.SendCommand('INITiate%d:CONTinuous %s' % (self.inst_port, status))
+    self.SendCommand('INITiate%d:CONTinuous %s' % (port_idx, status))
 
-  def _SetTriggerMode(self, trigger_source):
-    self.SendCommand('TRIGger%d:SOURce %s' %
-                     (self.inst_port, trigger_source))
+  def _SetTriggerMode(self, trigger_source, port_idx):
+    self.SendCommand('TRIGger%d:SOURce %s' % (port_idx, trigger_source))
 
-  def SetFrequency(self, freq_mhz):
+  def SetFrequency(self, freq_mhz, port_idx):
     logger.info('Set frequency to %d MHz', freq_mhz)
-    self.SendCommand('SENSe%d:FREQuency %sMHz' % (self.inst_port, freq_mhz))
-    self.SendCommand('SENSe%d:CORRection:GAIN2:STATe 0' % self.inst_port)
+    self.SendCommand('SENSe%d:FREQuency %sMHz' % (port_idx, freq_mhz))
+    self.SendCommand('SENSe%d:CORRection:GAIN2:STATe 0' % port_idx)
 
-  def FetchPower(self):
+  def FetchPower(self, port_idx):
     try:
-      self.SendCommand('INITiate%d:IMMediate' % self.inst_port)
-      result = float(self.QueryCommand('FETch%d?' % self.inst_port))
+      self.SendCommand('INITiate%d:IMMediate' % port_idx)
+      result = float(self.QueryCommand('FETch%d?' % port_idx))
       logger.debug('Fetch power: %s', result)
       return result
     except Exception:
@@ -194,17 +199,27 @@ class RFController(InstBase.PowerMeterControllerBase):
 
   def _TxConfig(self, center_freq, **kwargs):
     self.inst.SendCommand('ABORt')
-    self.inst.SetFrequency(center_freq)
+    for port_idx in PORT_INDEX_MAPPING.values():
+      self.inst.SetFrequency(center_freq, port_idx)
 
   def _TxMeasure(self, center_freq, **kwargs):
-    power = self.inst.FetchPower()
+    def _MeasurePower(antenna_index):
+      port_name = self.inst.port_mapping[antenna_index]
+      logger.debug('Measure power for antenna %s, port name is %s',
+                   antenna_index, port_name)
+      port_idx = PORT_INDEX_MAPPING[port_name]
+      power = self.inst.FetchPower(port_idx)
+      return power + self.inst.current_pathloss[antenna_index][center_freq]
+
     if 'chain_mask' in kwargs:  # WLAN case
       antenna_indice = ChainMaskToList(kwargs['chain_mask'])
       result = {}
       for idx in antenna_indice:
-        result[idx] = power + self.inst.current_pathloss[idx][center_freq]
+        result[idx] = _MeasurePower(idx)
     else:
-      result = power + self.inst.current_pathloss[0][center_freq]
+      # SISO case.
+      assert len(self.inst.port_mapping) == 1
+      result = _MeasurePower(0)
 
     self.result = {'avg_power': result}
 
