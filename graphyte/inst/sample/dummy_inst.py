@@ -29,9 +29,6 @@ class Inst(InstBase):
   def Terminate(self):
     logger.info('Inst Terminate')
 
-  def SelfCalibrate(self, calibration_type='full'):
-    logger.info('Inst SelfCalibrate')
-
   def _SetPortConfig(self, port_mapping, pathloss):
     logger.info('Inst _SetPortConfig')
 

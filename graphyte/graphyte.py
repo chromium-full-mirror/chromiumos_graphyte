@@ -176,7 +176,6 @@ class Graphyte(object):
     try:
       self.inst.Initialize()
       self.inst.LockInstrument()
-      self.inst.SelfCalibrate()
       self.inst.InitPortConfig(self.port_config)
       self.dut.Initialize()
     except Exception:

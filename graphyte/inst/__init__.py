@@ -30,15 +30,6 @@ class InstBase(device.DeviceBase):  # pylint: disable=abstract-method
     self.port_config_table = None
     self.active_component = (None, None)
 
-  def SelfCalibrate(self, calibration_type='full'):
-    """Runs the instrument self calirbation.
-
-    Runs the internal calculation to correct for power measurement inaccuracies
-    in the case of temperature drift. This method would be called once before
-    all test cases starts.
-    """
-    raise NotImplementedError
-
   def InitPortConfig(self, port_config_table):
     self.port_config_table = port_config_table
 

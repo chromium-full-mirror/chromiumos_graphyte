@@ -85,9 +85,6 @@ class Inst(InstBase):
   def Terminate(self):
     pass
 
-  def SelfCalibrate(self, calibration_type='full'):
-    pass
-
   def _SetPortConfig(self, port_mapping, pathloss):
     self.current_pathloss = pathloss
 
