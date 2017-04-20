@@ -109,20 +109,6 @@ class InstBase(device.DeviceBase):  # pylint: disable=abstract-method
       """Disconnects/unconfigures the interface that was being used."""
       raise NotImplementedError
 
-    def TxConfig(self, test):
-      test_case = self._CheckTestArgument(test.ToDict(), 'TX')
-      return self._TxConfig(**test_case)
-
-    def _TxConfig(self, **kwargs):
-      """Configures the instrument for the test case.
-
-      Configures measurement and commits settings to the instrument without
-      arming trigger. The method would be called before the DUT start
-      transmitting signal.
-      """
-      # TODO(akahuang): Decide whether this function should be removed.
-      pass
-
     def TxMeasure(self, test):
       test_case = self._CheckTestArgument(test.ToDict(), 'TX')
       return self._TxMeasure(**test_case)
@@ -177,19 +163,6 @@ class InstBase(device.DeviceBase):  # pylint: disable=abstract-method
       """
       raise NotImplementedError
 
-    def RxConfig(self, test):
-      test_case = self._CheckTestArgument(test.ToDict(), 'RX')
-      return self._RxConfig(**test_case)
-
-    def _RxConfig(self, **kwargs):
-      """Configures the instrument for the test case.
-
-      Configures the VSG and loads the waveform based on the signal information.
-      The method would be called before the DUT start receiving signal.
-      """
-      # TODO(akahuang): Decide whether this function should be removed.
-      pass
-
     def RxGenerate(self, test):
       test_case = self._CheckTestArgument(test.ToDict(), 'RX')
       return self._RxGenerate(**test_case)
@@ -210,9 +183,6 @@ class InstBase(device.DeviceBase):  # pylint: disable=abstract-method
     """The controller for power meters."""
     RF_TYPE = 'ALL'
 
-    def _TxConfig(self, center_freq, **kwargs):
-      raise NotImplementedError
-
     def _TxMeasure(self, center_freq, **kwargs):
       raise NotImplementedError
 
@@ -221,11 +191,6 @@ class InstBase(device.DeviceBase):  # pylint: disable=abstract-method
 
   class WlanControllerBase(ControllerBase):
     RF_TYPE = 'WLAN'
-
-    def _TxConfig(self, component_name, rf_type, test_type, center_freq,
-                  power_level, standard, bandwidth, data_rate, chain_mask, nss,
-                  long_preamble, **kwargs):
-      pass
 
     def _TxMeasure(self, component_name, rf_type, test_type, center_freq,
                    power_level, standard, bandwidth, data_rate, chain_mask,
@@ -236,11 +201,6 @@ class InstBase(device.DeviceBase):  # pylint: disable=abstract-method
                      power_level, standard, bandwidth, data_rate, chain_mask,
                      nss, long_preamble, result_limit, **kwargs):
       raise NotImplementedError
-
-    def _RxConfig(self, component_name, rf_type, test_type, center_freq,
-                  power_level, standard, bandwidth, data_rate, chain_mask, nss,
-                  long_preamble, rx_num_packets, **kwargs):
-      pass
 
     def _RxGenerate(self, component_name, rf_type, test_type, center_freq,
                     power_level, standard, bandwidth, data_rate, chain_mask,
@@ -256,10 +216,6 @@ class InstBase(device.DeviceBase):  # pylint: disable=abstract-method
       # Store the delta_f1_avg and delta_f2_avg for delta_f2_f1_avg_ratio
       self._delta_f1_avg_results = {}
       self._delta_f2_avg_results = {}
-
-    def _TxConfig(self, component_name, rf_type, test_type, center_freq,
-                  power_level, packet_type, bit_pattern, **kwargs):
-      pass
 
     def _TxMeasure(self, component_name, rf_type, test_type, center_freq,
                    power_level, packet_type, bit_pattern, result_limit,
@@ -309,11 +265,6 @@ class InstBase(device.DeviceBase):  # pylint: disable=abstract-method
                      **kwargs):
       raise NotImplementedError
 
-    def _RxConfig(self, component_name, rf_type, test_type, center_freq,
-                  power_level, packet_type, bit_pattern,
-                  rx_num_packets=None, rx_num_bits=None, **kwargs):
-      pass
-
     def _RxGenerate(self, component_name, rf_type, test_type, center_freq,
                     power_level, packet_type, bit_pattern,
                     rx_num_packets=None, rx_num_bits=None, **kwargs):
@@ -322,10 +273,6 @@ class InstBase(device.DeviceBase):  # pylint: disable=abstract-method
   class ZigbeeControllerBase(ControllerBase):
     RF_TYPE = '802_15_4'
 
-    def _TxConfig(self, component_name, rf_type, test_type, center_freq,
-                  power_level, **kwargs):
-      pass
-
     def _TxMeasure(self, component_name, rf_type, test_type, center_freq,
                    power_level, result_limit, **kwargs):
       raise NotImplementedError
@@ -333,10 +280,6 @@ class InstBase(device.DeviceBase):  # pylint: disable=abstract-method
     def _TxGetResult(self, component_name, rf_type, test_type, center_freq,
                      power_level, result_limit, **kwargs):
       raise NotImplementedError
-
-    def _RxConfig(self, component_name, rf_type, test_type, center_freq,
-                  power_level, rx_num_packets, **kwargs):
-      pass
 
     def _RxGenerate(self, component_name, rf_type, test_type, center_freq,
                     power_level, rx_num_packets, **kwargs):

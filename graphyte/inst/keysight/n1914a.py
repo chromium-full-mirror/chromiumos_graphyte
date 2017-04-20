@@ -194,12 +194,10 @@ class RFController(InstBase.PowerMeterControllerBase):
   def _Terminate(self):
     pass
 
-  def _TxConfig(self, center_freq, **kwargs):
+  def _TxMeasure(self, center_freq, **kwargs):
     self.inst.SendCommand('ABORt')
     for port_idx in PORT_INDEX_MAPPING.values():
       self.inst.SetFrequency(center_freq, port_idx)
-
-  def _TxMeasure(self, center_freq, **kwargs):
     def _MeasurePower(antenna_index):
       port_name = self.inst.port_mapping[antenna_index]
       logger.debug('Measure power for antenna %s, port name is %s',
@@ -224,9 +222,6 @@ class RFController(InstBase.PowerMeterControllerBase):
     ret = self.result
     self.result = None
     return ret
-
-  def _RxConfig(self, **kwargs):
-    raise NotImplementedError
 
   def _RxGenerate(self, rx_num_packets, power_level, **kwargs):
     raise NotImplementedError

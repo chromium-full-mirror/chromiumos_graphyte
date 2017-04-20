@@ -21,18 +21,12 @@ class WaitController(InstBase.ControllerBase):
   def _Terminate(self):
     pass
 
-  def _TxConfig(self, **kwargs):
-    pass
-
   def _TxMeasure(self, **kwargs):
     logger.info('TxMeasure')
     self.inst.wait_func()
 
   def _TxGetResult(self, **kwargs):
     return {}
-
-  def _RxConfig(self, **kwargs):
-    pass
 
   def _RxGenerate(self, **kwargs):
     pass

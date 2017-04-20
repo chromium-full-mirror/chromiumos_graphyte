@@ -34,11 +34,6 @@ class DUT(DUTBase):
     def _Terminate(self):
       logger.info('DUT Wlan Terminate')
 
-    def _TxConfig(self, component_name, center_freq,
-                  power_level, standard, bandwidth, data_rate, chain_mask, nss,
-                  long_preamble, **kwargs):
-      logger.info('DUT Wlan TxConfig')
-
     def _TxStart(self, component_name, center_freq,
                  power_level, standard, bandwidth, data_rate, chain_mask, nss,
                  long_preamble, **kwargs):
@@ -46,11 +41,6 @@ class DUT(DUTBase):
 
     def _TxStop(self, **kwargs):
       logger.info('DUT Wlan TxStop')
-
-    def _RxConfig(self, component_name, center_freq,
-                  power_level, standard, bandwidth, data_rate, chain_mask, nss,
-                  long_preamble, rx_num_packets, **kwargs):
-      logger.info('DUT Wlan RxConfig')
 
     def _RxClearResult(self, component_name, center_freq,
                        power_level, standard, bandwidth, data_rate, chain_mask,
@@ -68,20 +58,12 @@ class DUT(DUTBase):
     def _Terminate(self):
       logger.info('DUT Bluetooth Terminate')
 
-    def _TxConfig(self, component_name, center_freq,
-                  power_level, packet_type, bit_pattern, **kwargs):
-      logger.info('DUT Bluetooth TxConfig')
-
     def _TxStart(self, component_name, center_freq,
                  power_level, packet_type, bit_pattern, **kwargs):
       logger.info('DUT Bluetooth TxStart')
 
     def _TxStop(self, **kwargs):
       logger.info('DUT Bluetooth TxStop')
-
-    def _RxConfig(self, component_name, center_freq,
-                  power_level, packet_type, bit_pattern, **kwargs):
-      logger.info('DUT Bluetooth RxConfig')
 
     def _RxClearResult(self, component_name, center_freq,
                        power_level, packet_type, bit_pattern, **kwargs):
@@ -98,20 +80,12 @@ class DUT(DUTBase):
     def _Terminate(self):
       logger.info('DUT Zigbee Terminate')
 
-    def _TxConfig(self, component_name, center_freq,
-                  power_level, **kwargs):
-      logger.info('DUT Zigbee TxConfig')
-
     def _TxStart(self, component_name, center_freq,
                  power_level, **kwargs):
       logger.info('DUT Zigbee TxStart')
 
     def _TxStop(self, **kwargs):
       logger.info('DUT Zigbee TxStop')
-
-    def _RxConfig(self, component_name, center_freq,
-                  power_level, rx_num_packets, **kwargs):
-      logger.info('DUT Zigbee RxConfig')
 
     def _RxClearResult(self, component_name, center_freq,
                        power_level, rx_num_packets, **kwargs):

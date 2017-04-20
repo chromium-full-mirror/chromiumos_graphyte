@@ -32,10 +32,8 @@ class RFController(InstBase.PowerMeterControllerBase):
   def _Terminate(self):
     pass
 
-  def _TxConfig(self, center_freq, **kwargs):
-    self.inst.SetFrequency(center_freq)
-
   def _TxMeasure(self, center_freq, **kwargs):
+    self.inst.SetFrequency(center_freq)
     time.sleep(2)  # Wait for power meter stable
     power = self.inst.FetchPower()
     if 'chain_mask' in kwargs:  # WLAN case
@@ -50,9 +48,6 @@ class RFController(InstBase.PowerMeterControllerBase):
 
   def _TxGetResult(self, result_limit, **kwargs):
     return self.result
-
-  def _RxConfig(self, **kwargs):
-    raise NotImplementedError
 
   def _RxGenerate(self, rx_num_packets, power_level, **kwargs):
     raise NotImplementedError

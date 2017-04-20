@@ -46,18 +46,6 @@ class DUTBase(device.DeviceBase):  # pylint: disable=abstract-method
       """Disconnects/unconfigures the interface that was being used."""
       raise NotImplementedError
 
-    def TxConfig(self, test):
-      test_case = self._CheckTestArgument(test.ToDict(), 'TX')
-      return self._TxConfig(**test_case)
-
-    def _TxConfig(self, **kwargs):
-      """Configures the DUT for the test case.
-
-      Configures the transmission settings to the DUT without arming trigger.
-      """
-      # TODO(akahuang): Decide whether this function should be removed.
-      pass
-
     def TxStart(self, test):
       test_case = self._CheckTestArgument(test.ToDict(), 'TX')
       return self._TxStart(**test_case)
@@ -78,15 +66,6 @@ class DUTBase(device.DeviceBase):  # pylint: disable=abstract-method
     def _TxStop(self, **kwargs):
       """Stops the TX."""
       raise NotImplementedError
-
-    def RxConfig(self, test):
-      test_case = self._CheckTestArgument(test.ToDict(), 'RX')
-      return self._RxConfig(**test_case)
-
-    def _RxConfig(self, **kwargs):
-      """Configures the DUT for the receiving test case."""
-      # TODO(akahuang): Decide whether this function should be removed.
-      pass
 
     def RxClearResult(self, test):
       test_case = self._CheckTestArgument(test.ToDict(), 'RX')
@@ -117,20 +96,10 @@ class DUTBase(device.DeviceBase):  # pylint: disable=abstract-method
   class WlanControllerBase(ControllerBase):
     RF_TYPE = 'WLAN'
 
-    def _TxConfig(self, component_name, center_freq,
-                  power_level, standard, bandwidth, data_rate, chain_mask, nss,
-                  long_preamble, **kwargs):
-      pass
-
     def _TxStart(self, component_name, center_freq,
                  power_level, standard, bandwidth, data_rate, chain_mask, nss,
                  long_preamble, **kwargs):
       raise NotImplementedError
-
-    def _RxConfig(self, component_name, center_freq,
-                  power_level, standard, bandwidth, data_rate, chain_mask, nss,
-                  long_preamble, rx_num_packets, **kwargs):
-      pass
 
     def _RxClearResult(self, component_name, center_freq,
                        power_level, standard, bandwidth, data_rate, chain_mask,
@@ -145,18 +114,9 @@ class DUTBase(device.DeviceBase):  # pylint: disable=abstract-method
   class BluetoothControllerBase(ControllerBase):
     RF_TYPE = 'BLUETOOTH'
 
-    def _TxConfig(self, component_name, center_freq,
-                  power_level, packet_type, bit_pattern, **kwargs):
-      pass
-
     def _TxStart(self, component_name, center_freq,
                  power_level, packet_type, bit_pattern, **kwargs):
       raise NotImplementedError
-
-    def _RxConfig(self, component_name, center_freq,
-                  power_level, packet_type, bit_pattern,
-                  rx_num_packets=None, rx_num_bits=None, **kwargs):
-      pass
 
     def _RxClearResult(self, component_name, center_freq,
                        power_level, packet_type, bit_pattern,
@@ -171,17 +131,9 @@ class DUTBase(device.DeviceBase):  # pylint: disable=abstract-method
   class ZigbeeControllerBase(ControllerBase):
     RF_TYPE = '802_15_4'
 
-    def _TxConfig(self, component_name, center_freq,
-                  power_level, **kwargs):
-      pass
-
     def _TxStart(self, component_name, center_freq,
                  power_level, **kwargs):
       raise NotImplementedError
-
-    def _RxConfig(self, component_name, center_freq,
-                  power_level, rx_num_packets, **kwargs):
-      pass
 
     def _RxClearResult(self, component_name, center_freq,
                        power_level, rx_num_packets, **kwargs):
