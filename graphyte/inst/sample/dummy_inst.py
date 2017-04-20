@@ -23,10 +23,10 @@ class Inst(InstBase):
         'BLUETOOTH': self.BluetoothController(self),
         '802_15_4': self.ZigbeeController(self)}
 
-  def Initialize(self):
+  def _Initialize(self):
     logger.info('Inst Initialize')
 
-  def Terminate(self):
+  def _Terminate(self):
     logger.info('Inst Terminate')
 
   def _SetPortConfig(self, port_mapping, pathloss):

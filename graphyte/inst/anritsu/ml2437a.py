@@ -16,21 +16,13 @@ from ...default_setting import logger
 from ...testplan import ChainMaskToList
 from ...utils.graphyte_utils import CalculateAverage
 
-class InstrumentNotReady(Exception):
-  pass
-
 
 class RFController(InstBase.PowerMeterControllerBase):
   def __init__(self, inst=None, duty_cycle=None):
     super(RFController, self).__init__(inst)
     self.result = None
     self.duty_cycle = duty_cycle
-
-  def _Initialize(self):
     self.inst.SetDutyCycle(self.duty_cycle)
-
-  def _Terminate(self):
-    pass
 
   def _TxMeasure(self, center_freq, **kwargs):
     self.inst.SetFrequency(center_freq)
@@ -71,13 +63,11 @@ class Inst(InstBase):
         'BLUETOOTH': RFController(self, bluetooth_duty_cycle),
         '802_15_4': RFController(self, zigbee_duty_cycle)}
 
-  def Initialize(self):
+  def _Initialize(self):
     logger.info('Inst Initialize')
-    if not self.link.IsReady():
-      raise InstrumentNotReady
     self.link.CheckCall('*RST')
 
-  def Terminate(self):
+  def _Terminate(self):
     pass
 
   def _SetPortConfig(self, port_mapping, pathloss):

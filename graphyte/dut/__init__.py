@@ -32,20 +32,6 @@ class DUTBase(device.DeviceBase):  # pylint: disable=abstract-method
     def __init__(self, dut=None):
       self.dut = dut
 
-    def Initialize(self):
-      return self._Initialize()
-
-    def _Initialize(self):
-      """Initializes the controller."""
-      raise NotImplementedError
-
-    def Terminate(self):
-      return self._Terminate()
-
-    def _Terminate(self):
-      """Disconnects/unconfigures the interface that was being used."""
-      raise NotImplementedError
-
     def TxStart(self, test):
       test_case = self._CheckTestArgument(test.ToDict(), 'TX')
       return self._TxStart(**test_case)

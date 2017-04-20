@@ -59,9 +59,8 @@ class Inst(InstBase):
     self.controllers = {rf_type: RFController(self)
                         for rf_type in ['WLAN', 'BLUETOOTH', '802_15_4']}
 
-  def Initialize(self):
+  def _Initialize(self):
     logger.info('Inst Initialize')
-    self.link.CheckReady()
     # Choose SCPI language
     self.SendCommand('SYSTem:LANGuage SCPI')
     self.SendCommand('*RST')
@@ -75,7 +74,7 @@ class Inst(InstBase):
       self._SetContinuousTrigger(self.continuous_trigger, port_idx)
       self._SetTriggerMode(self.trigger_source, port_idx)
 
-  def Terminate(self):
+  def _Terminate(self):
     pass
 
   def _SetPortConfig(self, port_mapping, pathloss):
@@ -187,12 +186,6 @@ class RFController(InstBase.PowerMeterControllerBase):
   def __init__(self, inst):
     super(RFController, self).__init__(inst)
     self.result = None
-
-  def _Initialize(self):
-    pass
-
-  def _Terminate(self):
-    pass
 
   def _TxMeasure(self, center_freq, **kwargs):
     self.inst.SendCommand('ABORt')

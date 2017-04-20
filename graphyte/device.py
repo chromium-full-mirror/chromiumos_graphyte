@@ -36,30 +36,48 @@ class DeviceBase(object):
     self.controllers = {}
     self.link = link.Create(kwargs['link_options']) if self.need_link else None
 
-  def __getattr__(self, name):
-    """Delegates to the active controller, that is recorded at rf_type."""
-    try:
-      return getattr(self.controllers[self.rf_type], name)
-    except:
-      logger.exception('Failed in delegating RF method: %s', name)
-      raise NotImplementedError
+  @property
+  def active_controller(self):
+    if self.rf_type not in self.controllers:
+      raise KeyError('rf_type "%s" is not supported.' % self.rf_type)
+    return self.controllers[self.rf_type]
+
+  @active_controller.setter
+  def active_controller(self, value):
+    del value
+    raise ValueError(
+        'Update `rf_type` value instead of updating `active_controller`.')
 
   def Initialize(self):
     """Initializes the device."""
-    raise NotImplementedError
+    logger.debug('device.Initialize')
+    if self.need_link:
+      self.link.CheckReady()
+    return self._Initialize()
+
+  def _Initialize(self):
+    pass
 
   def Terminate(self):
     """Terminates the device."""
+    logger.debug('device.Terminate')
+    if self.rf_type is not None:
+      self.controllers[self.rf_type].Terminate()
+      self.rf_type = None
+    self._Terminate()
     if self.link is not None:
       self.link.Close()
       self.link = None
 
+  def _Terminate(self):
+    pass
+
   def SetRF(self, rf_type):
     """Set the RF type."""
     if self.rf_type is not None:
-      self.controllers[self.rf_type].Terminate()
+      self.active_controller.Terminate()
     self.rf_type = rf_type
-    self.controllers[self.rf_type].Initialize()
+    self.active_controller.Initialize()
 
 
 class ControllerBase(object):
@@ -80,6 +98,20 @@ class ControllerBase(object):
 
   # The RF type of the controller. Child class should override this.
   RF_TYPE = ''
+
+  def Initialize(self):
+    return self._Initialize()
+
+  def _Initialize(self):
+    """Initializes the controller."""
+    pass
+
+  def Terminate(self):
+    return self._Terminate()
+
+  def _Terminate(self):
+    """Disconnects/unconfigures the interface that was being used."""
+    pass
 
   def _CheckTestArgument(self, test_case, required_test_type):
     """Checks the test case has correct test type and RF type.

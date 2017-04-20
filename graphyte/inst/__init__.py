@@ -95,20 +95,6 @@ class InstBase(device.DeviceBase):  # pylint: disable=abstract-method
     def __init__(self, inst=None):
       self.inst = inst
 
-    def Initialize(self):
-      return self._Initialize()
-
-    def _Initialize(self):
-      """Initializes the RF interface."""
-      raise NotImplementedError
-
-    def Terminate(self):
-      return self._Terminate()
-
-    def _Terminate(self):
-      """Disconnects/unconfigures the interface that was being used."""
-      raise NotImplementedError
-
     def TxMeasure(self, test):
       test_case = self._CheckTestArgument(test.ToDict(), 'TX')
       return self._TxMeasure(**test_case)

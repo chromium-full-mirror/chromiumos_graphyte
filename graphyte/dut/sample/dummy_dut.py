@@ -21,10 +21,10 @@ class DUT(DUTBase):
         'BLUETOOTH': self.BluetoothController(self),
         '802_15_4': self.ZigbeeController(self)}
 
-  def Initialize(self):
+  def _Initialize(self):
     logger.info('DUT Initialize')
 
-  def Terminate(self):
+  def _Terminate(self):
     logger.info('DUT Terminate')
 
   class WlanController(DUTBase.WlanControllerBase):

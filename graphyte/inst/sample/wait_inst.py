@@ -15,12 +15,6 @@ from ...default_setting import GRAPHYTE_OUT
 
 
 class WaitController(InstBase.ControllerBase):
-  def _Initialize(self):
-    pass
-
-  def _Terminate(self):
-    pass
-
   def _TxMeasure(self, **kwargs):
     logger.info('TxMeasure')
     self.inst.wait_func()
@@ -65,12 +59,6 @@ class Inst(InstBase):
   def _WaitPeriod(self):
     logger.info('Wait %s seconds', self.wait_secs)
     time.sleep(self.wait_secs)
-
-  def Initialize(self):
-    pass
-
-  def Terminate(self):
-    pass
 
   def _SetPortConfig(self, port_mapping, pathloss):
     pass
