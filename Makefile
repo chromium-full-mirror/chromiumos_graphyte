@@ -1,4 +1,4 @@
-# Copyright (c) 2015 The Chromium OS Authors. All rights reserved.
+# Copyright 2017 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
@@ -23,10 +23,13 @@ UNITTEST_WHITELIST=$(filter-out $(UNITTEST_BLACKLIST), $(UNITTEST_FILES))
 .PHONY: .phony
 
 default: .phony
-	python setup.py sdist --formats=$(FORMATS)
+	#no build step is required
 
 install: .phony
-	python setup.py install
+	pip install .
+
+dist:
+	python setup.py sdist --formats=$(FORMATS)
 
 clean: .phony
 	rm -rf build dist MANIFEST graphyte.egg-info overlay-*
