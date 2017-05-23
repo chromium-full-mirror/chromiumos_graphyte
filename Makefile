@@ -28,7 +28,7 @@ default: .phony
 install: .phony
 	pip install .
 
-dist:
+dist: .phony
 	python setup.py sdist --formats=$(FORMATS)
 
 clean: .phony
