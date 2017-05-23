@@ -8,6 +8,7 @@ import subprocess
 import tempfile
 
 from .utils import file_utils
+from .default_setting import logger
 
 CalledProcessError = subprocess.CalledProcessError
 
@@ -157,7 +158,8 @@ class DeviceLink(object):
     """
     try:
       return self.CheckOutput(*args, **kargs)
-    except CalledProcessError:
+    except CalledProcessError as ex:
+      logger.debug('Failed to run command: %s', str(ex))
       return None
 
   def WriteFile(self, path, content):
