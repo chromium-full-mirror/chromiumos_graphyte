@@ -154,3 +154,21 @@ class LogFuncTest(unittest.TestCase):
     FakeFunction('foo', 'bar', a=1, b=2)
     mock_logger.debug.assert_called_with(
         'Calling %s(%s)', 'FakeFunction', 'foo, bar, a=1, b=2')
+
+
+@graphyte_utils.LogAllMethods
+class FakeClass(object):
+  def Foo(self, *args):
+    pass
+  def _Bar(self, *args):
+    pass
+
+
+class LogAllMethodsTest(unittest.TestCase):
+  @mock.patch(__name__ + '.graphyte_utils.logger')
+  def testArgsAndKwargsMethod(self, mock_logger):
+    obj = FakeClass()
+    obj._Bar(1, 2)  # pylint: disable=protected-access
+    mock_logger.debug.assert_not_called()
+    obj.Foo(3)
+    mock_logger.debug.assert_called_with('Calling %s(%s)', 'FakeClass.Foo', '3')

@@ -182,7 +182,7 @@ def CalculateAverageResult(results, average_type='Linear'):
     raise TypeError('The type should be list or a dict. %s' % results)
 
 
-def LogFunc(func):
+def LogFunc(func, prefix=''):
   """The decorator for logging the function call."""
   def Wrapper(*args, **kwargs):
     args_name = inspect.getargspec(func).args
@@ -192,6 +192,15 @@ def LogFunc(func):
       real_args = args[:]
     arg_str = ', '.join(map(str, real_args) +
                         ['%s=%r' % (key, val) for key, val in kwargs.items()])
-    logger.debug('Calling %s(%s)', func.__name__, arg_str)
+    logger.debug('Calling %s(%s)', prefix + func.__name__, arg_str)
     return func(*args, **kwargs)
   return Wrapper
+
+
+def LogAllMethods(cls):
+  """The class decorator that Logs all the public methods."""
+  prefix = cls.__name__ + '.'
+  for func_name, func in inspect.getmembers(cls, inspect.ismethod):
+    if not func_name.startswith('_'):
+      setattr(cls, func_name, LogFunc(func, prefix))
+  return cls
