@@ -79,7 +79,6 @@ class Graphyte(object):
     self.testplan = TestPlan(graphyte_config['test_plan'], config_dir)
     if not self.testplan:
       raise ValueError('Load test plan failed.')
-    self.rf_type = None
 
     # Load port config, including port mapping and path loss
     self.port_config = PortConfig(graphyte_config['port_config'], config_dir)
@@ -199,10 +198,8 @@ class Graphyte(object):
 
   def SetRF(self, rf_type):
     logger.info('Set RF type: %s', rf_type)
-    if rf_type != self.rf_type:
-      self.rf_type = rf_type
-      self.dut.SetRF(rf_type)
-      self.inst.SetRF(rf_type)
+    self.dut.SetRF(rf_type)
+    self.inst.SetRF(rf_type)
 
   def RunTest(self, test_case):
     logger.info('Running test: \n%s', test_case)

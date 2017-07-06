@@ -74,10 +74,13 @@ class DeviceBase(object):
 
   def SetRF(self, rf_type):
     """Set the RF type."""
+    if self.rf_type == rf_type:
+      return
     if self.rf_type is not None:
       self.active_controller.Terminate()
     self.rf_type = rf_type
-    self.active_controller.Initialize()
+    if self.rf_type is not None:
+      self.active_controller.Initialize()
 
 
 class ControllerBase(object):

@@ -70,6 +70,8 @@ class GraphyteTest(unittest.TestCase):
         mock.call.inst.active_controller.TxGetResult(self.fake_wlan_tx_test),
 
         # Run WLAN Rx Test case.
+        mock.call.dut.SetRF('WLAN'),
+        mock.call.inst.SetRF('WLAN'),
         mock.call.inst.SetPortConfig(self.fake_wlan_rx_test),
         mock.call.dut.active_controller.RxClearResult(self.fake_wlan_rx_test),
         mock.call.inst.active_controller.RxGenerate(self.fake_wlan_rx_test),
@@ -86,6 +88,8 @@ class GraphyteTest(unittest.TestCase):
         mock.call.inst.active_controller.TxGetResult(self.fake_bt_tx_test),
 
         # Run WLAN Rx Test case.
+        mock.call.dut.SetRF('BLUETOOTH'),
+        mock.call.inst.SetRF('BLUETOOTH'),
         mock.call.inst.SetPortConfig(self.fake_bt_rx_test),
         mock.call.dut.active_controller.RxClearResult(self.fake_bt_rx_test),
         mock.call.inst.active_controller.RxGenerate(self.fake_bt_rx_test),
