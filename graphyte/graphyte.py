@@ -20,7 +20,6 @@ import logging
 import os
 
 from .default_setting import DEFAULT_CONFIG_FILE
-from .default_setting import DEFAULT_LOG_FILE
 from .default_setting import DEFAULT_RESULT_FILE
 from .default_setting import GRAPHYTE_DIR
 from .default_setting import GRAPHYTE_OUT
@@ -32,14 +31,12 @@ from .testplan import TestPlan
 from .utils import graphyte_utils
 from .utils import sync_utils
 
-
 class Graphyte(object):
   """The graphyte module.
 
   Instantiating the class does everything now. Refer to the constructor below.
   """
-  def __init__(self, config_file=None, log_file=None, result_file=None,
-               verbose=False, console_output=False):
+  def __init__(self, config_file=None, result_file=None):
     """The constructor for this module does most of it right now.
 
     - Load the graphyte.settings file to find the modules to load.
@@ -61,11 +58,7 @@ class Graphyte(object):
     the flow diagram.
     """
     config_file = config_file or DEFAULT_CONFIG_FILE
-    log_file = log_file or DEFAULT_LOG_FILE
     result_file = result_file or DEFAULT_RESULT_FILE
-
-    self.SetLogging(log_file, verbose, console_output)
-    logger.info('Starting Graphyte....')
 
     config_path = graphyte_utils.SearchConfig(config_file, GRAPHYTE_DIR)
     config_dir = os.path.dirname(config_path)
@@ -134,24 +127,6 @@ class Graphyte(object):
                 device_type, module_name, device_config)
     return module.__dict__[class_name](**device_config)
 
-  def SetLogging(self, log_file, verbose, console_output):
-    level = logging.DEBUG if verbose else logging.INFO
-    log_file = graphyte_utils.PrepareOutputFile(log_file)
-    if os.path.exists(log_file):
-      os.remove(log_file)
-    fmt = '[%(levelname)s] %(asctime)s %(filename)s:%(lineno)d %(message)s'
-    date_fmt = '%H:%M:%S'
-    formatter = logging.Formatter(fmt, date_fmt)
-
-    root_logger = logging.getLogger('')
-    root_logger.setLevel(level)
-    file_handler = logging.FileHandler(log_file, 'a')
-    file_handler.setFormatter(formatter)
-    root_logger.addHandler(file_handler)
-    if console_output:
-      console_handler = logging.StreamHandler(GRAPHYTE_OUT)
-      console_handler.setFormatter(formatter)
-      root_logger.addHandler(console_handler)
 
   def Run(self):
     """The main method of the class.

@@ -6,8 +6,9 @@
 
 from argparse import ArgumentParser
 
-import graphyte
-
+from .bootstrap import Bootstrap
+from . import graphyte
+from .default_setting import logger
 
 def main():
   parser = ArgumentParser()
@@ -22,8 +23,16 @@ def main():
   parser.add_argument('--quiet', dest='console_output',
                       action='store_false', default=True,
                       help='Not output to console')
-  options = parser.parse_args()
-  app = graphyte.Graphyte(**vars(options))
+  options = vars(parser.parse_args())
+
+  Bootstrap.InitLogger(
+    log_file = options.pop('log_file'),
+    verbose = options.pop('verbose'),
+    console_output = options.pop('console_output'))
+
+  # Run Graphyte framework
+  logger.info('Starting Graphyte....')
+  app = graphyte.Graphyte(**options)
   app.Run()
 
 
