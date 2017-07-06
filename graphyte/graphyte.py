@@ -25,6 +25,7 @@ from .default_setting import DEFAULT_RESULT_FILE
 from .default_setting import GRAPHYTE_DIR
 from .default_setting import GRAPHYTE_OUT
 from .default_setting import logger
+from .device import DeviceType
 from .port_config import PortConfig
 from .result_writer import ResultWriter
 from .testplan import TestPlan
@@ -171,35 +172,45 @@ class Graphyte(object):
     self.Close()
     return self.all_tests_pass
 
-  def InitialzeDevices(self):
-    try:
-      self.inst.Initialize()
-      self.inst.LockInstrument()
-      self.inst.InitPortConfig(self.port_config)
-    except Exception:
-      exception = Exception('Failed to initialize the instrument device.')
-      logger.exception(exception)
-      raise exception
+  def InitialzeDevices(self, device=DeviceType.ALL):
+    if DeviceType.IsInst(device):
+      try:
+        self.inst.Initialize()
+        self.inst.LockInstrument()
+        self.inst.InitPortConfig(self.port_config)
+      except Exception:
+        exception = Exception('Failed to initialize the instrument device.')
+        logger.exception(exception)
+        raise exception
 
-    try:
-      self.dut.Initialize()
-    except Exception:
-      exception = Exception('Failed to initialize the DUT.')
-      logger.exception(exception)
-      raise exception
+    if DeviceType.IsDUT(device):
+      try:
+        self.dut.Initialize()
+      except Exception:
+        exception = Exception('failed to initialize the dut.')
+        logger.exception(exception)
+        raise exception
 
-  def TerminateDevices(self):
-    try:
-      self.inst.UnlockInstrument()
-      self.inst.Terminate()
-      self.dut.Terminate()
-    except Exception:
-      logger.exception('Terminate devices failed.')
+  def TerminateDevices(self, device=DeviceType.ALL):
+    if DeviceType.IsInst(device):
+      try:
+        self.inst.UnlockInstrument()
+        self.inst.Terminate()
+      except Exception:
+        logger.exception('Failed to terminate the instrument device.')
 
-  def SetRF(self, rf_type):
+    if DeviceType.IsDUT(device):
+      try:
+        self.dut.Terminate()
+      except Exception:
+        logger.exception('Failed to terminate DUT.')
+
+  def SetRF(self, rf_type, device=DeviceType.ALL):
     logger.info('Set RF type: %s', rf_type)
-    self.dut.SetRF(rf_type)
-    self.inst.SetRF(rf_type)
+    if DeviceType.IsDUT(device):
+      self.dut.SetRF(rf_type)
+    if DeviceType.IsInst(device):
+      self.inst.SetRF(rf_type)
 
   def RunTest(self, test_case):
     logger.info('Running test: \n%s', test_case)

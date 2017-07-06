@@ -6,6 +6,21 @@ from . import link
 from .default_setting import logger
 
 
+class DeviceType(object):
+  """Used to select device in action."""
+  DUT = 'DUT'
+  INST = 'INST'
+  ALL = 'ALL'
+
+  @classmethod
+  def IsDUT(cls, device):
+    return device in [cls.DUT, cls.ALL]
+
+  @classmethod
+  def IsInst(cls, device):
+    return device in [cls.INST, cls.ALL]
+
+
 class DeviceBase(object):
   """The abstract device class.
 
