@@ -51,6 +51,10 @@ class DeviceBase(object):
     self.controllers = {}
     self.link = link.Create(kwargs['link_options']) if self.need_link else None
 
+  def __str__(self):
+    return "Name: %s\nRF: %s\nLink: %s" % (
+        self.name, self.rf_type, self.link)
+
   @property
   def active_controller(self):
     if self.rf_type not in self.controllers:

@@ -56,6 +56,10 @@ class SSHLink(link.DeviceLink):
     self.connect_timeout = connect_timeout
     self.control_persist = control_persist
 
+  def __str__(self):
+    return "SSH to %s@%s:%s with identity='%s'" % (
+        self.user, self.host, self.port, self.identity)
+
   def _Signature(self, is_scp=False):
     """Generates the ssh command signature.
 
@@ -140,7 +144,8 @@ class SSHLink(link.DeviceLink):
         (stdin, stdout, stderr) != (None, None, None)):
       close_fds = False
     proc = subprocess.Popen(command, shell=shell, close_fds=close_fds,
-                            stdin=stdin, stdout=stdout, stderr=stderr)
+                            stdin=subprocess.PIPE,
+                            stdout=stdout, stderr=stderr)
     self._StartWatcher(proc)
     return proc
 
@@ -251,7 +256,7 @@ class SSHLink(link.DeviceLink):
         # get a new process from queue to monitor
         # since Queue.get will block if queue is empty, we don't need to sleep
         pid, ppid = self._proc_queue.get()
-        logger.info('start monitoring control master until %d terminates', pid)
+        logger.debug('start monitoring control master until %d terminates', pid)
 
         sync_utils.PollForCondition(
             lambda: process_utils.IsProcessAlive(pid, ppid),

@@ -26,9 +26,9 @@ def main():
   options = vars(parser.parse_args())
 
   Bootstrap.InitLogger(
-    log_file = options.pop('log_file'),
-    verbose = options.pop('verbose'),
-    console_output = options.pop('console_output'))
+      log_file=options.pop('log_file'),
+      verbose=options.pop('verbose'),
+      console_output=options.pop('console_output'))
 
   # Run Graphyte framework
   logger.info('Starting Graphyte....')

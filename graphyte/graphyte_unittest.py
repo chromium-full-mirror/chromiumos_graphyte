@@ -28,21 +28,21 @@ class GraphyteTest(unittest.TestCase):
 
     # Make fake port config and test plan.
     self.fake_wlan_tx_test = testplan.TestCase(
-          'WLAN TX',
-          {'rf_type': 'WLAN', 'test_type': 'TX'},
-          {})
+        'WLAN TX',
+        {'rf_type': 'WLAN', 'test_type': 'TX'},
+        {})
     self.fake_wlan_rx_test = testplan.TestCase(
-      'WLAN RX',
-      {'rf_type': 'WLAN', 'test_type': 'RX'},
-      {})
+        'WLAN RX',
+        {'rf_type': 'WLAN', 'test_type': 'RX'},
+        {})
     self.fake_bt_tx_test = testplan.TestCase(
-      'BLUETOOTH TX',
-      {'rf_type': 'BLUETOOTH', 'test_type': 'TX'},
-      {})
+        'BLUETOOTH TX',
+        {'rf_type': 'BLUETOOTH', 'test_type': 'TX'},
+        {})
     self.fake_bt_rx_test = testplan.TestCase(
-      'BLUETOOTH RX',
-      {'rf_type': 'BLUETOOTH', 'test_type': 'RX'},
-      {})
+        'BLUETOOTH RX',
+        {'rf_type': 'BLUETOOTH', 'test_type': 'RX'},
+        {})
     self.graphyte_obj.testplan = [
         self.fake_wlan_tx_test,
         self.fake_wlan_rx_test,

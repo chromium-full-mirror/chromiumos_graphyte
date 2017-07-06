@@ -16,13 +16,11 @@ Please refer to graphyte_main.py.
 """
 
 import json
-import logging
 import os
 
 from .default_setting import DEFAULT_CONFIG_FILE
 from .default_setting import DEFAULT_RESULT_FILE
 from .default_setting import GRAPHYTE_DIR
-from .default_setting import GRAPHYTE_OUT
 from .default_setting import logger
 from .device import DeviceType
 from .port_config import PortConfig
@@ -186,7 +184,7 @@ class Graphyte(object):
       self.inst.SetRF(rf_type)
 
   def RunTest(self, test_case):
-    logger.info('Running test: \n%s', test_case)
+    logger.info('Running test: %s', test_case)
     self.SetRF(test_case.rf_type)
 
     self.inst.SetPortConfig(test_case)
