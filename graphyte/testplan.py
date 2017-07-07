@@ -47,6 +47,8 @@ RESULT_MARKER = '@result'
 HEADER_CHECKER = {
     'order_by': ListChecker(['component_name', 'rf_type', 'test_type',
                              'center_freq', 'power_level'])}
+SUPPORTED_RF_TYPES = ['WLAN', 'BLUETOOTH', '802_15_4']
+SUPPORTED_TEST_TYPES = ['TX', 'RX']
 
 
 class TestPlan(object):
@@ -290,7 +292,7 @@ class WLANTestCaseFactory(TestCaseFactory):
   REQUIRED_ARG_CHECKER = {
       'rf_type':        ListChecker([RF_TYPE]),
       'component_name': ListChecker([str]),
-      'test_type':      ListChecker(['TX', 'RX']),
+      'test_type':      ListChecker(SUPPORTED_TEST_TYPES),
       'center_freq':    ListChecker([lambda freq: 2400 < freq < 6000]),
       'power_level':    ListChecker([int, float]),
       'standard':       ListChecker(['A', 'AC', 'B', 'G', 'N']),
@@ -343,7 +345,7 @@ class BluetoothTestCaseFactory(TestCaseFactory):
   REQUIRED_ARG_CHECKER = {
       'rf_type':        ListChecker([RF_TYPE]),
       'component_name': ListChecker([str]),
-      'test_type':      ListChecker(['TX', 'RX']),
+      'test_type':      ListChecker(SUPPORTED_TEST_TYPES),
       'center_freq':    ListChecker([lambda freq: 2400 < freq < 2500]),
       'power_level':    ListChecker([int, float]),
       'packet_type':    ListChecker(['1DH1', '1DH3', '1DH5', '2DH1', '2DH3',
@@ -475,7 +477,7 @@ class ZigbeeTestCaseFactory(TestCaseFactory):
   REQUIRED_ARG_CHECKER = {
       'rf_type':        ListChecker([RF_TYPE]),
       'component_name': ListChecker([str]),
-      'test_type':      ListChecker(['TX', 'RX']),
+      'test_type':      ListChecker(SUPPORTED_TEST_TYPES),
       'center_freq':    ListChecker([lambda freq: 2400 < freq < 6000]),
       'power_level':    ListChecker([int, float])}
   RX_ARG_CHECKER = {
