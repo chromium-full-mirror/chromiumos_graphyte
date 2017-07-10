@@ -32,6 +32,13 @@ class LinkOptionsError(Exception):
 class DeviceLink(object):
   """An abstract class for Device (DUT and instrument) Links."""
 
+  def Open(self):
+    """Opens the connection of the link
+
+    This method should be called before any operation.
+    """
+    pass
+
   def Close(self):
     """Closes the connection of the link.
 

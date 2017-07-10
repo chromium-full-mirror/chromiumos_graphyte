@@ -24,6 +24,7 @@ class SCPITest(unittest.TestCase):
   def setUp(self):
     self.mock_server, server_port = self._StartMockServer()
     self.scpi_link = SCPILink(host=_LOCALHOST, port=server_port)
+    self.scpi_link.Open()
 
   def tearDown(self):
     self.mock_server.shutdown()

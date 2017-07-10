@@ -42,14 +42,16 @@ class SCPILink(link.DeviceLink):
     self.initial_delay = initial_delay
     self.host = host
     self.port = port
+    self.retries = retries;
     self.rfile = None
     self.wfile = None
     self.socket = None
     self.id = None
 
-    if not sync_utils.Retry(retries, interval=1, target=self._Connect):
+  def Open(self):
+    if not sync_utils.Retry(self.retries, interval=1, target=self._Connect):
       raise SCPILinkError('Failed to connect %s:%d after %d tries' %
-                          (host, port, retries))
+                          (self.host, self.port, self.retries))
 
   def Push(self, local, remote):
     raise NotImplementedError

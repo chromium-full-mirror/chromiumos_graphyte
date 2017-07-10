@@ -39,6 +39,12 @@ class GPIBLink(link.DeviceLink):
     if query_delay < 0:
       raise ValueError('query_delay should not be negative.')
     self.query_delay = query_delay
+    self.minor = minor
+    self.primary = primary
+    self.timeout = timeout
+    self.device = None
+
+  def Open(self):
     try:
       resource_manager = visa.ResourceManager()  # Use NI backend
     except OSError:
@@ -48,14 +54,14 @@ class GPIBLink(link.DeviceLink):
                     'please install NI-488.2 driver. For Linux platform '
                     'please install linux-gpib and PyVisa-Py module.')
     try:
-      name = u'GPIB%d::%d::INSTR' % (minor, primary)
+      name = u'GPIB%d::%d::INSTR' % (self.minor, self.primary)
       self.device = resource_manager.open_resource(name)
       # PyVisa will set the smallest valid timeout that BIGGER than
       # the value we set. For example, the valid timeouts are 1000, 3000, 10000.
       # When we set 1000~2999, PyVisa would set 3000. When we set 3000~9999,
       # PyVisa would set 10000. So we minus 0.1 to let PyVisa set the smallest
       # valid timeout that SAME OR BIGGER than the value we set.
-      self.device.timeout = (timeout * 1000) - 0.1
+      self.device.timeout = (self.timeout * 1000) - 0.1
     except Exception as ex:
       raise ValueError('GPIBLink Init failed. %s' % ex)
 

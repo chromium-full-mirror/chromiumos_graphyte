@@ -67,6 +67,7 @@ class DeviceBase(object):
     """Initializes the device."""
     logger.debug('device.Initialize')
     if self.need_link:
+      self.link.Open()
       self.link.CheckReady()
     return self._Initialize()
 
@@ -82,7 +83,6 @@ class DeviceBase(object):
     self._Terminate()
     if self.link is not None:
       self.link.Close()
-      self.link = None
 
   def _Terminate(self):
     pass
