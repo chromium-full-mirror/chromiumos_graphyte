@@ -211,7 +211,9 @@ class SSHLink(link.DeviceLink):
       def _IsControlMasterRunning():
         sig, options = _GetLinkSignature(False)
         return subprocess.call(
-            ['ssh', '-O', 'check'] + options + [sig, 'true']) == 0
+            ['ssh', '-O', 'check'] + options + [sig, 'true'],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE) == 0
 
       def _StopControlMaster():
         sig, options = _GetLinkSignature(False)
