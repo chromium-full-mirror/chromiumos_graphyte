@@ -154,17 +154,15 @@ class Graphyte(object):
         self.inst.LockInstrument()
         self.inst.InitPortConfig(self.port_config)
       except Exception:
-        exception = Exception('Failed to initialize the instrument device.')
-        logger.exception(exception)
-        raise exception
+        logger.error('Failed to initialize instrumenet.')
+        raise
 
     if DeviceType.IsDUT(device):
       try:
         self.dut.Initialize()
       except Exception:
-        exception = Exception('failed to initialize the dut.')
-        logger.exception(exception)
-        raise exception
+        logger.error('Failed to initialize DUT.')
+        raise
 
   def TerminateDevices(self, device=DeviceType.ALL):
     if DeviceType.IsInst(device):
