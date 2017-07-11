@@ -212,8 +212,8 @@ class Graphyte(object):
   def RunTxTest(self, test_case):
     self.dut.active_controller.TxStart(test_case)
     self.inst.active_controller.TxMeasure(test_case)
-    self.dut.active_controller.TxStop(test_case)
     result = self.inst.active_controller.TxGetResult(test_case)
+    self.dut.active_controller.TxStop(test_case)
     return result
 
   def RunRxTest(self, test_case):
