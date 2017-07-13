@@ -51,6 +51,7 @@ class RFController(InstBase.PowerMeterControllerBase):
 class Inst(InstBase):
   name = 'Anritsu ML2437A'
   need_link = True
+  VALID_PORT_NAMES = ['A']
 
   def __init__(self, sample_number=5, wlan_duty_cycle=None,
                bluetooth_duty_cycle=None, zigbee_duty_cycle=None, **kwargs):

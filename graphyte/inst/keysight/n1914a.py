@@ -30,6 +30,7 @@ DEFAULT_LINK_OPTIONS = {
 class Inst(InstBase):
   name = 'Keysight N1914a'
   need_link = True
+  VALID_PORT_NAMES = ['A', 'B']
 
   def __init__(self, range_setting='AUTO', avg_count=0,
                continuous_trigger=False, trigger_source='IMMediate', **kwargs):

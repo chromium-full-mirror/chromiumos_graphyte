@@ -15,6 +15,7 @@ from ...utils.graphyte_utils import MakeMockPassResult
 
 class Inst(InstBase):
   name = 'Mock inst Plugin'
+  VALID_PORT_NAMES = ['dummy_port']
 
   def __init__(self, **kwargs):
     super(Inst, self).__init__(**kwargs)

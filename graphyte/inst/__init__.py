@@ -22,6 +22,8 @@ class InstBase(device.DeviceBase):  # pylint: disable=abstract-method
   by assigning the rf_type, and delegate to the assigned controller.
   """
   name = 'Virtual instrument Plugin'
+  # The list of the port names. Each child class should override it.
+  VALID_PORT_NAMES = []
 
   def __init__(self, **kwargs):
     super(InstBase, self).__init__(**kwargs)
@@ -32,6 +34,13 @@ class InstBase(device.DeviceBase):  # pylint: disable=abstract-method
 
   def InitPortConfig(self, port_config_table):
     self.port_config_table = port_config_table
+    for component_name, antennas_config in self.port_config_table.GetIterator():
+      for antenna_idx, antenna_config in enumerate(antennas_config):
+        for test_type in ['TX', 'RX']:
+          port = antenna_config[test_type]['port_mapping']
+          if port not in self.VALID_PORT_NAMES:
+            raise ValueError('Port (%s) mapping of %s %s %s is not supported.' %
+                             (port, component_name, antenna_idx, test_type))
 
   def SetPortConfig(self, test):
     component_name = test.args['component_name']

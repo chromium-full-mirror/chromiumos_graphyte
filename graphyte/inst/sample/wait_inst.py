@@ -31,6 +31,7 @@ class WaitController(InstBase.ControllerBase):
 
 class Inst(InstBase):
   name = 'Wait Mock Instrument'
+  VALID_PORT_NAMES = ['dummy_port']
 
   def __init__(self, wait_func='keypress', wait_secs=10, **kwargs):
     """Determine the wait method.
