@@ -37,3 +37,14 @@ or
 ## User manual
 Please find the user manual [here](https://groups.google.com/forum/#!topic/graphyte-public/GJgiDc482K8)
 for more details.
+
+## Interactive shell
+An interactive shell is also implemented to analyze the interactions
+between a DUT and an instrument step by step.
+
+Follow these steps to start the interactive shell:
+1. Install the graphyte framework and necessary plugins.
+2. Follow the user manual to create a valid config file.
+3. Run the interactive shell by:
+
+    $ python -m graphyte.plugin_shell path/to/config/file
