@@ -183,6 +183,12 @@ class Graphyte(object):
     if DeviceType.IsInst(device):
       self.inst.SetRF(rf_type)
 
+  def OnFailure(self, device=DeviceType.ALL):
+    if DeviceType.IsDUT(device):
+      self.dut.OnFailure()
+    if DeviceType.IsInst(device):
+      self.inst.OnFailure()
+
   def RunTest(self, test_case):
     logger.info('Running test: %s', test_case)
     self.SetRF(test_case.rf_type)
@@ -194,10 +200,17 @@ class Graphyte(object):
 
     def _RunTest():
       try:
-        return function_map[test_case.test_type](test_case)
+        ret = function_map[test_case.test_type](test_case)
       except Exception:
         logger.exception('RunTest error. test_case: %s', test_case)
+        self.OnFailure()
         return False, {}
+
+      if not ret[0]:
+        self.OnFailure()
+
+      return ret
+
     def _Condition(ret):
       # ret is (is_pass, result)
       return ret[0]

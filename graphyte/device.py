@@ -101,6 +101,10 @@ class DeviceBase(object):
     if self.rf_type is not None:
       self.active_controller.Initialize()
 
+  def OnFailure(self):
+    """Called when a test is failed."""
+    self.active_controller.OnFailure()
+
 
 class ControllerBase(object):
   """The abstract RF controller class.
@@ -133,6 +137,13 @@ class ControllerBase(object):
 
   def _Terminate(self):
     """Disconnects/unconfigures the interface that was being used."""
+    pass
+
+  def OnFailure(self):
+    return self._OnFailure()
+
+  def _OnFailure(self):
+    """Called when a test is failed."""
     pass
 
   def _CheckTestArgument(self, test_case, required_test_type):
