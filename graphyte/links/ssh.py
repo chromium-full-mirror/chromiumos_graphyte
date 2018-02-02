@@ -48,7 +48,7 @@ class SSHLink(link.DeviceLink):
   """
 
   def __init__(self, host, user='root', port=22, identity=None,
-               connect_timeout=1, control_persist=300):
+               connect_timeout=5, control_persist=300):
     self.host = host
     self.user = user
     self.port = port
