@@ -294,7 +294,7 @@ class WLANTestCaseFactory(TestCaseFactory):
       'component_name': ListChecker([str]),
       'test_type':      ListChecker(SUPPORTED_TEST_TYPES),
       'center_freq':    ListChecker([lambda freq: 2400 < freq < 6000]),
-      'power_level':    ListChecker([int, float]),
+      'power_level':    ListChecker([int, float, 'auto']),
       'standard':       ListChecker(['A', 'AC', 'B', 'G', 'N']),
       'bandwidth':      ListChecker([20, 40, 80, 160]),
       'data_rate':      ListChecker([1, 2, 5.5, 11,
@@ -347,7 +347,7 @@ class BluetoothTestCaseFactory(TestCaseFactory):
       'component_name': ListChecker([str]),
       'test_type':      ListChecker(SUPPORTED_TEST_TYPES),
       'center_freq':    ListChecker([lambda freq: 2400 < freq < 2500]),
-      'power_level':    ListChecker([int, float]),
+      'power_level':    ListChecker([int, float, 'auto']),
       'packet_type':    ListChecker(['1DH1', '1DH3', '1DH5', '2DH1', '2DH3',
                                      '2DH5', '3DH1', '3DH3', '3DH5', 'LE'])}
   LE_RX_ARG_CHECKER = {
@@ -479,7 +479,7 @@ class ZigbeeTestCaseFactory(TestCaseFactory):
       'component_name': ListChecker([str]),
       'test_type':      ListChecker(SUPPORTED_TEST_TYPES),
       'center_freq':    ListChecker([lambda freq: 2400 < freq < 6000]),
-      'power_level':    ListChecker([int, float])}
+      'power_level':    ListChecker([int, float, 'auto'])}
   RX_ARG_CHECKER = {
       'rx_num_packets': ListChecker([int])}
 
