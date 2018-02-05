@@ -49,10 +49,11 @@ Welcome to Graphyte Plugin Runner
 This tool will help you to check if your DUT and instrument are
 correctly set up, to make sure it's ready for graphyte framework.
 
-Set up:
+General usage:
   1. Use command 'choose' to choose a test case
   2. Use command 'set_test_arg' to tweak test arguments
   3. Use command 'status' to check all settings
+  4. Use command 'run' to start the test step-by-step.
 
 Commands for the active device:
   1. Use commands 'dut' or 'inst' to choose DUT or instrument.
@@ -67,6 +68,7 @@ For a Tx test:
   2. Start instrument: inst; start
   3. Stop instrument: inst; stop
   4. Stop DUT: dut; stop
+  5. Terminate: dut; terminate; inst; terminate
 
 For a Rx test, swap steps 3 & 4
 
@@ -223,6 +225,55 @@ Type command after prompt. Use 'help' for more details ===
     self.test_case.args[arg_name] = arg_value
     print("[SUCCESS] Argument '%s' has been changed to '%s'" % (
         arg_name, str(arg_value)))
+
+  def do_run(self, arg):
+    """Run the test step-by-step."""
+    calls = []
+    if self.test_case.test_type == 'TX':
+      calls = [
+        ('Initialize DUT', [self.do_dut, self.do_initialize]),
+        ('Initialize Instrument', [self.do_inst, self.do_initialize]),
+        ('DUT Start', [self.do_dut, self.do_start]),
+        ('Instrument Start', [self.do_inst, self.do_start]),
+        ('Instrument Stop', [self.do_inst, self.do_stop]),
+        ('DUT Stop', [self.do_dut, self.do_stop]),
+        ('Terminate DUT', [self.do_dut, self.do_terminate]),
+        ('Terminate Instrument', [self.do_inst, self.do_terminate])]
+    elif self.test_case.test_type == 'RX':
+      calls = [
+        ('Initialize DUT', [self.do_dut, self.do_initialize]),
+        ('Initialize Instrument', [self.do_inst, self.do_initialize]),
+        ('DUT Start', [self.do_dut, self.do_start]),
+        ('Instrument Start', [self.do_inst, self.do_start]),
+        ('DUT Stop', [self.do_dut, self.do_stop]),
+        ('Instrument Stop', [self.do_inst, self.do_stop]),
+        ('Terminate DUT', [self.do_dut, self.do_terminate]),
+        ('Terminate Instrument', [self.do_inst, self.do_terminate])]
+    else:
+      print("Unknown test type: %s" % self.test_case.test_type)
+      return
+
+    print("Start running test step-by-step.")
+    for op, funcs in calls:
+      print()
+
+      msg = "Next command is '%s'. " % op
+      msg += "Press 'r' to run; 's' to skip; 'q' to quit: "
+
+      while True:
+        action = raw_input(msg)
+        if action == 'r':
+          for func in funcs:
+            func(arg)
+          break
+        elif action == 's':
+          break
+        elif action == 'q':
+          print('Stop step-by-step run.')
+          return
+        else:
+          print('Unknown input: "%s"' % action)
+    print("Step-by-step run is finished.")
 
   def do_initialize(self, _):
     """Initializes the active device."""
