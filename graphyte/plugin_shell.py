@@ -50,7 +50,7 @@ This tool will help you to check if your DUT and instrument are
 correctly set up, to make sure it's ready for graphyte framework.
 
 Set up:
-  1. Use command 'set_test_type' to choose a test case
+  1. Use command 'choose' to choose a test case
   2. Use command 'set_test_arg' to tweak test arguments
   3. Use command 'status' to check all settings
 
@@ -141,43 +141,58 @@ Type command after prompt. Use 'help' for more details ===
     self.active_device = DeviceType.INST
     print("[SUCCESS] Active device switched to INST")
 
-  def help_set_test_type(self):
-    print('Find the first test case with given test type,')
-    print('and set the active test case to it.')
+  def help_choose(self):
+    print('Choose the active test case with the given test type.')
     print('')
-    print('Usage: set_test_type (RF type) (Test type)')
+    print('Usage: choose [RF type] [Test type]')
     print('')
     print('Available RF types: ' + ', '.join(testplan.SUPPORTED_RF_TYPES))
     print('Available test types: ' + ', '.join(testplan.SUPPORTED_TEST_TYPES))
 
-  def do_set_test_type(self, type_str):
-    print('DEBUG: test_str="%s"' % type_str)
+  def do_choose(self, type_str):
     args = type_str.upper().split()
 
-    if len(args) != 2:
-      print('[FAILED] The number of the arguments should be 2.')
-      self.help_set_test_type()
+    if len(args) > 2:
+      print('[FAILED] Number of the arguments should be less or equal to 2.')
+      self.help_choose()
       return
 
-    rf_type, test_type = args
+    rf_type = args[0] if len(args) > 0 else None
+    test_type = args[1] if len(args) > 1 else None
 
-    # Check the args is valid.
-    if (not CheckIn('RF type', rf_type, testplan.SUPPORTED_RF_TYPES) or
-        not CheckIn('Test type', test_type, testplan.SUPPORTED_TEST_TYPES) or
-        not self._CheckActiveDevice([DEVICE_STATUS.STOP, DEVICE_STATUS.IDLE])):
-      self.help_set_test_type()
-      return
-
-    # Find the test case from the test plan.
-    for test_case in self.graphyte_obj.testplan:
-      if test_case.rf_type == rf_type and test_case.test_type == test_type:
-        self.test_case = test_case.Copy()
-        print('[SUCCESS] Test case switched to %s' % self._TestCaseName())
+    if rf_type:
+      if not CheckIn('RF type', rf_type, testplan.SUPPORTED_RF_TYPES):
+        print('Invalid RF type: %s' % rf_type)
+        self.help_choose()
         return
 
-    # TODO(akahuang): Set a default value if not found.
-    print('[FAILED] Cannot find a match test case from the test plan. '
-          'Please add this type of test case in the test plan.')
+    if test_type:
+      if not CheckIn('Test type', test_type, testplan.SUPPORTED_TEST_TYPES):
+        print('Invalid test type: %s' % test_type)
+        self.help_choose()
+        return
+
+    candidates = []
+    for test_case in self.graphyte_obj.testplan:
+      if rf_type and test_case.rf_type != rf_type:
+        continue
+      if test_type and test_case.test_type != test_type:
+        continue
+      candidates.append(test_case)
+
+    if not candidates:
+      print('No any test plan available.')
+      return
+
+    for idx, test_case in enumerate(candidates):
+        print('[%d] %s' % (idx, test_case))
+
+    try:
+      choose_idx = int(raw_input("Enter the index of the test case: "))
+      self.test_case = candidates[choose_idx].Copy()
+      print('[SUCCESS] Test case switched to %s' % self._TestCaseName())
+    except Exception as ex:
+      print('Failed to set the active test case: %s' % ex)
 
   def help_set_test_arg(self):
     print("Sets the argument of the test case.")
