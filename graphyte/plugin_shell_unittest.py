@@ -9,6 +9,7 @@ import mock
 import unittest
 
 import graphyte_common  # pylint: disable=unused-import
+from graphyte import bootstrap
 from graphyte import controller
 from graphyte import plugin_shell
 from graphyte import testplan
@@ -104,7 +105,7 @@ class PluginShellTest(unittest.TestCase):
                       self.plugin_shell.device_status['DUT'])
 
   def testDutTx(self):
-    self.plugin_shell.do_set_test_type('WLAN TX')
+    self.plugin_shell.test_case = self.fake_wlan_tx_test.Copy()
     self.plugin_shell.do_dut(None)
     self.plugin_shell.do_initialize(None)
 
@@ -116,7 +117,7 @@ class PluginShellTest(unittest.TestCase):
     self.controller_obj.dut.active_controller.TxStop.assert_called_once()
 
   def testDutRx(self):
-    self.plugin_shell.do_set_test_type('WLAN RX')
+    self.plugin_shell.test_case = self.fake_wlan_rx_test.Copy()
     self.plugin_shell.do_dut(None)
     self.plugin_shell.do_initialize(None)
 
@@ -128,7 +129,7 @@ class PluginShellTest(unittest.TestCase):
     self.controller_obj.dut.active_controller.RxGetResult.assert_called_once()
 
   def testInstTx(self):
-    self.plugin_shell.do_set_test_type('WLAN TX')
+    self.plugin_shell.test_case = self.fake_wlan_tx_test.Copy()
     self.plugin_shell.do_inst(None)
     self.plugin_shell.do_initialize(None)
 
@@ -140,7 +141,7 @@ class PluginShellTest(unittest.TestCase):
     self.controller_obj.inst.active_controller.TxGetResult.assert_called_once()
 
   def testInstRx(self):
-    self.plugin_shell.do_set_test_type('WLAN RX')
+    self.plugin_shell.test_case = self.fake_wlan_rx_test.Copy()
     self.plugin_shell.do_inst(None)
     self.plugin_shell.do_initialize(None)
 
@@ -152,4 +153,7 @@ class PluginShellTest(unittest.TestCase):
     self.controller_obj.inst.active_controller.RxStop.assert_called_once()
 
 if __name__ == '__main__':
+  bootstrap.Bootstrap.InitLogger(
+      verbose=True,
+      console_output=True)
   unittest.main()
