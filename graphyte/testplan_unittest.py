@@ -1,6 +1,5 @@
 #!/usr/bin/python
-# -*- coding: utf-8 -*-
-# Copyright 2015 The Chromium OS Authors. All rights reserved.
+# Copyright 2018 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
@@ -9,7 +8,8 @@ import os
 import tempfile
 import unittest
 
-from . import testplan
+import graphyte_common  # pylint: disable=unused-import
+from graphyte import testplan
 
 class SampleTestPlanTest(unittest.TestCase):
   def testLoadSampleTestPlan(self):
@@ -538,3 +538,6 @@ class BluetoothTestPlanTest(unittest.TestCase):
     with self.assertRaises(ValueError):
       self.test_plan.ParseCSVFile(self.temp_path)
     self.assertEquals(0, len(self.test_plan))
+
+if __name__ == '__main__':
+  unittest.main()

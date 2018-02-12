@@ -1,4 +1,4 @@
-# Copyright (c) 2012 The Chromium OS Authors. All rights reserved.
+# Copyright 2018 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
@@ -23,10 +23,11 @@ import threading
 import zipfile
 import zipimport
 
-from . import platform_utils
-from . import process_utils
-from . import time_utils
-from . import type_utils
+import graphyte_common  # pylint: disable=unused-import
+from graphyte.utils import platform_utils
+from graphyte.utils import process_utils
+from graphyte.utils import time_utils
+from graphyte.utils import type_utils
 
 
 # Block size in bytes for iteratively generating hashes of files.

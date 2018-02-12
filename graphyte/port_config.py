@@ -1,6 +1,5 @@
 #!/usr/bin/python
-# -*- coding: utf-8 -*-
-# Copyright 2015 The Chromium OS Authors. All rights reserved.
+# Copyright 2018 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
@@ -42,8 +41,9 @@ import json
 import os
 import sys
 
-from .default_setting import logger
-from .utils.graphyte_utils import SearchConfig
+import graphyte_common  # pylint: disable=unused-import
+from graphyte.default_setting import logger
+from graphyte.utils.graphyte_utils import SearchConfig
 
 class PortConfig(object):
   def __init__(self, config_file=None, search_dirs=None):

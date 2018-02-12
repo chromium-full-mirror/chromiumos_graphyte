@@ -1,15 +1,15 @@
 #!/usr/bin/python
-# -*- coding: utf-8 -*-
-# Copyright 2017 The Chromium OS Authors. All rights reserved.
+# Copyright 2018 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 import logging
 import os
 
-from .default_setting import DEFAULT_LOG_FILE
-from .default_setting import GRAPHYTE_OUT
-from .utils import graphyte_utils
+import graphyte_common  # pylint: disable=unused-import
+from graphyte.default_setting import DEFAULT_LOG_FILE
+from graphyte.default_setting import GRAPHYTE_OUT
+from graphyte.utils import graphyte_utils
 
 class Bootstrap(object):
   """Bootstrap of graphyte framework

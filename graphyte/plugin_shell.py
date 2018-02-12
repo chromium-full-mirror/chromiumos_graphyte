@@ -1,6 +1,5 @@
 #!/usr/bin/python
-# -*- coding: utf-8 -*-
-# Copyright 2017 The Chromium OS Authors. All rights reserved.
+# Copyright 2018 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
@@ -21,12 +20,13 @@ import argparse
 import cmd
 import sys
 
-from . import graphyte
-from . import testplan
-from .bootstrap import Bootstrap
-from .default_setting import logger
-from .device import DeviceType
-from .utils import type_utils
+import graphyte_common  # pylint: disable=unused-import
+from graphyte import controller
+from graphyte import testplan
+from graphyte.bootstrap import Bootstrap
+from graphyte.default_setting import logger
+from graphyte.device import DeviceType
+from graphyte.utils import type_utils
 
 DEVICE_STATUS = type_utils.Enum(
     STOP='STOP',  # Device is not initialized.
@@ -75,12 +75,12 @@ For a Rx test, swap steps 3 & 4
 Type command after prompt. Use 'help' for more details ===
 """
 
-  def __init__(self, graphyte_obj):
+  def __init__(self, controller_obj):
     cmd.Cmd.__init__(self)
 
-    self.graphyte_obj = graphyte_obj
+    self.controller_obj = controller_obj
     # Assume the testplan is not empty. Select the first test case.
-    self.test_case = graphyte_obj.testplan[0]
+    self.test_case = controller_obj.testplan[0]
     self.active_device = DeviceType.DUT
     self.device_status = {
         DeviceType.DUT: DEVICE_STATUS.STOP,
@@ -109,14 +109,14 @@ Type command after prompt. Use 'help' for more details ===
         '(active)' if self.active_device == DeviceType.DUT else ''))
     print('  Status: %s' % self.device_status[DeviceType.DUT])
     print('  Details: %s' % '\n    '.join(
-        str(self.graphyte_obj.dut).splitlines()))
+        str(self.controller_obj.dut).splitlines()))
 
     print('')
     print('Instrument: %s' % (
         '(active)' if self.active_device == DeviceType.INST else ''))
     print('  Status: %s' % self.device_status[DeviceType.INST])
     print('  Details: %s' % '\n    '.join(
-        str(self.graphyte_obj.inst).splitlines()))
+        str(self.controller_obj.inst).splitlines()))
 
     print('')
     print('Test case:')
@@ -175,7 +175,7 @@ Type command after prompt. Use 'help' for more details ===
         return
 
     candidates = []
-    for test_case in self.graphyte_obj.testplan:
+    for test_case in self.controller_obj.testplan:
       if rf_type and test_case.rf_type != rf_type:
         continue
       if test_type and test_case.test_type != test_type:
@@ -231,24 +231,24 @@ Type command after prompt. Use 'help' for more details ===
     calls = []
     if self.test_case.test_type == 'TX':
       calls = [
-        ('Initialize DUT', [self.do_dut, self.do_initialize]),
-        ('Initialize Instrument', [self.do_inst, self.do_initialize]),
-        ('DUT Start', [self.do_dut, self.do_start]),
-        ('Instrument Start', [self.do_inst, self.do_start]),
-        ('Instrument Stop', [self.do_inst, self.do_stop]),
-        ('DUT Stop', [self.do_dut, self.do_stop]),
-        ('Terminate DUT', [self.do_dut, self.do_terminate]),
-        ('Terminate Instrument', [self.do_inst, self.do_terminate])]
+          ('Initialize DUT', [self.do_dut, self.do_initialize]),
+          ('Initialize Instrument', [self.do_inst, self.do_initialize]),
+          ('DUT Start', [self.do_dut, self.do_start]),
+          ('Instrument Start', [self.do_inst, self.do_start]),
+          ('Instrument Stop', [self.do_inst, self.do_stop]),
+          ('DUT Stop', [self.do_dut, self.do_stop]),
+          ('Terminate DUT', [self.do_dut, self.do_terminate]),
+          ('Terminate Instrument', [self.do_inst, self.do_terminate])]
     elif self.test_case.test_type == 'RX':
       calls = [
-        ('Initialize DUT', [self.do_dut, self.do_initialize]),
-        ('Initialize Instrument', [self.do_inst, self.do_initialize]),
-        ('DUT Start', [self.do_dut, self.do_start]),
-        ('Instrument Start', [self.do_inst, self.do_start]),
-        ('DUT Stop', [self.do_dut, self.do_stop]),
-        ('Instrument Stop', [self.do_inst, self.do_stop]),
-        ('Terminate DUT', [self.do_dut, self.do_terminate]),
-        ('Terminate Instrument', [self.do_inst, self.do_terminate])]
+          ('Initialize DUT', [self.do_dut, self.do_initialize]),
+          ('Initialize Instrument', [self.do_inst, self.do_initialize]),
+          ('DUT Start', [self.do_dut, self.do_start]),
+          ('Instrument Start', [self.do_inst, self.do_start]),
+          ('DUT Stop', [self.do_dut, self.do_stop]),
+          ('Instrument Stop', [self.do_inst, self.do_stop]),
+          ('Terminate DUT', [self.do_dut, self.do_terminate]),
+          ('Terminate Instrument', [self.do_inst, self.do_terminate])]
     else:
       print("Unknown test type: %s" % self.test_case.test_type)
       return
@@ -281,7 +281,7 @@ Type command after prompt. Use 'help' for more details ===
       return
 
     try:
-      self.graphyte_obj.InitialzeDevices(self.active_device)
+      self.controller_obj.InitialzeDevices(self.active_device)
       self.device_status[self.active_device] = DEVICE_STATUS.IDLE
     except Exception as ex:
       print('')
@@ -295,7 +295,7 @@ Type command after prompt. Use 'help' for more details ===
       return
 
     try:
-      self.graphyte_obj.TerminateDevices(self.active_device)
+      self.controller_obj.TerminateDevices(self.active_device)
       self.device_status[self.active_device] = DEVICE_STATUS.STOP
     except Exception as ex:
       print('')
@@ -311,18 +311,18 @@ Type command after prompt. Use 'help' for more details ===
 
     try:
       # Set RF type.
-      self.graphyte_obj.SetRF(self.test_case.rf_type, self.active_device)
+      self.controller_obj.SetRF(self.test_case.rf_type, self.active_device)
 
       # Call the start function.
       if self.active_device == DeviceType.DUT:
-        active_controller = self.graphyte_obj.dut.active_controller
+        active_controller = self.controller_obj.dut.active_controller
         if self.test_case.test_type == 'TX':
           active_controller.TxStart(self.test_case)
         else:
           active_controller.RxClearResult(self.test_case)
       elif self.active_device == DeviceType.INST:
-        self.graphyte_obj.inst.SetPortConfig(self.test_case)
-        active_controller = self.graphyte_obj.inst.active_controller
+        self.controller_obj.inst.SetPortConfig(self.test_case)
+        active_controller = self.controller_obj.inst.active_controller
         if self.test_case.test_type == 'TX':
           active_controller.TxMeasure(self.test_case)
         else:
@@ -357,13 +357,13 @@ Type command after prompt. Use 'help' for more details ===
     try:
       # Call the stop function.
       if self.active_device == DeviceType.DUT:
-        active_controller = self.graphyte_obj.dut.active_controller
+        active_controller = self.controller_obj.dut.active_controller
         if self.test_case.test_type == 'TX':
           active_controller.TxStop(self.test_case)
         else:
           _CheckResult(active_controller.RxGetResult(self.test_case))
       elif self.active_device == DeviceType.INST:
-        active_controller = self.graphyte_obj.inst.active_controller
+        active_controller = self.controller_obj.inst.active_controller
         if self.test_case.test_type == 'TX':
           _CheckResult(active_controller.TxGetResult(self.test_case))
         else:
@@ -409,12 +409,12 @@ def main():
   logger.info('Starting Shell....')
 
   try:
-    graphyte_obj = graphyte.Graphyte(options.config_file, '/dev/null')
+    controller_obj = controller.Controller(options.config_file, '/dev/null')
   except Exception:
     logger.exception('Failed to Initialize Graphyte instance.')
     return
 
-  PluginShell(graphyte_obj).cmdloop()
+  PluginShell(controller_obj).cmdloop()
 
 
 if __name__ == '__main__':

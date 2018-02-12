@@ -1,6 +1,5 @@
 #!/usr/bin/python
-# -*- coding: utf-8 -*-
-# Copyright 2016 The Chromium OS Authors. All rights reserved.
+# Copyright 2018 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
@@ -11,8 +10,9 @@ import os
 import tempfile
 import unittest
 
-from . import result_writer
-from . import testplan
+import graphyte_common  # pylint: disable=unused-import
+from graphyte import result_writer
+from graphyte import testplan
 
 
 class ResultWriterTest(unittest.TestCase):
@@ -203,3 +203,6 @@ class ResultWriterTest(unittest.TestCase):
 
     self.writer.WriteResult(test_case, result)
     self._CompareResultList(correct_data)
+
+if __name__ == '__main__':
+  unittest.main()

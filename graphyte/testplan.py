@@ -1,6 +1,5 @@
 #!/usr/bin/python
-# -*- coding: utf-8 -*-
-# Copyright 2015 The Chromium OS Authors. All rights reserved.
+# Copyright 2018 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
@@ -31,12 +30,13 @@ import csv
 import itertools
 import logging
 
-from .data_parser import ListChecker
-from .data_parser import TupleChecker
-from .data_parser import Parse
-from .default_setting import logger
-from .utils.graphyte_utils import IsInBound
-from .utils.graphyte_utils import SearchConfig
+import graphyte_common  # pylint: disable=unused-import
+from graphyte.data_parser import ListChecker
+from graphyte.data_parser import TupleChecker
+from graphyte.data_parser import Parse
+from graphyte.default_setting import logger
+from graphyte.utils.graphyte_utils import IsInBound
+from graphyte.utils.graphyte_utils import SearchConfig
 
 
 CONFIG_MARKER = '@config'
@@ -595,9 +595,9 @@ def ChainMaskToList(chain_mask):
   The chain mask is the indicator of the activated antenna in binary
   representation. LSB means the first antenna and we called it antenna #0. For
   example:
-    1 (b’0001) means the first antenna is activated.
-    2 (b’0010) means the second antenna is activated.
-    3 (b’0011) means the first and the second antenna are activated.
+    1 (b0001) means the first antenna is activated.
+    2 (b0010) means the second antenna is activated.
+    3 (b0011) means the first and the second antenna are activated.
   If the chain_mask is None, it means there is only 1 antenna.
 
   Args:
@@ -624,15 +624,3 @@ def StripRow(row):
   while len(row) > 0 and len(row[-1]) == 0:
     row.pop()
   return row
-
-# TODO(akahuang): Implement the CSV file check and CSV template generation.
-def main():
-  logger.setLevel(level=logging.INFO)
-  config_file = 'sample_testplan.csv'
-  test_plan = TestPlan(config_file)
-  for test_case in test_plan:
-    logger.info('test_case: %s', str(test_case))
-
-
-if __name__ == '__main__':
-  main()

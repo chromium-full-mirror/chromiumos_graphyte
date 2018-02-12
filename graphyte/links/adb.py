@@ -1,5 +1,4 @@
-#!/usr/bin/env python
-# Copyright 2016 The Chromium OS Authors. All rights reserved.
+# Copyright 2018 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
@@ -9,9 +8,10 @@ import pipes
 import subprocess
 import uuid
 
-from .. import link
-from ..default_setting import logger
-from ..utils.file_utils import UnopenedTemporaryFile
+import graphyte_common  # pylint: disable=unused-import
+from graphyte import link
+from graphyte.default_setting import logger
+from graphyte.utils.file_utils import UnopenedTemporaryFile
 
 
 class ADBProcess(object):

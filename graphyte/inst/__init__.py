@@ -1,6 +1,4 @@
-#!/usr/bin/python
-# -*- coding: utf-8 -*-
-# Copyright 2015 The Chromium OS Authors. All rights reserved.
+# Copyright 2018 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
@@ -10,8 +8,9 @@ This is the virtual instrument class which every instrument plugin should
 implement.
 """
 
-from ..default_setting import logger
-from .. import device
+import graphyte_common  # pylint: disable=unused-import
+from graphyte.default_setting import logger
+from graphyte import device
 
 
 class InstBase(device.DeviceBase):  # pylint: disable=abstract-method

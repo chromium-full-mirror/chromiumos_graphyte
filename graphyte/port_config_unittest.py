@@ -1,6 +1,5 @@
 #!/usr/bin/python
-# -*- coding: utf-8 -*-
-# Copyright 2016 The Chromium OS Authors. All rights reserved.
+# Copyright 2018 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
@@ -9,7 +8,8 @@ import os
 import tempfile
 import unittest
 
-from . import port_config
+import graphyte_common  # pylint: disable=unused-import
+from graphyte import port_config
 
 
 class PathlossTest(unittest.TestCase):
@@ -110,3 +110,6 @@ class PathLossClassTest(unittest.TestCase):
     self.assertFalse(bool(pathloss_table))
     with self.assertRaisesRegexp(KeyError, 'empty'):
       pathloss_table[10]  # pylint: disable=W0104
+
+if __name__ == '__main__':
+  unittest.main()

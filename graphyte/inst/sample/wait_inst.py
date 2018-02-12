@@ -1,6 +1,5 @@
 #!/usr/bin/python
-# -*- coding: utf-8 -*-
-# Copyright 2015 The Chromium OS Authors. All rights reserved.
+# Copyright 2018 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
@@ -8,10 +7,11 @@
 
 import time
 
-from .. import InstBase
-from ...default_setting import logger
-from ...default_setting import GRAPHYTE_IN
-from ...default_setting import GRAPHYTE_OUT
+import graphyte_common  # pylint: disable=unused-import
+from graphyte.inst import InstBase
+from graphyte.default_setting import logger
+from graphyte.default_setting import GRAPHYTE_IN
+from graphyte.default_setting import GRAPHYTE_OUT
 
 
 class WaitController(InstBase.ControllerBase):

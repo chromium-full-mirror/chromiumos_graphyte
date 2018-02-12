@@ -1,6 +1,5 @@
 #!/usr/bin/python
-# -*- coding: utf-8 -*-
-# Copyright 2016 The Chromium OS Authors. All rights reserved.
+# Copyright 2018 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
@@ -9,7 +8,8 @@ import subprocess
 import tempfile
 import unittest
 
-from . import link
+import graphyte_common  # pylint: disable=unused-import
+from graphyte import link
 
 
 class LoadLinkTest(unittest.TestCase):
@@ -101,3 +101,6 @@ class ShellAPITest(unittest.TestCase):
       err_str = stderr.read()
       self.assertEqual("output hello\n", out_str)
       self.assertEqual("error hello\n", err_str)
+
+if __name__ == '__main__':
+  unittest.main()

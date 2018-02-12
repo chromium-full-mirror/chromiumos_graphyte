@@ -1,26 +1,26 @@
 #!/usr/bin/python
-# -*- coding: utf-8 -*-
-# Copyright 2017 The Chromium OS Authors. All rights reserved.
+# Copyright 2018 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 import mock
 import unittest
 
-from . import graphyte
-from . import testplan
+import graphyte_common  # pylint: disable=unused-import
+from graphyte import controller
+from graphyte import testplan
 
 
-class GraphyteTest(unittest.TestCase):
+class ControllerTest(unittest.TestCase):
   def setUp(self):
-    self.graphyte_obj = graphyte.Graphyte()
+    self.controller_obj = controller.Controller()
 
     # Mock DUT and Inst plugin.
     self.mock = mock.Mock()
     self.mock.dut = mock.MagicMock()
     self.mock.inst = mock.MagicMock()
-    self.graphyte_obj.dut = self.mock.dut
-    self.graphyte_obj.inst = self.mock.inst
+    self.controller_obj.dut = self.mock.dut
+    self.controller_obj.inst = self.mock.inst
     self.mock.dut.active_controller.RxGetResult = mock.MagicMock(
         return_value=(True, {'fake_rx_result': 'VALUE'}))
     self.mock.inst.active_controller.TxGetResult = mock.MagicMock(
@@ -43,21 +43,21 @@ class GraphyteTest(unittest.TestCase):
         'BLUETOOTH RX',
         {'rf_type': 'BLUETOOTH', 'test_type': 'RX'},
         {})
-    self.graphyte_obj.testplan = [
+    self.controller_obj.testplan = [
         self.fake_wlan_tx_test,
         self.fake_wlan_rx_test,
         self.fake_bt_tx_test,
         self.fake_bt_rx_test]
-    self.graphyte_obj.port_config = 'FAKE_PORT_CONFIG'
+    self.controller_obj.port_config = 'FAKE_PORT_CONFIG'
 
   def testE2E(self):
-    self.graphyte_obj.Run()
+    self.controller_obj.Run()
 
     self.mock.assert_has_calls([
         # Initialization.
         mock.call.inst.Initialize(),
         mock.call.inst.LockInstrument(),
-        mock.call.inst.InitPortConfig(self.graphyte_obj.port_config),
+        mock.call.inst.InitPortConfig(self.controller_obj.port_config),
         mock.call.dut.Initialize(),
 
         # Run WLAN Tx Test case.
@@ -100,3 +100,6 @@ class GraphyteTest(unittest.TestCase):
         mock.call.inst.UnlockInstrument(),
         mock.call.inst.Terminate(),
         mock.call.dut.Terminate()])
+
+if __name__ == '__main__':
+  unittest.main()

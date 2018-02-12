@@ -1,4 +1,4 @@
-# Copyright (c) 2012 The Chromium OS Authors. All rights reserved.
+# Copyright 2018 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
@@ -8,7 +8,8 @@ import datetime
 import time
 from uuid import uuid4
 
-from . import platform_utils
+import graphyte_common  # pylint: disable=unused-import
+from graphyte.utils import platform_utils
 
 EPOCH_ZERO = datetime.datetime(1970, 1, 1)
 MonotonicTime = platform_utils.GetProvider('MonotonicTime')

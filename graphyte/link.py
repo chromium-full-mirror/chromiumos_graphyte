@@ -1,5 +1,4 @@
-#!/usr/bin/env python
-# Copyright 2016 The Chromium OS Authors. All rights reserved.
+# Copyright 2018 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
@@ -7,8 +6,9 @@ import inspect
 import subprocess
 import tempfile
 
-from .utils import file_utils
-from .default_setting import logger
+import graphyte_common  # pylint: disable=unused-import
+from graphyte.utils import file_utils
+from graphyte.default_setting import logger
 
 CalledProcessError = subprocess.CalledProcessError
 
@@ -199,7 +199,7 @@ def _GetLinkClass(class_name):
 
   The module and class will be constructed based on the arguments.
   For example, ADBLink would load the class like
-    from .links.adb import ADBLink
+    from graphyte.links.adb import ADBLink
 
   Args:
     class_name: A string for name of the class to load, or a class object.

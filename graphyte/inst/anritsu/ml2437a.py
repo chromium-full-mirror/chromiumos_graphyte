@@ -1,6 +1,5 @@
 #!/usr/bin/python
-# -*- coding: utf-8 -*-
-# Copyright 2016 The Chromium OS Authors. All rights reserved.
+# Copyright 2018 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
@@ -11,10 +10,11 @@ Reference: ML2430A series power meter operation manual."""
 import re
 import time
 
-from .. import InstBase
-from ...default_setting import logger
-from ...testplan import ChainMaskToList
-from ...utils.graphyte_utils import CalculateAverage
+import graphyte_common  # pylint: disable=unused-import
+from graphyte.inst import InstBase
+from graphyte.default_setting import logger
+from graphyte.testplan import ChainMaskToList
+from graphyte.utils.graphyte_utils import CalculateAverage
 
 
 class RFController(InstBase.PowerMeterControllerBase):

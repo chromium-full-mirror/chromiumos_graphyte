@@ -1,6 +1,5 @@
 #!/usr/bin/python
-# -*- coding: utf-8 -*-
-# Copyright 2015 The Chromium OS Authors. All rights reserved.
+# Copyright 2018 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
@@ -8,9 +7,10 @@
 
 import csv
 
-from . import testplan
-from .utils.graphyte_utils import IsInBound
-from .utils.graphyte_utils import PrepareOutputFile
+import graphyte_common  # pylint: disable=unused-import
+from graphyte import testplan
+from graphyte.utils.graphyte_utils import IsInBound
+from graphyte.utils.graphyte_utils import PrepareOutputFile
 
 
 class ResultWriter(object):

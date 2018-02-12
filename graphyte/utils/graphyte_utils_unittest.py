@@ -1,6 +1,5 @@
 #!/usr/bin/python
-# -*- coding: utf-8 -*-
-# Copyright 2016 The Chromium OS Authors. All rights reserved.
+# Copyright 2018 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
@@ -8,7 +7,8 @@ import math
 import mock
 import unittest
 
-from . import graphyte_utils
+import graphyte_common  # pylint: disable=unused-import
+from graphyte.utils import graphyte_utils
 
 
 class IsInBoundTest(unittest.TestCase):

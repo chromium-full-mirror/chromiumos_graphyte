@@ -1,12 +1,12 @@
 #!/usr/bin/python
-# -*- coding: utf-8 -*-
-# Copyright 2015 The Chromium OS Authors. All rights reserved.
+# Copyright 2018 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 import unittest
 
-from . import data_parser
+import graphyte_common  # pylint: disable=unused-import
+from graphyte import data_parser
 
 
 class ParseTest(unittest.TestCase):
@@ -110,3 +110,6 @@ class TupleCheckerTest(unittest.TestCase):
     self.assertFalse(self.checker.CheckData((123, -44.5, 'hello')))
     self.assertFalse(self.checker.CheckData(123))
     self.assertFalse(self.checker.CheckData(('hello', 123)))
+
+if __name__ == '__main__':
+  unittest.main()

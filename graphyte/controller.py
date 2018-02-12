@@ -1,6 +1,5 @@
 #!/usr/bin/python
-# -*- coding: utf-8 -*-
-# Copyright 2015 The Chromium OS Authors. All rights reserved.
+# Copyright 2018 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
@@ -18,24 +17,25 @@ Please refer to graphyte_main.py.
 import json
 import os
 
-from .default_setting import DEFAULT_CONFIG_FILE
-from .default_setting import DEFAULT_RESULT_FILE
-from .default_setting import GRAPHYTE_DIR
-from .default_setting import logger
-from .device import DeviceType
-from .port_config import PortConfig
-from .result_writer import ResultWriter
-from .testplan import TestPlan
-from .utils import graphyte_utils
-from .utils import sync_utils
+import graphyte_common  # pylint: disable=unused-import
+from graphyte.default_setting import DEFAULT_CONFIG_FILE
+from graphyte.default_setting import DEFAULT_RESULT_FILE
+from graphyte.default_setting import GRAPHYTE_DIR
+from graphyte.default_setting import logger
+from graphyte.device import DeviceType
+from graphyte.port_config import PortConfig
+from graphyte.result_writer import ResultWriter
+from graphyte.testplan import TestPlan
+from graphyte.utils import graphyte_utils
+from graphyte.utils import sync_utils
 
-class Graphyte(object):
-  """The graphyte module.
+class Controller(object):
+  """The controller controls the flow to perform tests.
 
   Instantiating the class does everything now. Refer to the constructor below.
   """
   def __init__(self, config_file=None, result_file=None):
-    """The constructor for this module does most of it right now.
+    """Instantiate a controller to perform all the tests, which includes:
 
     - Load the graphyte.settings file to find the modules to load.
     - Load the plugins

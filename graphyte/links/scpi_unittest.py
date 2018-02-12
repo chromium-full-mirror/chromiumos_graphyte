@@ -1,4 +1,5 @@
-# Copyright 2016 The Chromium OS Authors. All rights reserved.
+#!/usr/bin/python
+# Copyright 2018 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
@@ -11,9 +12,10 @@ import logging
 import threading
 import unittest
 
-from .scpi import SCPILink
-from .scpi_mock import MockServerHandler
-from .scpi_mock import MockTestServer
+import graphyte_common  # pylint: disable=unused-import
+from graphyte.links.scpi import SCPILink
+from graphyte.links.scpi_mock import MockServerHandler
+from graphyte.links.scpi_mock import MockTestServer
 
 _LOCALHOST = '127.0.0.1'
 _ARBITRARY_UNUSED_PORT = 0
@@ -53,3 +55,6 @@ class SCPITest(unittest.TestCase):
 
   def testQuery(self):
     self.assertEqual(self.scpi_link.CheckOutput('*IDN?'), self.EXPECTED_MODEL)
+
+if __name__ == '__main__':
+  unittest.main()

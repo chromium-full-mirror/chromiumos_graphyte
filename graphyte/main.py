@@ -1,14 +1,14 @@
 #!/usr/bin/python
-# -*- coding: utf-8 -*-
-# Copyright 2015 The Chromium OS Authors. All rights reserved.
+# Copyright 2018 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
 from argparse import ArgumentParser
 
-from .bootstrap import Bootstrap
-from . import graphyte
-from .default_setting import logger
+import graphyte_common  # pylint: disable=unused-import
+from graphyte.bootstrap import Bootstrap
+from graphyte import controller
+from graphyte.default_setting import logger
 
 def main():
   parser = ArgumentParser()
@@ -32,7 +32,7 @@ def main():
 
   # Run Graphyte framework
   logger.info('Starting Graphyte....')
-  app = graphyte.Graphyte(**options)
+  app = controller.Controller(**options)
   app.Run()
 
 

@@ -1,6 +1,4 @@
-#!/usr/bin/python
-# -*- coding: utf-8 -*-
-# Copyright 2015 The Chromium OS Authors. All rights reserved.
+# Copyright 2018 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
@@ -12,9 +10,10 @@ import json
 import math
 import os
 
-from ..default_setting import CONFIG_DIR
-from ..default_setting import LOG_DIR
-from ..default_setting import logger
+import graphyte_common  # pylint: disable=unused-import
+from graphyte.default_setting import CONFIG_DIR
+from graphyte.default_setting import LOG_DIR
+from graphyte.default_setting import logger
 
 
 def LoadConfig(filepath):

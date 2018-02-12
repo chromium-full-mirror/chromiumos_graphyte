@@ -1,6 +1,5 @@
 #!/usr/bin/python
-# -*- coding: utf-8 -*-
-# Copyright 2016 The Chromium OS Authors. All rights reserved.
+# Copyright 2018 The Chromium OS Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
@@ -10,9 +9,10 @@ Reference: Keysight official document
   N1913A/N1914A EPM series Power Meter Programming Guide.
 """
 
-from .. import InstBase
-from ...default_setting import logger
-from ...testplan import ChainMaskToList
+import graphyte_common  # pylint: disable=unused-import
+from graphyte.inst import InstBase
+from graphyte.default_setting import logger
+from graphyte.testplan import ChainMaskToList
 
 # The mapping from the port name to the index. The port name is recorded at
 # the port_mapping config file, and the index is used for calling SCPI command.
