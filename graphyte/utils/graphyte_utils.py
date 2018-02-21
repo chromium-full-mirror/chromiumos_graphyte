@@ -54,9 +54,12 @@ def SearchConfig(filepath, search_dirs=None):
     possible_dirs += search_dirs
   for possible_dir in possible_dirs:
     path = os.path.abspath(os.path.join(possible_dir, filepath))
+    logger.debug("Trying to find config file at '%s'", path)
     if os.path.exists(path):
+      logger.debug("config file found at '%s'", path)
       return path
-  logger.error('Cannot find config file: %s', filepath)
+    logger.debug("Failed to find config file at '%s'", path)
+  logger.error('Failed to find config file: %s', filepath)
   raise IOError
 
 
