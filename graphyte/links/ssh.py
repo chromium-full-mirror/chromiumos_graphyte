@@ -58,6 +58,15 @@ class SSHLink(link.DeviceLink):
     self.connect_timeout = connect_timeout
     self.control_persist = control_persist
 
+    if self.identity is not None:
+      try:
+        self.identity = graphyte_utils.SearchConfig(self.identity)
+        os.chmod(self.identity, 0600)
+      except Exception:
+        logger.error('SSHLink: Failed to locate identity file "%s"',
+                     self.identity)
+        self.identity = None
+
   def __str__(self):
     return "SSH to %s@%s:%s with identity='%s'" % (
         self.user, self.host, self.port, self.identity)
