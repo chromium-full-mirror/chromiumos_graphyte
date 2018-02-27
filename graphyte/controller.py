@@ -191,6 +191,8 @@ class Controller(object):
 
   def RunTest(self, test_case):
     logger.info('Running test: %s', test_case)
+    logger.info('Test arguments: %r', test_case.args)
+    logger.info('Test limit: %r', test_case.result_limit)
     self.SetRF(test_case.rf_type)
 
     self.inst.SetPortConfig(test_case)
