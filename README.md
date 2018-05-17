@@ -11,6 +11,8 @@ with 802.15.4 on the horizon.
 Please refer to the [user manual](https://groups.google.com/forum/#!topic/graphyte-public/GJgiDc482K8)
 for more details.
 
+![Flow chart](doc/images/graphyte_flow.png)
+
 ## Build
 No build step is required.
 
