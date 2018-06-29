@@ -565,7 +565,7 @@ class TestCase(object):
         logger.error('The result of %s is missing.', key)
         is_pass = False
       # Check the result value meets the result limit.
-      if not IsInBound(result[key], self.result_limit[key]):
+      elif not IsInBound(result[key], self.result_limit[key]):
         logger.info('The test in result %s failed. %s not in %s',
                     key, result[key], self.result_limit[key])
         is_pass = False
