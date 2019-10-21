@@ -10,6 +10,7 @@ from graphyte.inst import InstBase
 from graphyte.testplan import ChainMaskToList
 from graphyte.default_setting import logger
 from graphyte.utils.graphyte_utils import MakeMockPassResult
+from graphyte.utils import process_utils
 
 
 class Inst(InstBase):
@@ -37,6 +38,10 @@ class Inst(InstBase):
 
   def UnlockInstrument(self):
     logger.info('Inst UnlockInstrument')
+
+  def GetVersion(self):
+    logger.info('Inst GetVersion')
+    return process_utils.CheckOutput(['uname', '-a']).strip()
 
   class WlanController(InstBase.WlanControllerBase):
     def __init__(self, inst):

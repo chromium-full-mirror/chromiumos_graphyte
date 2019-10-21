@@ -69,3 +69,6 @@ class Inst(InstBase):
 
   def UnlockInstrument(self):
     pass
+
+  def GetVersion(self):
+    return self.name

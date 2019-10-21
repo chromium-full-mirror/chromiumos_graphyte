@@ -80,6 +80,9 @@ class Inst(InstBase):
   def UnlockInstrument(self):
     pass
 
+  def GetVersion(self):
+    return self.name
+
   def SetFrequency(self, freq_mhz):
     logger.info('Set frequency to %d MHz', freq_mhz)
     self.link.CheckCall('CFFRQ A, %s' % (freq_mhz * 1e6))

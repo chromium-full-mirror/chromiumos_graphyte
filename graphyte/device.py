@@ -74,7 +74,9 @@ class DeviceBase(object):
     if self.need_link:
       self.link.Open()
       self.link.CheckReady()
-    return self._Initialize()
+    return_value = self._Initialize()
+    logger.info('Device version is %r.', self.GetVersion())
+    return return_value
 
   def _Initialize(self):
     pass
@@ -106,6 +108,12 @@ class DeviceBase(object):
     """Called when a test is failed."""
     self.active_controller.OnFailure()
 
+  def GetVersion(self):
+    """Returns device version."""
+    raise NotImplementedError('This function returns an object that can be '
+                              'formatted by %r which represents the version '
+                              'of the device. For example, returns the output '
+                              'from "uname -a".')
 
 class ControllerBase(object):
   """The abstract RF controller class.

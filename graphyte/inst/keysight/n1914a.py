@@ -90,6 +90,9 @@ class Inst(InstBase):
     # Multi-DUT testing is not supported, ignore this method.
     pass
 
+  def GetVersion(self):
+    return self.name
+
   def QueryCommand(self, command):
     self.link.CheckCall('*CLS')
     output = self.link.CheckOutput(command)

@@ -9,6 +9,7 @@ import graphyte_common  # pylint: disable=unused-import
 from graphyte.dut import DUTBase
 from graphyte.default_setting import logger
 from graphyte.utils.graphyte_utils import MakeMockPassResult
+from graphyte.utils import process_utils
 
 
 class DUT(DUTBase):
@@ -26,6 +27,10 @@ class DUT(DUTBase):
 
   def _Terminate(self):
     logger.info('DUT Terminate')
+
+  def GetVersion(self):
+    logger.info('DUT GetVersion')
+    return process_utils.CheckOutput(['uname', '-a']).strip()
 
   class WlanController(DUTBase.WlanControllerBase):
     def _Initialize(self):
