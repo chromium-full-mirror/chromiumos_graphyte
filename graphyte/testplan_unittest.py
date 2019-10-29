@@ -35,7 +35,7 @@ class WLANTestPlanTest(unittest.TestCase):
         '@result', 'evm', 'avg_power', 'freq_error', 'lo_leakage',
         'mask_margin', 'spectral_flatness', 'obw', 'phase_noise']
     self.valid_result_value = [
-        '', '(None,-25)', '(16,20)', '(0,20)', '(0,20)',
+        '', '(None,-25)', '(16,20)', '(0,20)', '(None,-15)',
         '(0,20)', '(0,20)', '(0,20)', '(-20,20)']
 
   def tearDown(self):

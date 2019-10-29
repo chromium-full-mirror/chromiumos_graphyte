@@ -206,3 +206,26 @@ def LogAllMethods(cls):
     if not func_name.startswith('_'):
       setattr(cls, func_name, LogFunc(func, prefix))
   return cls
+
+
+def AssertRangeContain(condition_message, arg_name, outer, inner):
+  """Check if the outer interval contains the inner interval.
+
+  Args:
+    condition_message: the description of what standards need this check.
+    arg_name: the name of the argument under check.
+    outer: A pair of values, the standard required interval.
+    inner: A pair of values, the interval from the testplan.
+
+  Raise:
+    ValueError if the lower bound of the outer larger than the lower bound of
+    the inner or the upper bound of the outer smaller than the upper bound of
+    the inner. None stands for infinity in upper bound and negative infinity in
+    lower bound.
+  """
+  lower = outer[0] is None or (inner[0] is not None and inner[0] >= outer[0])
+  upper = outer[1] is None or (inner[1] is not None and inner[1] <= outer[1])
+  if lower and upper:
+    return
+  raise ValueError('For %s, the bounds of %s must be contained by %r but '
+                   'get %r.' % (condition_message, arg_name, outer, inner))

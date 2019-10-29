@@ -35,6 +35,7 @@ from graphyte.data_parser import ListChecker
 from graphyte.data_parser import TupleChecker
 from graphyte.data_parser import Parse
 from graphyte.default_setting import logger
+from graphyte.utils.graphyte_utils import AssertRangeContain
 from graphyte.utils.graphyte_utils import IsInBound
 from graphyte.utils.graphyte_utils import SearchConfig
 
@@ -49,7 +50,6 @@ HEADER_CHECKER = {
                              'center_freq', 'power_level'])}
 SUPPORTED_RF_TYPES = ['WLAN', 'BLUETOOTH', '802_15_4']
 SUPPORTED_TEST_TYPES = ['TX', 'RX']
-
 
 class TestPlan(object):
   """Generates the test plan from CSV file.
@@ -289,6 +289,22 @@ class TestCaseFactory(object):
 class WLANTestCaseFactory(TestCaseFactory):
   RF_TYPE = 'WLAN'
 
+  # The limitations are from ieee 802.11-2016. The title is Part 11: Wireless
+  # LAN Medium Access Control (MAC) and Physical Layer (PHY) Specifications.
+  # B is in chapter 15 and chapter 16.
+  # A is in chapter 17.
+  # G is in chapter 18.
+  # N is in chapter 19.
+  # AC is in chapter 21.
+
+  # 16.3.6.5 and 16.3.6.6.
+  # 17.2.2.3 and 17.2.3.4. Note that Graphyte does not support 10MHz or 5MHz.
+  # 19.3.5. Note that Graphyte does not support UEQM so no MCS[33,76].
+  # 21.3.5.
+  DATA_RATE_A_G = [6, 9, 12, 18, 24, 36, 48, 54]
+  DATA_RATE_AC = ['MCS' + str(i) for i in range(10)]
+  DATA_RATE_B = [1, 2, 5.5, 11]
+  DATA_RATE_N = ['MCS' + str(i) for i in range(32)]
   REQUIRED_ARG_CHECKER = {
       'rf_type':        ListChecker([RF_TYPE]),
       'component_name': ListChecker([str]),
@@ -297,20 +313,95 @@ class WLANTestCaseFactory(TestCaseFactory):
       'power_level':    ListChecker([int, float, 'auto']),
       'standard':       ListChecker(['A', 'AC', 'B', 'G', 'N']),
       'bandwidth':      ListChecker([20, 40, 80, 160]),
-      'data_rate':      ListChecker([1, 2, 5.5, 11,
-                                     6, 9, 12, 18, 24, 36, 48, 54] +
-                                    ['MCS' + str(i) for i in range(32)]),
+      'data_rate':      ListChecker(DATA_RATE_B +
+                                    DATA_RATE_A_G +
+                                    DATA_RATE_N +
+                                    DATA_RATE_AC),
       'chain_mask':     ListChecker(range(1, 16)),  # 4x4 MIMO supported
       'nss':            ListChecker([None, 1, 2, 3, 4]),
       'long_preamble':  ListChecker([0, 1])}
+
+  STANDARD_ARG_CHECKERS = {
+      'A': {'data_rate': ListChecker(DATA_RATE_A_G),
+            'bandwidth': ListChecker([20]),
+            'nss': ListChecker([None])},
+      'AC': {'data_rate': ListChecker(DATA_RATE_AC),
+             'bandwidth': ListChecker([20, 40, 80, 160]),
+             'nss': ListChecker([1, 2, 3, 4])},
+      'B': {'data_rate': ListChecker(DATA_RATE_B),
+            'bandwidth': ListChecker([20]),
+            'nss': ListChecker([None])},
+      'G': {'data_rate': ListChecker(DATA_RATE_A_G),
+            'bandwidth': ListChecker([20]),
+            'nss': ListChecker([None])},
+      'N': {'data_rate': ListChecker(DATA_RATE_N),
+            'bandwidth': ListChecker([20, 40]),
+            'nss': ListChecker([None])}}
+  # The indices of different modulation scheme.
+  MODULATION_INDEX = {
+      'A': dict(zip(DATA_RATE_A_G, range(1, 9))),
+      'AC': dict(zip(DATA_RATE_AC, [1, 3, 4, 5, 6, 7, 8, 9, 10, 11])),
+      'B': {data_rate: 0 for data_rate in DATA_RATE_B},
+      'G': dict(zip(DATA_RATE_A_G, range(1, 9))),
+      'N': {'MCS' + str(i): [1, 3, 4, 5, 6, 7, 8, 9][i % 8]
+            for i in range(32)}}
+  # 15.4.5.10 Transmit modulation accuracy
+  # 17.3.9.7.4 Transmitter constellation error
+  # 19.3.18.7.3 Transmitter constellation error
+  # 21.3.17.4.3 Transmitter constellation error
+  STANDARD_EVM_UPPER_BOUNDS = [-9.1, -5, -8, -10, -13, -16, -19, -22, -25, -27,
+                               -30, -32]
+  # 15.4.6.2 Receiver minimum input level sensitivity
+  # 16.3.8.2 Receiver minimum input level sensitivity
+  # 17.3.10.2 Receiver minimum input sensitivity
+  # 19.3.19.1 Receiver minimum input sensitivity
+  # 21.3.18.1 Receiver minimum input sensitivity
+  STANDARD_SENSITIVITY = {
+      20: [-76, -82, -81, -79, -77, -74, -70, -66, -65, -64, -59, -57],
+      40: [None, -79, None, -76, -74, -71, -67, -63, -62, -61, -56, -54],
+      80: [None, -76, None, -73, -71, -68, -64, -60, -59, -58, -53, -51],
+      160: [None, -73, None, -70, -68, -65, -61, -57, -56, -55, -50, -48]}
+
   RX_ARG_CHECKER = {
       'rx_num_packets': ListChecker([int])}
   TX_RESULTS = ['evm', 'avg_power', 'freq_error', 'lo_leakage', 'mask_margin',
                 'spectral_flatness', 'obw', 'phase_noise']
   RX_RESULTS = ['rx_per']
+  # 15.4.5.6 Transmit center frequency tolerance
+  # 17.3.9.5 Transmit center frequency tolerance
+  # 19.3.18.4 Transmit center frequency tolerance
+  # 21.3.17.3 Transmit center frequency and symbol clock frequency tolerance
+  STANDARD_FREQ_ERROR = {
+      'A': (-20, 20),
+      'AC': (-20, 20),
+      'B': (-25, 25),
+      'G': (-20, 20),
+      'N': (-20, 20),
+      'N5': (-25, 25)}
+  # 15.4.5.9 RF carrier suppression
+  # 17.3.9.7.2 Transmitter center frequency leakage
+  # 19.3.18.7.2 Transmit center frequency leakage
+  # 21.3.17.4.2 Transmit center frequency leakage
+  STANDARD_LO_LEAKAGE = {
+      'A': {20: (None, -15.0)},
+      'AC': {20: (None, -17.5), 40: (None, -20.6),
+             80: (None, -23.8), 160: (None, -26.8)},
+      'B': {20: (None, -15.0)},
+      'G': {20: (None, -15.0)},
+      'N': {20: (None, -15.0), 40: (None, -20.0)}}
+  # 15.4.6.2 Receiver minimum input level sensitivity
+  # 16.3.8.2 Receiver minimum input level sensitivity
+  # 17.3.10.2 Receiver minimum input sensitivity
+  # 19.3.19.1 Receiver minimum input sensitivity
+  # 21.3.18.1 Receiver minimum input sensitivity
+  STANDARD_RX_PER = {
+      'A': (0, 10),
+      'AC': (0, 10),
+      'B': (0, 8),
+      'G': (0, 10),
+      'N': (0, 10)}
 
   def _VerifyArgAndResult(self, args, result_limit):
-    # TODO(akahuang): standard to data_rate mapping
     # Check the RF type is valid.
     if self.RF_TYPE != args['rf_type']:
       raise ValueError('%s is not a valid RF type.' % args['rf_type'])
@@ -319,12 +410,62 @@ class WLANTestCaseFactory(TestCaseFactory):
     if args['test_type'] == 'RX':
       arg_checker.update(self.RX_ARG_CHECKER)
     TestCaseFactory.VerifyArguments(arg_checker, args)
+    # Check if the arguments are valid in the specified standard.
+    bandwidth = args['bandwidth']
+    center_freq = args['center_freq']
+    data_rate = args['data_rate']
+    standard = args['standard']
+    TestCaseFactory.VerifyArguments(
+        self.STANDARD_ARG_CHECKERS[standard],
+        {'data_rate': data_rate,
+         'bandwidth': bandwidth,
+         'nss': args['nss']})
+    modulation_index = self.MODULATION_INDEX[standard][data_rate]
+    if args['test_type'] == 'RX':
+      standard_limit = (None,
+                        self.STANDARD_SENSITIVITY[bandwidth][modulation_index])
+      AssertRangeContain('standard %s with data rate %s and bandwidth %d'
+                         % (standard, data_rate, bandwidth),
+                         'power_level',
+                         standard_limit,
+                         (None, args['power_level']))
     # Check there is result and all results are valid.
     if args['test_type'] == 'TX':
       result_list = self.TX_RESULTS
     else:
       result_list = self.RX_RESULTS
     TestCaseFactory._VerifyResults(result_list, result_limit)
+    # Check if the results are valid in the specified standard.
+    if 'evm' in result_limit:
+      AssertRangeContain('standard %s with data rate %s'
+                         % (standard, data_rate),
+                         'evm',
+                         (None,
+                          self.STANDARD_EVM_UPPER_BOUNDS[modulation_index]),
+                         result_limit['evm'])
+    if 'freq_error' in result_limit:
+      index = standard if standard != 'N' or center_freq < 3000 else 'N5'
+      AssertRangeContain('standard %s with frequency %f'
+                         % (standard, center_freq),
+                         'freq_error',
+                         self.STANDARD_FREQ_ERROR[index],
+                         result_limit['freq_error'])
+    if 'lo_leakage' in result_limit:
+      AssertRangeContain('standard %s with bandwidth %s'
+                         % (standard, bandwidth),
+                         'lo_leakage',
+                         self.STANDARD_LO_LEAKAGE[standard][bandwidth],
+                         result_limit['lo_leakage'])
+    if 'obw' in result_limit:
+      AssertRangeContain('all conditions',
+                         'obw',
+                         (0, None),
+                         result_limit['obw'])
+    if 'rx_per' in result_limit:
+      AssertRangeContain('standard %s' % standard,
+                         'rx_per',
+                         self.STANDARD_RX_PER[standard],
+                         result_limit['rx_per'])
 
   @property
   def canonical_arg_order(self):
