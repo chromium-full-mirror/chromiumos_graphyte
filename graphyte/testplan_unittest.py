@@ -202,7 +202,7 @@ class BluetoothTestPlanTest(unittest.TestCase):
     valid_results = [
         '@result', 'bandwidth_20db', 'delta_f2_f1_avg_ratio']
     valid_result_value = [
-        '', '(16,20)', '(0,20)']
+        '', '(0,1.0)', '(0.8,None)']
 
     self._WriteCSVContent([
         self.valid_args + valid_results,
@@ -220,7 +220,8 @@ class BluetoothTestPlanTest(unittest.TestCase):
         'edr_extreme_omega_i0', 'edr_omega_i', 'edr_power_diff',
         'edr_prob_evm_99_pass']
     valid_result_value = [
-        '', '(0,20)', '(0,20)', '(0,20)', '(0,20)', '(0,20)', '(0,20)', '(0,2)']
+        '', '(0, 13)', '(0, 25)', '(-10, 10)', '(-75, 75)', '(-75, 75)',
+        '(-4, 1)', '(0,2)']
 
     self._WriteCSVContent([
         self.valid_args + valid_results,
@@ -238,8 +239,8 @@ class BluetoothTestPlanTest(unittest.TestCase):
         'delta_f1_f0', 'delta_f2_f1_avg_ratio', 'delta_f2_avg', 'delta_f2_max',
         'delta_fn_fn5_max']
     valid_result_value = [
-        '', '(0,20)', '(0,20)', '(0,20)', '(0,20)', '(0,20)', '(0,20)',
-        '(0,20)', '(0,20)']
+        '', '(0,20)', '(0,20)', '(225, 275)', '(0,20)', '(0.8, None)', '(0,20)',
+        '(182, None)', '(0,20)']
 
     self._WriteCSVContent([
         self.valid_args + valid_results,
@@ -308,9 +309,10 @@ class BluetoothTestPlanTest(unittest.TestCase):
         'acp_3', 'acp_2', 'acp_1', 'acp0', 'acp1',
         'acp2', 'acp3', 'acp4', 'acp5']
     valid_result_value = [
-        '', '(16,20)', '(0,20)', '(0,20)', '(0,20)',
-        '(0,20)', '(0,20)', '(0,20)', '(0,20)', '(0,20)',
-        '(0,20)', '(0,20)', '(0,20)', '(0,20)']
+        '', '(16,20)', '(0, 1.0)', '(None, -40)', '(None, -40)',
+        '(None, -40)', '(None, -40)', '(None, -40)', '(None, -40)',
+        '(None, -40)', '(None, -40)', '(None, -40)', '(None, -40)',
+        '(None, -40)']
 
     self._WriteCSVContent([
         self.valid_args + valid_results,
@@ -329,8 +331,8 @@ class BluetoothTestPlanTest(unittest.TestCase):
         'edr_extreme_omega_0', 'edr_extreme_omega_i0', 'edr_omega_i',
         'edr_power_diff', 'edr_prob_evm_99_pass']
     valid_result_value = [
-        '', '(16,20)', '(0,20)', '(0,20)', '(0,20)', '(0,20)', '(0,20)',
-        '(0,20)', '(0,20)', '(0,20)']
+        '', '(16,20)', '(0,20)', '(0,20)', '(0,20)', '(-10, 10)', '(0,20)',
+        '(0,20)', '(-4, 1)', '(0,20)']
 
     self._WriteCSVContent([
         self.valid_args + valid_results,
@@ -349,9 +351,9 @@ class BluetoothTestPlanTest(unittest.TestCase):
         'acp_3', 'acp_2', 'acp_1', 'acp0', 'acp1',
         'acp2', 'acp3', 'acp4', 'acp5']
     valid_result_value = [
-        '', '(16,20)', '(0,20)', '(0,20)', '(0,20)',
-        '(0,20)', '(0,20)', '(0,20)', '(0,20)', '(0,20)',
-        '(0,20)', '(0,20)', '(0,20)', '(0,20)']
+        '', '(16,20)', '(0,20)', '(None, -30)', '(None, -30)',
+        '(None, -30)', '(None, -30)', '(0,20)', '(None, -30)', '(None, -30)',
+        '(None, -30)', '(None, -30)', '(None, -30)', '(None, -30)']
 
     self._WriteCSVContent([
         self.valid_args + valid_results,
@@ -368,7 +370,7 @@ class BluetoothTestPlanTest(unittest.TestCase):
     valid_results = [
         '@result', 'delta_f1_avg', 'freq_deviation']
     valid_result_value = [
-        '', '(0,20)', '(0,20)']
+        '', '(140, 175)', '(0,20)']
 
     self._WriteCSVContent([
         self.valid_args + valid_results,
@@ -385,7 +387,7 @@ class BluetoothTestPlanTest(unittest.TestCase):
     valid_results = [
         '@result', 'delta_f1_avg']
     valid_result_value = [
-        '', '(0,20)']
+        '', '(225, 275)']
 
     self._WriteCSVContent([
         self.valid_args + valid_results,
@@ -402,7 +404,7 @@ class BluetoothTestPlanTest(unittest.TestCase):
     valid_results = [
         '@result', 'freq_drift', 'delta_f2_avg', 'delta_f2_max']
     valid_result_value = [
-        '', '(16,20)', '(16,20)', '(16,20)']
+        '', '(16,20)', '(16,20)', '(115, None)']
 
     self._WriteCSVContent([
         self.valid_args + valid_results,
@@ -420,8 +422,8 @@ class BluetoothTestPlanTest(unittest.TestCase):
         '@result', 'delta_f2_avg', 'delta_f2_max', 'delta_f1_f0',
         'delta_f0_fn_max', 'delta_fn_fn5_max']
     valid_result_value = [
-        '', '(16,20)', '(0,20)', '(16,20)',
-        '(0,20)', '(16,20)']
+        '', '(16,20)', '(185, None)', '(None, 23)',
+        '(None, 50)', '(None, 20)']
 
     self._WriteCSVContent([
         self.valid_args + valid_results,
@@ -440,7 +442,7 @@ class BluetoothTestPlanTest(unittest.TestCase):
         'delta_f1_avg',  # bit_pattern is F0
         'delta_f2_avg', 'delta_f2_max']  # bit_pattern is AA
     valid_result_value = [
-        '', '(16,20)', '(16,20)', '(0,20)', '(0,20)']
+        '', '(16,20)', '(225, 275)', '(0,20)', '(185, None)']
 
     self._WriteCSVContent([
         self.valid_args + valid_results,
@@ -458,7 +460,7 @@ class BluetoothTestPlanTest(unittest.TestCase):
     valid_results = [
         '@result', 'delta_f2_f1_avg_ratio']
     valid_result_value = [
-        '', '(16,20)']
+        '', '(0.8,None)']
 
     self._WriteCSVContent([
         self.valid_args + valid_results,
@@ -473,7 +475,7 @@ class BluetoothTestPlanTest(unittest.TestCase):
     rx_args = ['rx_num_packets']
     valid_args_value = [
         '', 'BT', 'BLUETOOTH', 'RX', '2412',
-        '18', 'LE', '10000']
+        '-70', 'LE', '10000']
     valid_results = [
         '@result', 'rx_per']
     valid_result_value = [
@@ -490,11 +492,11 @@ class BluetoothTestPlanTest(unittest.TestCase):
     rx_args = ['rx_num_bits']
     valid_args_value = [
         '', 'BT', 'BLUETOOTH', 'RX', '2412',
-        '18', '1DH1', '10000']
+        '-70', '1DH1', '1600000']
     valid_results = [
         '@result', 'rx_ber']
     valid_result_value = [
-        '', '(0,20)']
+        '', '(0,0.1)']
 
     self._WriteCSVContent([
         self.valid_args + rx_args + valid_results,

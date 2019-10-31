@@ -28,7 +28,6 @@ If the first column starts from #, we ignore the rest of the line.
 
 import csv
 import itertools
-import logging
 
 import graphyte_common  # pylint: disable=unused-import
 from graphyte.data_parser import ListChecker
@@ -483,6 +482,13 @@ class WLANTestCaseFactory(TestCaseFactory):
 
 class BluetoothTestCaseFactory(TestCaseFactory):
   RF_TYPE = 'BLUETOOTH'
+
+  # The standard test limits are from
+  # https://www.bluetooth.com/specifications/qualification-test-requirements/.
+  # Current reference revisions are RF.TS.5.1.0 and RF-PHY.TS.5.1.1.
+  # RF.TS.5.1.0 describes tests for BDR or EDR.
+  # RF-PHY.TS.5.1.1 describes tests for LE.
+  # Each test is named by something like RF-PHY/TRM/BV-03-C.
   REQUIRED_ARG_CHECKER = {
       'rf_type':        ListChecker([RF_TYPE]),
       'component_name': ListChecker([str]),
@@ -495,9 +501,9 @@ class BluetoothTestCaseFactory(TestCaseFactory):
       'rx_num_packets': ListChecker([int])}
   BT_RX_ARG_CHECKER = {
       'rx_num_bits': ListChecker([int])}
-  COMMON_RESULTS = [
-      'avg_power', 'acp_5', 'acp_4', 'acp_3', 'acp_2',
-      'acp_1', 'acp0', 'acp1', 'acp2', 'acp3', 'acp4', 'acp5']
+  ADJACENT_CHANNELS = ['acp_5', 'acp_4', 'acp_3', 'acp_2', 'acp_1',
+                       'acp0', 'acp1', 'acp2', 'acp3', 'acp4', 'acp5']
+  COMMON_RESULTS = ['avg_power'] + ADJACENT_CHANNELS
   FORMAT_RESULT_CHECKER = {
       'BDR': ['bandwidth_20db', 'freq_deviation', 'freq_drift', 'delta_f1_avg',
               'delta_f2_avg', 'delta_f2_max', 'delta_f2_f1_avg_ratio'],
@@ -517,9 +523,8 @@ class BluetoothTestCaseFactory(TestCaseFactory):
   # NOTE2: delta_f2_f1_avg_ratio is the ratio of delta_f2_avg and delta_f1_avg,
   # so it needs 'F0' and 'AA' patterns.
   BIT_PATTERN_RESULTS = {
-      'PRBS9': ['avg_power', 'bandwidth_20db', 'acp_5', 'acp_4', 'acp_3',
-                'acp_2', 'acp_1', 'acp0', 'acp1', 'acp2', 'acp3', 'acp4',
-                'acp5', 'freq_offset', 'rx_ber', 'rx_per'],
+      'PRBS9': ['avg_power', 'bandwidth_20db', 'freq_offset', 'rx_ber',
+                'rx_per'] + ADJACENT_CHANNELS,
       'F0': ['freq_deviation', 'delta_f1_avg', 'delta_f2_f1_avg_ratio'],
       'AA': ['freq_drift', 'delta_f2_avg', 'delta_f2_max', 'delta_f1_f0',
              'delta_f2_f1_avg_ratio', 'delta_f0_fn_max', 'delta_fn_fn5_max']}
@@ -537,6 +542,19 @@ class BluetoothTestCaseFactory(TestCaseFactory):
       '3DH1': 83,
       '3DH3': 552,
       '3DH5': 1021}
+
+  # The limits of adjacent channel power are defined in RF-PHY/TRM/BV-03-C and
+  # RF/TRM/CA/BV-06-C.
+  ADJACENT_CHANNEL_POWER = {
+      'LE': dict(zip(
+          ADJACENT_CHANNELS,
+          [-30, -30, -30, -20, None, None, None, -20, -30, -30, -30])),
+      'BDR': dict(zip(
+          ADJACENT_CHANNELS,
+          [-40, -40, -40, -20, None, None, None, -20, -40, -40, -40])),
+      'EDR': dict(zip(
+          ADJACENT_CHANNELS,
+          [-40, -40, -40, -20, None, None, None, -20, -40, -40, -40]))}
 
   def _DetermineFormat(self, packet_type):
     """Determines the bluetooth format of the packet type.
@@ -557,28 +575,111 @@ class BluetoothTestCaseFactory(TestCaseFactory):
       return 'EDR'
     return 'BDR'
 
+  def _VerifyArgAndResultStandardRX(self, packet_format, args, result_limit):
+    """Check if Bluetooth RX test limits are better than standard."""
+    AssertRangeContain('all packets', 'power_level',
+                       (None, -70), (None, args['power_level']))
+    if packet_format == 'LE':
+      # The limits of power_level, rx_num_packets, and rx_per for LE are defined
+      # in RF-PHY/RCV/BV-01-C.
+      AssertRangeContain(packet_format, 'rx_num_packets',
+                         (1500, None), (args['rx_num_packets'], None))
+      AssertRangeContain(packet_format, 'rx_per',
+                         (0, 30.8), result_limit['rx_per'])
+    elif packet_format == 'BDR':
+      # The limits of power_level, rx_num_bits, and rx_ber for BDR are defined
+      # in RF/RCV/CA/BV-02-C.
+      AssertRangeContain(packet_format, 'rx_num_bits',
+                         (1600000, None), (args['rx_num_bits'], None))
+      AssertRangeContain(packet_format, 'rx_ber',
+                         (0, 0.1), result_limit['rx_ber'])
+    else:  # packet_format == EDR
+      # The limits of power_level, rx_num_bits, and rx_ber for EDR are defined
+      # in RF/RCV/CA/BV-07-C.
+      standard_ber_level_0 = 0.007
+      standard_ber_level_1 = 0.01
+      AssertRangeContain(packet_format, 'rx_ber',
+                         (0, standard_ber_level_1), result_limit['rx_ber'])
+      if result_limit['rx_ber'][1] <= standard_ber_level_0:
+        message = 'EDR with rx_ber in [0, %f]' % standard_ber_level_0
+        standard_bits = (1600000, None)
+      else:
+        message = 'EDR with rx_ber in (%f, %f]' % (standard_ber_level_0,
+                                                   standard_ber_level_1)
+        standard_bits = (16000000, None)
+      AssertRangeContain(message, 'rx_num_bits', standard_bits,
+                         (args['rx_num_bits'], None))
+
+  def _VerifyArgAndResultStandardTX(self, packet_format, packet_type,
+                                    result_limit):
+    """Check if Bluetooth TX test limits are better than standard."""
+    standard_acp_list = self.ADJACENT_CHANNEL_POWER[packet_format]
+    for channel, standard_acp in standard_acp_list.items():
+      if channel in result_limit:
+        AssertRangeContain(
+            packet_format, channel, (None, standard_acp), result_limit[channel])
+    STANDARD_BT_TX = {
+        # The limits of delta_f1_avg, delta_f2_max, and delta_f2_f1_avg_ratio
+        # are defined in RF-PHY/TRM/BV-05-C and RF/TRM/CA/BV-07-C.
+        'delta_f1_avg': (225, 275) if packet_format == 'LE' else (140, 175),
+        'delta_f2_max': (182, None) if packet_format == 'LE' else (115, None),
+        'delta_f2_f1_avg_ratio': (0.8, None),
+        # The limits of delta_f0_fn_max, delta_f1_f0, delta_fn_fn5_max, and
+        # freq_offset are defined in RF-PHY/TRM/BV-06-C.
+        'delta_f0_fn_max': (None, 50),
+        'delta_f1_f0': (None, 23),
+        'delta_fn_fn5_max': (None, 20),
+        'freq_offset': (-150, 150),
+        # The limits of freq_drift are defined in RF/TRM/CA/BV-09-C.
+        'freq_drift': (-25, 25) if packet_type == '1DH1' else (-40, 40),
+        # The limits of edr_power_diff are defined in RF/TRM/CA/BV-10-C.
+        'edr_power_diff': (-4, 1),
+        # The limits of edr_evm_avg, edr_evm_peak, edr_prob_evm_99_pass,
+        # edr_extreme_omega_0, edr_extreme_omega_i0, and edr_omega_i are defined
+        # in RF/TRM/CA/BV-11-C.
+        'edr_evm_avg': (0, 20) if packet_type[0] == '2' else (0, 13),
+        'edr_evm_peak': (0, 35) if packet_type[0] == '2' else (0, 25),
+        'edr_prob_evm_99_pass': (0, 30) if packet_type[0] == '2' else (0, 20),
+        'edr_extreme_omega_0': (-10, 10),
+        'edr_extreme_omega_i0': (-75, 75),
+        'edr_omega_i': (-75, 75),
+        # The limits of bandwidth_20db are defined in RF/TRM/CA/BV-05-C.
+        'bandwidth_20db': (0, 1.0)
+    }
+    for arg_name, limits in STANDARD_BT_TX.items():
+      if arg_name in result_limit:
+        AssertRangeContain(
+            packet_type, arg_name, limits, result_limit[arg_name])
+
   def _VerifyArgAndResult(self, args, result_limit):
     # Check the RF type is valid.
     if self.RF_TYPE != args['rf_type']:
       raise ValueError('%s is not a valid RF type.' % args['rf_type'])
     # Check all required arguments are valid.
     arg_checker = self.REQUIRED_ARG_CHECKER.copy()
-    if args['test_type'] == 'RX':
-      if args['packet_type'] == 'LE':
+    test_type = args['test_type']
+    packet_type = args['packet_type']
+    packet_format = self._DetermineFormat(packet_type)
+    if test_type == 'RX':
+      if packet_format == 'LE':
         arg_checker.update(self.LE_RX_ARG_CHECKER)
       else:
         arg_checker.update(self.BT_RX_ARG_CHECKER)
     TestCaseFactory.VerifyArguments(arg_checker, args)
     # Check there is result and all results are valid.
-    if args['test_type'] == 'TX':
-      result_list = self.COMMON_RESULTS[:]
-      packet_format = self._DetermineFormat(args['packet_type'])
-      result_list += self.FORMAT_RESULT_CHECKER[packet_format]
-    elif args['packet_type'] == 'LE':
+    if test_type == 'TX':
+      result_list = (self.COMMON_RESULTS +
+                     self.FORMAT_RESULT_CHECKER[packet_format])
+    elif packet_format == 'LE':
       result_list = self.LE_RX_RESULTS
     else:
       result_list = self.BT_RX_RESULTS
     TestCaseFactory._VerifyResults(result_list, result_limit)
+    if test_type == 'RX':
+      self._VerifyArgAndResultStandardRX(packet_format, args, result_limit)
+    else:
+      self._VerifyArgAndResultStandardTX(
+          packet_format, packet_type, result_limit)
 
   def _Create(self, args, result_limit):
     """Creates the bluetooth test case.
