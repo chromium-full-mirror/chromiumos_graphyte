@@ -5,6 +5,8 @@
 
 import math
 import mock
+import os
+import tempfile
 import unittest
 
 import graphyte_common  # pylint: disable=unused-import
@@ -172,3 +174,39 @@ class LogAllMethodsTest(unittest.TestCase):
     mock_logger.debug.assert_not_called()
     obj.Foo(3)
     mock_logger.debug.assert_called_with('Calling %s(%s)', 'FakeClass.Foo', '3')
+
+
+class IsolateAllMethodsCurrentWorkingDirectoryTest(unittest.TestCase):
+  def setUp(self):
+    self._my_jail = graphyte_utils.IsolateCWD()
+    self._initial_dir = os.getcwd()
+    self._temp_dir = tempfile.mkdtemp()
+
+  def tearDown(self):
+    os.chdir(self._initial_dir)
+    if self._temp_dir:
+      os.rmdir(self._temp_dir)
+
+  def testIsolating(self):
+    @self._my_jail.IsolateAllMethods
+    class FakeClassOne(object):
+      def Foo(self, temp_dir):
+        os.chdir(temp_dir)
+      def Baz(self):
+        raise Exception('Test')
+    @self._my_jail.IsolateAllMethods
+    class FakeClassTwo(object):
+      def Bar(self):
+        return os.getcwd()
+    obj_1 = FakeClassOne()
+    obj_2 = FakeClassTwo()
+    obj_1.Foo(self._temp_dir)
+    # Test if changing inside affects outside.
+    self.assertEqual(os.getcwd(), self._initial_dir)
+    # Test the working directory inside.
+    self.assertEqual(obj_2.Bar(), self._temp_dir)
+    # Raise an exception in the decorated object.
+    self.assertRaisesRegexp(Exception, 'Test', obj_1.Baz)
+    # Redo test after an exception to check exception safety.
+    self.assertEqual(os.getcwd(), self._initial_dir)
+    self.assertEqual(obj_2.Bar(), self._temp_dir)

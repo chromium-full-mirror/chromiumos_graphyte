@@ -208,6 +208,41 @@ def LogAllMethods(cls):
   return cls
 
 
+class IsolateCWD(object):
+  """The decorator that isolates changes of current working directory.
+
+  The methods decorated with the same IsolateCWD share the same working
+  directory. It protects working directory from being changed by other plugins
+  and also prevents working directory of other plugins being changed.
+  """
+  def __init__(self):
+    self._outside_cwd = None
+    self._inside_cwd = os.getcwd()
+    self._depth = 0
+
+  def IsolateFunc(self, func):
+    def Wrapper(*args, **kwargs):
+      try:
+        # _depth equals to zero implies that its call from outside.
+        if self._depth == 0:
+          self._outside_cwd = os.getcwd()
+          os.chdir(self._inside_cwd)
+        self._depth += 1
+        return func(*args, **kwargs)
+      finally:
+        self._depth -= 1
+        # _depth equals to zero implies that the call ends to outside.
+        if self._depth == 0:
+          self._inside_cwd = os.getcwd()
+          os.chdir(self._outside_cwd)
+    return Wrapper
+
+  def IsolateAllMethods(self, cls):
+    for func_name, func in inspect.getmembers(cls, inspect.ismethod):
+      setattr(cls, func_name, self.IsolateFunc(func))
+    return cls
+
+
 def AssertRangeContain(condition_message, arg_name, outer, inner):
   """Check if the outer interval contains the inner interval.
 

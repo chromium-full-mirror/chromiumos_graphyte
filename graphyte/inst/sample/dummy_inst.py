@@ -5,20 +5,31 @@
 
 """The mock instrument class. """
 
+import os
+import tempfile
+
 import graphyte_common  # pylint: disable=unused-import
 from graphyte.inst import InstBase
 from graphyte.testplan import ChainMaskToList
+from graphyte.default_setting import GRAPHYTE_DIR
 from graphyte.default_setting import logger
 from graphyte.utils.graphyte_utils import MakeMockPassResult
+from graphyte.utils import graphyte_utils
 from graphyte.utils import process_utils
 
+# INST_JAIL makes the classes it decorates share the same working directory.
+# It protects working directory from being changed by other plugins and also
+# prevents working directory of other plugins being changed.
+INST_JAIL = graphyte_utils.IsolateCWD()
 
+@INST_JAIL.IsolateAllMethods
 class Inst(InstBase):
   name = 'Mock inst Plugin'
   VALID_PORT_NAMES = ['dummy_port']
 
   def __init__(self, **kwargs):
     super(Inst, self).__init__(**kwargs)
+    self.temp_dir = None
     self.controllers = {
         'WLAN': self.WlanController(self),
         'BLUETOOTH': self.BluetoothController(self),
@@ -26,9 +37,16 @@ class Inst(InstBase):
 
   def _Initialize(self):
     logger.info('Inst Initialize')
+    # Change to other working directory if you want.
+    self.temp_dir = tempfile.mkdtemp('_Inst')
+    logger.info('Inst Change diretory to %r', self.temp_dir)
+    os.chdir(self.temp_dir)
 
   def _Terminate(self):
-    logger.info('Inst Terminate')
+    logger.info('Inst Terminate at %r', os.getcwd())
+    os.chdir(GRAPHYTE_DIR)
+    if self.temp_dir:
+      os.rmdir(self.temp_dir)
 
   def _SetPortConfig(self, port_mapping, pathloss):
     logger.info('Inst _SetPortConfig')
@@ -43,6 +61,7 @@ class Inst(InstBase):
     logger.info('Inst GetVersion')
     return process_utils.CheckOutput(['uname', '-a']).strip()
 
+  @INST_JAIL.IsolateAllMethods
   class WlanController(InstBase.WlanControllerBase):
     def __init__(self, inst):
       super(Inst.WlanController, self).__init__(inst)
@@ -79,6 +98,7 @@ class Inst(InstBase):
     def _RxStop(self, **kwargs):
       logger.info('Wlan RxStop')
 
+  @INST_JAIL.IsolateAllMethods
   class BluetoothController(InstBase.BluetoothControllerBase):
     def _Initialize(self):
       logger.info('Inst Bluetooth Initialize')
@@ -104,6 +124,7 @@ class Inst(InstBase):
     def _RxStop(self, **kwargs):
       logger.info('Bluetooth RxStop')
 
+  @INST_JAIL.IsolateAllMethods
   class ZigbeeController(InstBase.ZigbeeControllerBase):
     def _Initialize(self):
       logger.info('Inst Zigbee Initialize')
