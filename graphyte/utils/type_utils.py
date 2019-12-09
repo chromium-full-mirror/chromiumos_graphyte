@@ -5,11 +5,13 @@
 """Utilities for data types."""
 
 import collections
+import functools
 import inspect
-import itertools
-import Queue
 import re
 
+import six
+from six import iteritems
+from six.moves import queue
 
 # The regular expression used by Overrides.
 _OVERRIDES_CLASS_RE = re.compile(r'^\s*class[^#]+\(\s*([^\s#]+)\s*\)\s*\:')
@@ -17,12 +19,19 @@ _OVERRIDES_CLASS_RE = re.compile(r'^\s*class[^#]+\(\s*([^\s#]+)\s*\)\s*\:')
 
 class Error(Exception):
   """Generic fatal error."""
-  pass
+
+
+class TestFailure(Error):
+  """Failure of a test."""
+
+
+class TestListError(Error):
+  """TestList exception"""
 
 
 class TimeoutError(Error):
   """Timeout error."""
-  def __init__(self, message, output=None):
+  def __init__(self, message='Timed out', output=None):
     Error.__init__(self)
     self.message = message
     self.output = output
@@ -40,25 +49,32 @@ class Obj(object):
   def __repr__(self):
     return repr(self.__dict__)
 
+  def __eq__(self, rhs):
+    return isinstance(rhs, Obj) and self.__dict__ == rhs.__dict__
 
-# TODO(akahuang): Update from latest factory repo.
-def Enum(*args, **kwargs):
-  """Creates the immutable enumeration set.
+  def __ne__(self, rhs):
+    return not self.__eq__(rhs)
+
+
+class Enum(frozenset):
+  """An enumeration type.
 
   Usage:
-    1. C-style enum. The value starts from 0 and increase orderly.
-      A = Enum('foo', 'bar')
-      then A.foo == 0, A.bar == 1
-    2. Key-value pair enum.
-      B = Enum(foo='FOO', bar='BAR')
-      then B.foo == 'FOO', B.bar == 'BAR'
+    To create a enum object:
+      dummy_enum = type_utils.Enum(['A', 'B', 'C'])
+
+    To access a enum object, use:
+      dummy_enum.A
+      dummy_enum.B
   """
-  fields = dict(zip(args, itertools.count()), **kwargs)
-  enum_type = collections.namedtuple('Enum', fields.keys())
-  return enum_type(**fields)
+
+  def __getattr__(self, name):
+    if name in self:
+      return name
+    raise AttributeError
 
 
-def DrainQueue(queue):
+def DrainQueue(q):
   """Returns as many elements as can be obtained from a queue without blocking.
 
   (This may be no elements at all.)
@@ -66,8 +82,8 @@ def DrainQueue(queue):
   ret = []
   while True:
     try:
-      ret.append(queue.get_nowait())
-    except Queue.Empty:
+      ret.append(q.get_nowait())
+    except queue.Empty:
       break
   return ret
 
@@ -83,6 +99,17 @@ def FlattenList(lst):
              [])
 
 
+def FlattenTuple(tupl):
+  """Flattens a tuple, recursively including all items in contained tuples.
+
+  For example:
+
+    FlattenList((1,2,(3,4,()),5,6)) == (1,2,3,4,5,6)
+  """
+  return sum((FlattenTuple(x) if isinstance(x, tuple) else (x, ) for x in tupl),
+             ())
+
+
 def MakeList(value):
   """Converts the given value to a list.
 
@@ -91,9 +118,31 @@ def MakeList(value):
     otherwise, a list contains only one element.
   """
   if (isinstance(value, collections.Iterable) and
-      not isinstance(value, basestring)):
+      not isinstance(value, six.string_types)):
     return list(value)
   return [value]
+
+
+def MakeTuple(value):
+  """Converts the given value to a tuple recursively.
+
+  This is helpful for using an iterable argument as dict keys especially
+  that arguments from JSON will always be list instead of tuple.
+
+  Returns:
+    A tuple of elements from "value" if it is iterable (except string)
+    recursively; otherwise, a tuple with only one element.
+  """
+  def ShouldExpand(v):
+    return (isinstance(v, collections.Iterable) and
+            not isinstance(v, six.string_types))
+
+  def Expand(v):
+    return tuple(Expand(e) if ShouldExpand(e) else e for e in v)
+
+  if ShouldExpand(value):
+    return Expand(value)
+  return (value,)
 
 
 def MakeSet(value):
@@ -104,7 +153,7 @@ def MakeSet(value):
     otherwise, a set contains only one element.
   """
   if (isinstance(value, collections.Iterable) and
-      not isinstance(value, basestring)):
+      not isinstance(value, six.string_types)):
     return set(value)
   return set([value])
 
@@ -122,6 +171,26 @@ def CheckDictKeys(dict_to_check, allowed_keys):
   extra_keys = set(dict_to_check) - set(allowed_keys)
   if extra_keys:
     raise ValueError('Found extra keys: %s' % list(extra_keys))
+
+
+def GetDict(data, key_path, default_value=None):
+  """A simplified getter function to retrieve values inside dictionary.
+
+  This function is very similar to `dict.get`, except it accepts a key path
+  (can be a list or string delimited by dot, for example ['a', 'b'] or 'a.b')
+
+  Args:
+    data: A dictionary that may contain sub-dictionaries.
+    key_path: A list of keys, or one simple string delimited by dot.
+    default_value: The value to return if key_path does not exist.
+  """
+  if isinstance(key_path, six.string_types):
+    key_path = key_path.split('.')
+  for key in key_path:
+    if key not in data:
+      return default_value
+    data = data[key]
+  return data
 
 
 class AttrDict(dict):
@@ -142,34 +211,18 @@ class AttrDict(dict):
     assertEqual(bar.z[0].m, 'value_z_0_m')
   """
 
-  def _IsBuiltinDict(self, item):
-    return (isinstance(item, dict) and
-            item.__class__.__module__ == '__builtin__' and
-            item.__class__.__name__ == 'dict')
-
-  def _IsBuiltinList(self, item):
-    return (isinstance(item, list) and
-            item.__class__.__module__ == '__builtin__' and
-            item.__class__.__name__ == 'list')
-
-  def _ConvertList(self, itemlist):
-    converted = []
-    for item in itemlist:
-      if self._IsBuiltinDict(item):
-        converted.append(AttrDict(item))
-      elif self._IsBuiltinList(item):
-        converted.append(self._ConvertList(item))
-      else:
-        converted.append(item)
-    return converted
+  @classmethod
+  def _Convert(cls, obj):
+    if isinstance(obj, list):
+      return [cls._Convert(val) for val in obj]
+    if isinstance(obj, dict):
+      return cls(obj)
+    return obj
 
   def __init__(self, *args, **kwargs):
     super(AttrDict, self).__init__(*args, **kwargs)
-    for key, value in self.iteritems():
-      if self._IsBuiltinDict(value):
-        self[key] = AttrDict(value)
-      elif self._IsBuiltinList(value):
-        self[key] = self._ConvertList(value)
+    for key, val in iteritems(self):
+      self[key] = self._Convert(val)
     self.__dict__ = self
 
 
@@ -256,6 +309,63 @@ def Overrides(method):
   return method
 
 
+class CachedGetter(object):
+  """A decorator for a cacheable getter function.
+
+  This is helpful for caching results for getter functions. For example::
+
+  @CacheGetter
+  def ReadDeviceID():
+    with open('/var/device_id') as f:
+      return f.read()
+
+  The real file I/O will occur only on first invocation of ``ReadDeviceID()``,
+  until ``ReadDeviceID.InvalidateCache()`` is called.
+
+  In current implementation, the getter may accept arguments, but the arguments
+  are ignored if there is already cache available. In other words::
+
+  @CacheGetter
+  def m(v):
+    return v + 1
+
+  m(0)  # First call: returns 1
+  m(1)  # Second call: return previous cached answer, 1.
+  """
+
+  def __init__(self, getter):
+    functools.update_wrapper(self, getter)
+    self._getter = getter
+    self._has_cached = False
+    self._cached_value = None
+
+  def InvalidateCache(self):
+    self._has_cached = False
+    self._cached_value = None
+
+  def Override(self, value):
+    self._has_cached = True
+    self._cached_value = value
+
+  def HasCached(self):
+    return self._has_cached
+
+  def __call__(self, *args, **kargs):
+    # TODO(hungte) Cache args/kargs as well, to return different values when the
+    # arguments are different.
+    if not self.HasCached():
+      self.Override(self._getter(*args, **kargs))
+    return self._cached_value
+
+
+def OverrideCacheableGetter(getter, value):
+  """Overrides a function decorated by CacheableGetter with some value."""
+  assert hasattr(getter, 'has_cached'), 'Need a CacheableGetter target.'
+  assert hasattr(getter, 'cached_value'), 'Need a CacheableGetter target.'
+  getter.has_cached = True
+  getter.cached_value = value
+
+
 class LazyProperty(object):
   """A decorator for lazy loading properties.
 
@@ -275,6 +385,7 @@ class LazyProperty(object):
   def __init__(self, prop):
     self._init_func = prop
     self._prop_name = self.PROP_NAME_PREFIX + prop.__name__
+    functools.update_wrapper(self, prop)
 
   def __get__(self, obj, ignored_obj_type):
     if obj is None:
@@ -297,6 +408,23 @@ class LazyProperty(object):
     if not isinstance(getattr(obj_class, prop_name), cls):
       raise AttributeError('%s is not a %s' % (prop_name, cls.__name__))
     setattr(obj, cls.PROP_NAME_PREFIX + prop_name, value)
+
+
+class LazyObject(object):
+  """A proxy object for creating an object on demand.."""
+
+  def __init__(self, constructor, *args, **kargs):
+    self._proxy_constructor = lambda: constructor(*args, **kargs)
+    self._proxy_object = None
+
+  def __getattr__(self, name):
+    if self._proxy_constructor is not None:
+      self._proxy_object = self._proxy_constructor()
+      self._proxy_constructor = None
+    attr = getattr(self._proxy_object, name)
+    # We can't do 'setattr' here to speed up processing because the members in
+    # the proxy object may be volatile.
+    return attr
 
 
 class UniqueStack(object):
@@ -344,7 +472,7 @@ class UniqueStack(object):
     This function should run in amortized O(1)
     """
     with self._lock:
-      while len(self._list) > 0:
+      while self._list:
         if self._list[-1] in self._set:
           return self._list[-1]
         else:
@@ -353,15 +481,15 @@ class UniqueStack(object):
 
 
 def UnicodeToString(obj):
-  '''Converts any Unicode strings in obj to UTF-8 strings.
+  """Converts any Unicode strings in obj to UTF-8 strings.
 
   Recurses into lists, dicts, and tuples in obj.
-  '''
+  """
   if isinstance(obj, list):
     return [UnicodeToString(x) for x in obj]
   elif isinstance(obj, dict):
     return dict((UnicodeToString(k), UnicodeToString(v))
-                for k, v in obj.iteritems())
+                for k, v in iteritems(obj))
   elif isinstance(obj, unicode):
     return obj.encode('utf-8')
   elif isinstance(obj, tuple):
@@ -373,17 +501,18 @@ def UnicodeToString(obj):
 
 
 def UnicodeToStringArgs(function):
-  '''A function decorator that converts function's arguments from
+  """A function decorator that converts function's arguments from
   Unicode to strings using UnicodeToString.
-  '''
-  return (lambda *args, **kwargs:
-          function(*UnicodeToString(args),
-                   **UnicodeToString(kwargs)))
+  """
+  @functools.wraps(function)
+  def _Wrapper(*args, **kwargs):
+    return function(*UnicodeToString(args), **UnicodeToString(kwargs))
 
+  return _Wrapper
 
 def UnicodeToStringClass(cls):
-  '''A class decorator that converts all arguments of all
-  methods in class from Unicode to strings using UnicodeToStringArgs.'''
+  """A class decorator that converts all arguments of all
+  methods in class from Unicode to strings using UnicodeToStringArgs."""
   for k, v in cls.__dict__.items():
     if callable(v):
       setattr(cls, k, UnicodeToStringArgs(v))
@@ -410,3 +539,14 @@ def StdRepr(obj, extra=None, excluded_keys=None, true_only=False):
                if k[0] != '_' and k not in excluded_keys and (
                    not true_only or getattr(obj, k))])
           + ')')
+
+
+def BindFunction(func, *args, **kwargs):
+  """Bind arguments to a function.
+
+  The returned function have same __name__ and __doc__ with func.
+  """
+  @functools.wraps(func)
+  def _Wrapper():
+    return func(*args, **kwargs)
+  return _Wrapper

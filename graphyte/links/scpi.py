@@ -93,7 +93,7 @@ class SCPILink(link.DeviceLink):
       if self._IsQueryCommand(command):
         output = self._Query(command)
         if stdout:
-          stdout.write(output)
+          stdout.write(output.encode('utf-8'))
       else:
         self._Send(command)
       return 0
@@ -159,7 +159,7 @@ class SCPILink(link.DeviceLink):
     with sync_utils.Timeout(self.timeout):
       if not self.timeout:
         logger.debug('Waiting for reading...')
-      ret = self.rfile.readline().rstrip('\n')
+      ret = self.rfile.readline().decode('utf-8').rstrip('\n')
       logger.debug('Read: %s', ret)
       return ret
 
@@ -168,7 +168,7 @@ class SCPILink(link.DeviceLink):
     if '\n' in command:
       raise SCPILinkError('Newline in command: %r' % command)
     logger.debug('Write: %s', command)
-    self.wfile.write(command + '\n')
+    self.wfile.write((command + '\n').encode('utf-8'))
 
   def _IsQueryCommand(self, command):
     return '?' in command

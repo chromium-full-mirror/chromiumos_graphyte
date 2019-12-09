@@ -117,7 +117,7 @@ def Retry(max_retry_times, interval, target, condition=None, *args, **kwargs):
   if condition is None:
     condition = lambda x: x
   result = None
-  for retry_time in xrange(max_retry_times):
+  for retry_time in range(max_retry_times):
     try:
       result = target(*args, **kwargs)
     except Exception:

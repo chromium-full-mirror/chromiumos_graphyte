@@ -308,7 +308,7 @@ class WLANTestCaseFactory(TestCaseFactory):
       'rf_type':        ListChecker([RF_TYPE]),
       'component_name': ListChecker([str]),
       'test_type':      ListChecker(SUPPORTED_TEST_TYPES),
-      'center_freq':    ListChecker([lambda freq: 2400 < freq < 6000]),
+      'center_freq':    ListChecker([lambda freq: 2400 < int(freq) < 6000]),
       'power_level':    ListChecker([int, float, 'auto']),
       'standard':       ListChecker(['A', 'AC', 'B', 'G', 'N']),
       'bandwidth':      ListChecker([20, 40, 80, 160]),
@@ -316,7 +316,7 @@ class WLANTestCaseFactory(TestCaseFactory):
                                     DATA_RATE_A_G +
                                     DATA_RATE_N +
                                     DATA_RATE_AC),
-      'chain_mask':     ListChecker(range(1, 16)),  # 4x4 MIMO supported
+      'chain_mask':     ListChecker(list(range(1, 16))),  # 4x4 MIMO supported
       'nss':            ListChecker([None, 1, 2, 3, 4]),
       'long_preamble':  ListChecker([0, 1])}
 
@@ -411,7 +411,7 @@ class WLANTestCaseFactory(TestCaseFactory):
     TestCaseFactory.VerifyArguments(arg_checker, args)
     # Check if the arguments are valid in the specified standard.
     bandwidth = args['bandwidth']
-    center_freq = args['center_freq']
+    center_freq = int(args['center_freq'])
     data_rate = args['data_rate']
     standard = args['standard']
     TestCaseFactory.VerifyArguments(

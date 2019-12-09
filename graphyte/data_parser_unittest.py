@@ -60,7 +60,7 @@ class LiteralCheckerTest(unittest.TestCase):
 
   def testCheckerStr(self):
     self.assertEqual(
-        "LiteralChecker([<type 'int'>, 'a', None])", str(self.checker))
+        "LiteralChecker([%s, 'a', None])" % int, str(self.checker))
 
   def testValidData(self):
     self.assertTrue(self.checker.CheckData(123))
@@ -80,7 +80,7 @@ class ListCheckerTest(unittest.TestCase):
 
   def testCheckerStr(self):
     self.assertEqual(
-        "ListChecker([<type 'int'>, 'a', None])", str(self.checker))
+        "ListChecker([%s, 'a', None])" % int, str(self.checker))
 
   def testValidData(self):
     self.assertTrue(self.checker.CheckData([123, -55, 'a', None]))
@@ -98,7 +98,7 @@ class TupleCheckerTest(unittest.TestCase):
 
   def testCheckerStr(self):
     self.assertEqual(
-        "TupleChecker([<type 'int'>, None], ['hello', <type 'float'>])",
+        "TupleChecker([%s, None], ['hello', %s])" % (int, float),
         str(self.checker))
 
   def testValidData(self):

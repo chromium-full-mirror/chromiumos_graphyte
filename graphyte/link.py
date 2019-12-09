@@ -7,26 +7,24 @@ import subprocess
 import tempfile
 
 import graphyte_common  # pylint: disable=unused-import
-from graphyte.utils import file_utils
 from graphyte.default_setting import logger
+from graphyte.utils import file_utils
 
 CalledProcessError = subprocess.CalledProcessError
 
 MODULE_PATH_MAPPING = {
-    'ADBLink': 'links.adb',
-    'SSHLink': 'links.ssh',
-    'SCPILink': 'links.scpi',
-    'GPIBLink': 'links.gpib'}
+    'ADBLink': 'graphyte.links.adb',
+    'SSHLink': 'graphyte.links.ssh',
+    'SCPILink': 'graphyte.links.scpi',
+    'GPIBLink': 'graphyte.links.gpib'}
 
 
 class LinkNotReady(Exception):
   """Exception for link is not ready."""
-  pass
 
 
 class LinkOptionsError(Exception):
   """Exception for invalid link options."""
-  pass
 
 
 class DeviceLink(object):
@@ -149,7 +147,7 @@ class DeviceLink(object):
       exit_code = self.Call(command, stdin, stdout, stderr)
       stdout.flush()
       stdout.seek(0)
-      output = stdout.read()
+      output = stdout.read().decode('utf-8')
     if exit_code != 0:
       raise CalledProcessError(
           returncode=exit_code, cmd=command, output=output)
@@ -222,7 +220,7 @@ def _ExtractArgs(func, kargs):
   if spec.keywords is None:
     # if the function accepts ** arguments, we can just pass everything into it
     # so we only need to filter kargs if spec.keywords is None
-    kargs = {k: v for (k, v) in kargs.iteritems() if k in spec.args}
+    kargs = {k: v for (k, v) in kargs.items() if k in spec.args}
   return kargs
 
 

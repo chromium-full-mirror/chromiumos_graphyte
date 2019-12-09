@@ -46,7 +46,7 @@ def TryMakeDirs(path):
     pass
 
 
-def MakeDirsUidGid(path, uid=-1, gid=-1, mode=0777):
+def MakeDirsUidGid(path, uid=-1, gid=-1, mode=0o777):
   """Recursive directory creation with specified uid, gid and mode.
 
   Like os.makedirs, but it also chown() and chmod() to the directories it
@@ -56,7 +56,7 @@ def MakeDirsUidGid(path, uid=-1, gid=-1, mode=0777):
     path: Path to create recursively.
     uid: User id. -1 means unchanged.
     gid: Group id. -1 means unchanged.
-    mode: Mode (numeric) of path. Default 0777.
+    mode: Mode (numeric) of path. Default 0o777.
   """
   logging.debug('MakeDirsUidGid %r', path)
   if not path:
@@ -69,7 +69,7 @@ def MakeDirsUidGid(path, uid=-1, gid=-1, mode=0777):
   os.mkdir(path)
   os.chmod(path, mode)
   os.chown(path, uid, gid)
-  logging.debug('mkdir %r with mode 0%o uid %r gid %r', path, mode, uid, gid)
+  logging.debug('mkdir %r with mode 0o%o uid %r gid %r', path, mode, uid, gid)
 
 
 class Glob(object):
@@ -90,7 +90,7 @@ class Glob(object):
     elif isinstance(exclude, str):
       self.exclude = [exclude]
     else:
-      raise TypeError, 'Unexpected exclude type %s' % type(exclude)
+      raise TypeError('Unexpected exclude type %s' % type(exclude))
 
   def Match(self, root):
     """Returns files that match include but not exclude.
@@ -628,8 +628,8 @@ def GlobSingleFile(pattern):
   """
   matches = glob.glob(pattern)
   if len(matches) != 1:
-    raise ValueError, 'Expected one match for %s but got %s' % (
-        pattern, matches)
+    raise ValueError('Expected one match for %s but got %s' % (
+        pattern, matches))
 
   return matches[0]
 

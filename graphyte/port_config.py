@@ -36,8 +36,11 @@ It means that path1 is {2402: 20.0, 2406: 19.9},
 path2 is {2402: 21.0, 2404: 20.3}.
 """
 
+from __future__ import print_function
+
 import csv
 import json
+import math
 import os
 import sys
 
@@ -62,9 +65,9 @@ class PortConfig(object):
     self.port_config = config['port_config']
 
     # Load the pathloss table for each antenna
-    for component_config in self.port_config.itervalues():
+    for component_config in self.port_config.values():
       for antenna_config in component_config:
-        for config_table in antenna_config.itervalues():
+        for config_table in antenna_config.values():
           filename, title = config_table['pathloss']
           config_table['pathloss'] = self.LoadPathloss(filename, title)
 
@@ -92,7 +95,7 @@ class PortConfig(object):
     pathloss to float.
     """
     ret = {}
-    for key, value in pathloss.iteritems():
+    for key, value in pathloss.items():
       if not value:
         continue
       ret[int(key)] = float(value)
@@ -132,7 +135,7 @@ class PortConfig(object):
     return self.GetPortConfig(**kwarg)['pathloss']
 
   def GetIterator(self):
-    return self.port_config.iteritems()
+    return self.port_config.items()
 
 
 class PathlossTable(object):
@@ -150,6 +153,8 @@ class PathlossTable(object):
 
   def __nonzero__(self):
     return len(self.table) > 0
+
+  __bool__ = __nonzero__
 
   def __getitem__(self, freq):
     """Returns the pathloss of the frequency.
@@ -170,8 +175,12 @@ class PathlossTable(object):
     if freq in self.table:
       return self.table[freq]
 
-    upper_dist = sys.maxint
-    lower_dist = sys.maxint
+    try:
+      upper_dist = math.inf
+      lower_dist = math.inf
+    except AttributeError:
+      upper_dist = sys.maxint
+      lower_dist = sys.maxint
     upper_freq = None
     lower_freq = None
     for k in self.table:
@@ -195,15 +204,15 @@ class PathlossTable(object):
 def main():
   port_config = PortConfig('sample_port_config.json')
   for component_name, antennas_config in port_config.GetIterator():
-    print 'Component: %s' % component_name
+    print('Component: %s' % component_name)
     for antenna_idx, antenna_config in enumerate(antennas_config):
-      print ' Antenna %d:' % antenna_idx
+      print(' Antenna %d:' % antenna_idx)
       for test_type in ['TX', 'RX']:
-        print '  port Config for %s: ' % test_type
-        print '  pathloss: %s' % antenna_config[test_type]['pathloss']
-        print '  port_mapping: %s' % antenna_config[test_type]['port_mapping']
+        print('  port Config for %s: ' % test_type)
+        print('  pathloss: %s' % antenna_config[test_type]['pathloss'])
+        print('  port_mapping: %s' % antenna_config[test_type]['port_mapping'])
 
-  print port_config.QueryPortConfig('WLAN_2G', 'TX')
+  print(port_config.QueryPortConfig('WLAN_2G', 'TX'))
 
 
 if __name__ == '__main__':

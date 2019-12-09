@@ -6,13 +6,28 @@
 
 import datetime
 import time
-from uuid import uuid4
+import uuid
 
 import graphyte_common  # pylint: disable=unused-import
 from graphyte.utils import platform_utils
 
-EPOCH_ZERO = datetime.datetime(1970, 1, 1)
+
 MonotonicTime = platform_utils.GetProvider('MonotonicTime')
+
+
+# pylint: disable=unused-argument
+class TZUTC(datetime.tzinfo):
+  """A tzinfo about UTC."""
+
+  def utcoffset(self, dt):
+    return datetime.timedelta(0)
+
+  def dst(self, dt):
+    return datetime.timedelta(0)
+
+  def tzname(self, dt):
+    return 'UTC'
+
 
 def FormatElapsedTime(elapsed_secs):
   """Formats an elapsed time.
@@ -51,8 +66,8 @@ def TimeString(time_value=None, time_separator=':', milliseconds=True):
     milliseconds: Whether to include milliseconds.
   """
 
-  if type(time_value) is datetime.datetime:
-    t = (time_value - EPOCH_ZERO).total_seconds()
+  if isinstance(time_value, datetime.datetime):
+    t = DatetimeToUnixtime(time_value)
   else:
     t = time_value or time.time()
   ret = time.strftime(
@@ -74,4 +89,21 @@ def TimedUUID():
   enough randomness to remain unique.
   """
   return ('%08x' % (int(time.time() * 100) & 0xFFFFFFFF) +
-          str(uuid4())[8:])
+          str(uuid.uuid4())[8:])
+
+
+EPOCH_ZERO = datetime.datetime(1970, 1, 1)
+EPOCH_ZERO_WITH_TZINFO = datetime.datetime(1970, 1, 1, tzinfo=TZUTC())
+
+
+def DatetimeToUnixtime(obj):
+  """Converts datetime.datetime to Unix time.
+
+  The function will use the time zone info if obj has; otherwise, it will treat
+  obj as in Coordinated Universal Time (UTC).
+  """
+  if not isinstance(obj, datetime.datetime):
+    raise ValueError('Expected datetime.datetime but found %s' % type(obj))
+  if obj.tzinfo is not None:
+    return (obj - EPOCH_ZERO_WITH_TZINFO).total_seconds()
+  return (obj - EPOCH_ZERO).total_seconds()

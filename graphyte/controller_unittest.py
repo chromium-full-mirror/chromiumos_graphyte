@@ -3,8 +3,15 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-import mock
+from __future__ import absolute_import
+
+import sys
 import unittest
+
+if sys.version_info.major < 3:
+  import mock
+else:
+  import unittest.mock as mock
 
 import graphyte_common  # pylint: disable=unused-import
 from graphyte import controller

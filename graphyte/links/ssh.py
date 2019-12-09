@@ -5,7 +5,6 @@
 
 """Implementation of graphyte.link.DeviceLink using SSH."""
 
-import Queue
 import os
 import pipes
 import platform
@@ -13,6 +12,9 @@ import shlex
 import subprocess
 import threading
 import time
+
+import six
+from six.moves import queue
 
 import graphyte_common  # pylint: disable=unused-import
 from graphyte import link
@@ -61,7 +63,7 @@ class SSHLink(link.DeviceLink):
     if self.identity is not None:
       try:
         self.identity = graphyte_utils.SearchConfig(self.identity)
-        os.chmod(self.identity, 0600)
+        os.chmod(self.identity, 0o600)
       except Exception:
         logger.error('SSHLink: Failed to locate identity file "%s"',
                      self.identity)
@@ -137,16 +139,15 @@ class SSHLink(link.DeviceLink):
     """See DUTLink.Shell"""
     remote_sig, options = self._Signature(False)
 
-    if isinstance(command, basestring):
+    if isinstance(command, six.string_types):
       # since the shell command is passed through SSH client,
       # the entire command is argument for SSH command
       # e.g. command = 'VAR=xxx cmd arg0 arg1...'
       # will become: 'ssh' <SSH OPTIONS> 'VAR=xxx' 'cmd' 'arg0' 'arg1' ...
       command = shlex.split(command)
-      command = ['ssh'] + options + [remote_sig] + command
     else:
-      command = ['ssh'] + options + [remote_sig] + map(pipes.quote, command)
-
+      command = [pipes.quote(c) for c in command]
+    command = ['ssh'] + options + [remote_sig] + command
     shell = False
 
     logger.debug('SSHLink: Run [%r]', command)
@@ -175,7 +176,7 @@ class SSHLink(link.DeviceLink):
 
       self._link = link_instance
       self._thread = threading.Thread(target=self.Run)
-      self._proc_queue = Queue.Queue()
+      self._proc_queue = queue.Queue()
 
       self._user = self._link.user
       self._host = self._link.host

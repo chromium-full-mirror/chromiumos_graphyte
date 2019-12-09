@@ -4,8 +4,6 @@
 
 from __future__ import print_function
 
-import Queue
-from StringIO import StringIO
 import contextlib
 import copy
 import getpass
@@ -19,6 +17,9 @@ import sys
 import threading
 import time
 import traceback
+
+from six.moves import queue
+from six.moves import StringIO
 
 
 PIPE = subprocess.PIPE
@@ -367,7 +368,7 @@ def KillProcessTree(process, caption):
 
     def add_children(pid):
       pids.append(pid)
-      map(add_children, children.get(pid, []))
+      list(map(add_children, children.get(pid, [])))
     add_children(root)
     # Reverse the list to first kill children then parents.
     # Note reversed(pids) will return an iterator instead of real list, so
@@ -386,7 +387,7 @@ def KillProcessTree(process, caption):
           os.kill(pid, sig)
         except OSError:
           pass
-      pids = filter(IsProcessAlive, pids)
+      pids = list(filter(IsProcessAlive, pids))
       if not pids:
         return
       time.sleep(0.2)  # Sleep 200 ms and try again
@@ -429,7 +430,7 @@ def SpawnTee(args, **kwargs):
     raise ValueError('output_file must be specified')
   stdout = kwargs.get('stdout', sys.stdout)
 
-  message_queue = Queue.Queue()
+  message_queue = queue.Queue()
 
   def Tee(out_fd):
     """Writes available data from message queue to stdout and output file."""
@@ -440,7 +441,7 @@ def SpawnTee(args, **kwargs):
         stdout.flush()
         out_fd.write(line)
         out_fd.flush()
-    except Queue.Empty:
+    except queue.Empty:
       return
 
   def EnqueueOutput(in_fd):

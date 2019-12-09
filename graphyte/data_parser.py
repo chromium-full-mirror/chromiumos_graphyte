@@ -65,7 +65,8 @@ def Parse(string, checker=None):
       left, items, right = string[0], string[1:-1], string[-1]
       if right != RIGHT_BRACKETS_DICT[left]:
         raise ValueError('The right bracket is not found: %s', string)
-      return BUILDER_DICT[left](map(_ParseLiteral, items.split(',')))
+      literals = list(map(_ParseLiteral, items.split(',')))
+      return BUILDER_DICT[left](literals)
 
   result = _Parse(string)
   if checker is not None and checker.CheckData(result) is False:

@@ -11,18 +11,18 @@ Example Usage:
   MockTestServer(('0.0.0.0', SERVER_PORT), MockServerHandler).serve_forever()
 """
 
-import logging
 import inspect
+import logging
 import re
-import types
-import SocketServer
 
+import six
+from six.moves import socketserver
 
-class MockTestServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer):
+class MockTestServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
   allow_reuse_address = True
 
 
-class MockServerHandler(SocketServer.StreamRequestHandler):
+class MockServerHandler(socketserver.StreamRequestHandler):
   """A mocking handler for socket.
 
   This handler responses client based on its pre-defined lookup table.
@@ -49,8 +49,8 @@ class MockServerHandler(SocketServer.StreamRequestHandler):
     """
     # Check if the response is one of the known types.
     is_known_types = False
-    if (isinstance(response, types.StringType) or
-        isinstance(response, types.NoneType)):
+
+    if isinstance(response, six.string_types) or response is None:
       is_known_types = True
     elif inspect.isfunction(response) or inspect.ismethod(response):
       is_known_types = True
@@ -60,16 +60,16 @@ class MockServerHandler(SocketServer.StreamRequestHandler):
 
   def __init__(self, *args, **kwargs):
     self.lookup = list(self.responses_lookup)
-    SocketServer.StreamRequestHandler.__init__(self, *args, **kwargs)
+    socketserver.StreamRequestHandler.__init__(self, *args, **kwargs)
 
   def handle(self):
     regex_type = type(re.compile(''))
     while True:
-      line = self.rfile.readline().rstrip('\r\n')
+      line = self.rfile.readline().decode('utf-8').rstrip('\r\n')
       if not line:
         break
       for rule, response in self.lookup:
-        if isinstance(rule, str) and line == rule:
+        if isinstance(rule, six.string_types) and line == rule:
           logging.info('Input %r matched.', line)
         elif isinstance(rule, regex_type) and rule.match(line):
           logging.info('Input %r matched with regexp %s', line, rule.pattern)
@@ -78,8 +78,8 @@ class MockServerHandler(SocketServer.StreamRequestHandler):
 
         if inspect.isfunction(response) or inspect.ismethod(response):
           response = response(line)
-        if isinstance(response, types.StringType):
-          self.wfile.write(response)
+        if isinstance(response, six.string_types):
+          self.wfile.write(response.encode('utf-8'))
         break  # Only the first match will be used.
       else:
         raise ValueError('Input %r is not matching any.' % line)

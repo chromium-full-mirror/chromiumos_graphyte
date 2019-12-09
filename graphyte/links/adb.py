@@ -8,6 +8,8 @@ import pipes
 import subprocess
 import uuid
 
+import six
+
 import graphyte_common  # pylint: disable=unused-import
 from graphyte import link
 from graphyte.default_setting import logger
@@ -89,7 +91,7 @@ class ADBLink(link.DeviceLink):
 
     # Convert list-style commands to single string because we need to run
     # multiple commands in same session (and needs shell=True).
-    if not isinstance(command, basestring):
+    if not isinstance(command, six.string_types):
       command = ' '.join(pipes.quote(param) for param in command)
 
     # ADB protocol currently mixes stderr and stdout in same channel (i.e., the

@@ -10,6 +10,7 @@ import os
 import platform
 import time
 
+import six
 
 # Cache to speed up.
 _CURRENT_PLATFORM_SYSTEM = platform.system()
@@ -44,7 +45,7 @@ def Provider(api_name, systems):
     systems: A list of supported platform systems.
   """
   global _PROVIDER_MAP
-  assert not isinstance(systems, basestring), "systems must be list."
+  assert not isinstance(systems, six.string_types), "systems must be list."
   if api_name not in _PROVIDER_MAP:
     _PROVIDER_MAP[api_name] = {}
   def ProviderDecorator(func):
@@ -71,8 +72,8 @@ def GetProvider(api_name, system=None):
     system = _CURRENT_PLATFORM_SYSTEM
   func = systems.get(system, systems.get(_SYSTEM_DEFAULT, None))
   if func is None:
-    raise NotImplementedError, 'No implementation on %s for <%s>' % (
-        system, api_name)
+    raise NotImplementedError('No implementation on %s for <%s>' % (
+        system, api_name))
   return func
 
 

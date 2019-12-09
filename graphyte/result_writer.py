@@ -61,7 +61,7 @@ class ResultWriter(object):
         self._WriteResult(new_test_case, new_result)
 
   def _WriteResult(self, test_case, result):
-    for result_name, bound in test_case.result_limit.iteritems():
+    for result_name, bound in test_case.result_limit.items():
       value = result.get(result_name, 'None')
       data = {
           'test_item': test_case.name,

@@ -49,7 +49,7 @@ class ShellAPITest(unittest.TestCase):
     return subprocess.Popen(command, stdin=stdin, stdout=stdout, stderr=stderr)
 
   def _WriteScript(self, script):
-    os.write(self.temp_fd, script)
+    os.write(self.temp_fd, script.encode('utf-8'))
 
   def testNormalCall(self):
     self._WriteScript('exit 0')
@@ -89,7 +89,7 @@ class ShellAPITest(unittest.TestCase):
     with tempfile.NamedTemporaryFile() as stdin, \
         tempfile.NamedTemporaryFile() as stdout, \
         tempfile.NamedTemporaryFile() as stderr:
-      stdin.write('hello')
+      stdin.write(b'hello')
       stdin.flush()
       stdin.seek(0)
       ret = self.link_instance.Call(['sh', self.temp_file], stdin=stdin,
@@ -99,8 +99,8 @@ class ShellAPITest(unittest.TestCase):
       stderr.seek(0)
       out_str = stdout.read()
       err_str = stderr.read()
-      self.assertEqual("output hello\n", out_str)
-      self.assertEqual("error hello\n", err_str)
+      self.assertEqual(b"output hello\n", out_str)
+      self.assertEqual(b"error hello\n", err_str)
 
 if __name__ == '__main__':
   unittest.main()

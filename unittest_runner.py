@@ -4,6 +4,8 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+from __future__ import print_function
+
 import logging
 import os
 import sys
@@ -15,11 +17,11 @@ WORKING_DIR = os.path.dirname(os.path.realpath(__file__))
 
 
 def PassMessage(message):
-  print '\033[22;32m%s\033[22;0m' % message
+  print('\033[22;32m%s\033[22;0m' % message)
 
 
 def FailMessage(message):
-  print '\033[22;31m%s\033[22;0m' % message
+  print('\033[22;31m%s\033[22;0m' % message)
 
 
 def LogFilePath(dir_name, filename):
@@ -45,7 +47,8 @@ def main(argv):
     suite = unittest.defaultTestLoader.loadTestsFromName(module_name)
     start_time = time.time()
     log_file = LogFilePath(temp_dir, filename)
-    result = unittest.TextTestRunner(stream=open(log_file, 'w')).run(suite)
+    with open(log_file, 'w') as stream:
+      result = unittest.TextTestRunner(stream=stream).run(suite)
     duration = time.time() - start_time
     if result.wasSuccessful():
       PassMessage('*** PASS [%.2f s] %s' % (duration, filename))
@@ -55,14 +58,14 @@ def main(argv):
       failed_tests.append(filename)
     total_tests += 1
 
-  print '%d/%d tests passed' % (passed_tests, total_tests)
+  print('%d/%d tests passed' % (passed_tests, total_tests))
   if failed_tests:
-    print ''
-    print 'Logs of %d failed tests:' % len(failed_tests)
+    print('')
+    print('Logs of %d failed tests:' % len(failed_tests))
     for failed_test in failed_tests:
       FailMessage(LogFilePath(temp_dir, failed_test))
-    print 'To re-test failed unittests, run:'
-    print 'make test UNITTEST_WHITELIST="%s"' % ' '.join(failed_tests)
+    print('To re-test failed unittests, run:')
+    print('make test UNITTEST_WHITELIST="%s"' % ' '.join(failed_tests))
 
 
 if __name__ == '__main__':

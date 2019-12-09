@@ -8,6 +8,8 @@ import pipes
 import shutil
 import subprocess
 
+import six
+
 import graphyte_common  # pylint: disable=unused-import
 from graphyte import link
 
@@ -45,7 +47,7 @@ class LocalLink(link.DeviceLink):
     # Android only has /system/bin/sh) then calling Popen may give you 'No such
     # file or directory' error.
 
-    if not isinstance(command, basestring):
+    if not isinstance(command, six.string_types):
       command = ' '.join(pipes.quote(param) for param in command)
 
     if self._shell_path:

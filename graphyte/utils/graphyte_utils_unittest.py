@@ -98,14 +98,14 @@ class CalculateAverageTest(unittest.TestCase):
   def testLogAverage10(self):
     db_10 = lambda x: 10 * math.log10(x)
     answer = db_10(self.answer)
-    values = map(db_10, self.values)
+    values = [db_10(x) for x in self.values]
     self.assertEquals(
         answer, graphyte_utils.CalculateAverage(values, '10Log10'))
 
   def testLogAverage20(self):
     db_20 = lambda x: 20 * math.log10(x)
     answer = db_20(self.answer)
-    values = map(db_20, self.values)
+    values = [db_20(x) for x in self.values]
     self.assertEquals(
         answer, graphyte_utils.CalculateAverage(values, '20Log10'))
 

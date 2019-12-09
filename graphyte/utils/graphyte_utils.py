@@ -9,6 +9,7 @@ import inspect
 import json
 import math
 import os
+import sys
 
 import graphyte_common  # pylint: disable=unused-import
 from graphyte.default_setting import CONFIG_DIR
@@ -31,7 +32,7 @@ def OverrideConfig(base, overrides):
   Returns:
     The new mapping object with values overridden.
   """
-  for key, val in overrides.iteritems():
+  for key, val in overrides.items():
     if isinstance(val, collections.Mapping):
       base[key] = OverrideConfig(base.get(key, {}), val)
     else:
@@ -118,7 +119,7 @@ def MakeMockPassResult(result_limit):
     lower, upper = bound
     return lower or upper or 0
   return dict([(key, _MakeInBoundValue(bound))
-               for key, bound in result_limit.iteritems()])
+               for key, bound in result_limit.items()])
 
 
 def CalculateAverage(values, average_type='Linear'):
@@ -132,7 +133,7 @@ def CalculateAverage(values, average_type='Linear'):
     the average value.
   """
   length = len(values)
-  values = map(float, values)
+  values = [float(x) for x in values]
   if length == 0:
     return float('nan')
   if length == 1:
@@ -184,6 +185,12 @@ def CalculateAverageResult(results, average_type='Linear'):
     raise TypeError('The type should be list or a dict. %s' % results)
 
 
+if sys.version_info.major < 3:
+  IsMemberMethod = inspect.ismethod
+else:
+  IsMemberMethod = inspect.isfunction
+
+
 def LogFunc(func, prefix=''):
   """The decorator for logging the function call."""
   def Wrapper(*args, **kwargs):
@@ -192,7 +199,7 @@ def LogFunc(func, prefix=''):
       real_args = args[1:]
     else:
       real_args = args[:]
-    arg_str = ', '.join(map(str, real_args) +
+    arg_str = ', '.join([str(val) for val in real_args] +
                         ['%s=%r' % (key, val) for key, val in kwargs.items()])
     logger.debug('Calling %s(%s)', prefix + func.__name__, arg_str)
     return func(*args, **kwargs)
@@ -202,7 +209,7 @@ def LogFunc(func, prefix=''):
 def LogAllMethods(cls):
   """The class decorator that Logs all the public methods."""
   prefix = cls.__name__ + '.'
-  for func_name, func in inspect.getmembers(cls, inspect.ismethod):
+  for func_name, func in inspect.getmembers(cls, IsMemberMethod):
     if not func_name.startswith('_'):
       setattr(cls, func_name, LogFunc(func, prefix))
   return cls
@@ -238,7 +245,7 @@ class IsolateCWD(object):
     return Wrapper
 
   def IsolateAllMethods(self, cls):
-    for func_name, func in inspect.getmembers(cls, inspect.ismethod):
+    for func_name, func in inspect.getmembers(cls, IsMemberMethod):
       setattr(cls, func_name, self.IsolateFunc(func))
     return cls
 

@@ -28,10 +28,10 @@ from graphyte.default_setting import logger
 from graphyte.device import DeviceType
 from graphyte.utils import type_utils
 
-DEVICE_STATUS = type_utils.Enum(
-    STOP='STOP',  # Device is not initialized.
-    IDLE='IDLE',  # Device is initiailized but not running.
-    RUNNING='RUNNING')  # Device starts running the test case.
+DEVICE_STATUS = type_utils.Enum([
+    'STOP',  # Device is not initialized.
+    'IDLE',  # Device is initiailized but not running.
+    'RUNNING'])  # Device starts running the test case.
 
 
 def CheckIn(name, item, arr):
